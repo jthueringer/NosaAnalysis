@@ -2,23 +2,18 @@
 % Please edit documentation in R/performAnalysis.R
 \name{performAnalysis}
 \alias{performAnalysis}
-\title{Creates a yaml file storing the parameters that are used for the analysis of the NOSA software results
-and returns these parameters as well as a list of available Metrics objects.}
+\title{Perform the analysis of the NOSA software results.}
 \usage{
-performAnalysis(directory = NULL, yaml_obj = list())
+performAnalysis(directory = NULL, yaml_obj = list(), yaml_file = NULL)
 }
 \arguments{
-\item{directory}{A yaml class object created by YAMLClass$new()}
+\item{directory}{Path to nosa result files to bee analysed.}
 
-\item{yaml_obj}{list of parameters; if it is empty, it is filled with defaults}
+\item{yaml_obj}{List of parameters; if it is empty, it is filled with defaults}
 }
 \value{
 List with filenames
 }
 \description{
-Valid parameters are:
-   needs_time_correction, data_as_xlsx, plot_every_input
-}
-\details{
-Please provide them as a list() of this format: list$parameter_name
+A yaml object can also be provided to define which analyses are to be performed.
 }

@@ -28,10 +28,9 @@ performAnalysis = function(directory = NULL, yaml_obj = list(), yaml_file = NULL
   yaml_params = yaml_list$param
 
   yc = yaml_list$yc
-  yc$writeYaml(yaml_file)
 
   nsr <- NosaResultLoader$new()
   nsr$loadNosaResults(directory, yaml_params$sheetnames, yaml_params$needs_time_correction)
 
-  return(nsr$sections)#yaml_params$sheetnames)#
+  return(nsr$sections)#
 }

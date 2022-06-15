@@ -6,8 +6,7 @@
 #'
 #' @field yamlObj A Yaml object
 #'
-#' @exportClass YamlClass
-#' @export YamlClass
+#'
 #'
 YamlClass = setRefClass(
   "YamlClass",
@@ -41,7 +40,8 @@ YamlClass = setRefClass(
         eval(parse(text=expr))
         cat("\n")
         return (default)
-      } else {
+      }
+      else {
         # TODO: check is.numeric or string?
         cat(paste0(" new value: ", paste(param_val, sep="", collapse=","), "\n"))
         return (param_val)

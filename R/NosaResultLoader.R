@@ -24,7 +24,7 @@ NosaResultLoader = setRefClass(
   The last sheet 'Spike Detection' is provided as list that contains 4 data.frames
   "
 
-      cat("searching nosa results ", data_directory, " ...\n", sep = "")
+      cat("\nsearching nosa results ", data_directory, " ...\n", sep = "")
 
       list_files = list.files(data_directory, pattern = "xlsx")
 
@@ -32,8 +32,14 @@ NosaResultLoader = setRefClass(
 
       # a scope
       {
-        # use user given sheet names
+        # use user given sheet names, the metadata-sheet must be included
         sheets <- names(sheets_list)
+        if (!('metadata' %in% sheets))
+        {
+          stop(
+            paste0( " The metadata sheet must be included, but is missing.")
+          )
+        }
 
         tmp_df = list()
         timelane_to_zero = FALSE
@@ -73,8 +79,7 @@ NosaResultLoader = setRefClass(
           if (sum(duplicates) > 0)
           {
             stop(
-              paste0( file, " contains duplicated sources:\t", complete_df$metadata$`source name`[duplicates]
-              )
+              paste0( file, " contains duplicated sources:\t", complete_df$metadata$`source name`[duplicates] )
             )
           }
 
@@ -98,8 +103,7 @@ NosaResultLoader = setRefClass(
           if (sum(!duplicated(complete_df[['metadata']][["source start frame"]])) != 1 )
           {
             stop(
-              paste0("\nThe dataset  of ", file, " contains different timelanes, which therefore cannot be processed. Manually merge the different tables into one."
-              )
+              paste0("\nThe dataset  of ", file, " contains different timelanes, which therefore cannot be processed. Manually merge the different tables into one.")
             )
           }
 
@@ -110,16 +114,15 @@ NosaResultLoader = setRefClass(
             if (!identical(sheet, "metadata"))
             {
               time_indices = grep("^Time", colnames(complete_df[[sheet]]))
-              if (sum(complete_df[[sheet]][[time_indices]][1])>0)
+              if (!is.null(time_indices) && needs_time_correction)
               {
-
-                if (needs_time_correction)
-                {
-                  complete_df[[sheet]][time_indices] = data.frame(sapply(time_indices, function(i) {
+                complete_df[[sheet]][time_indices] = data.frame(sapply(time_indices, function(i) {
                   round(complete_df[[sheet]][[time_indices]] - complete_df[[sheet]][[time_indices]][1], digits = 3)
-                  }))
-                  timelane_to_zero = TRUE
-                }
+                }))
+                # correct the metatdata
+                complete_df[['metadata']][['source end frame']] = complete_df[['metadata']][['source end frame']] - complete_df[['metadata']][['source start frame']]
+                complete_df[['metadata']][['source start frame']][complete_df[['metadata']][['source start frame']] > 0] = 0
+                timelane_to_zero = TRUE
               }
             }
           }
@@ -166,8 +169,7 @@ NosaResultLoader = setRefClass(
                 if (sum(!duplicated(tmp_df[[sheet]][['source start frame']])) != 1 )
                 {
                   stop(
-                    paste0( "\nThe timeline  of ", file, " differs from the previously loaded file(s), which therefore cannot be processed. Manually merge the different tables into one."
-                    )
+                    paste0( "\nThe timeline  of ", file, " differs from the previously loaded file(s), which therefore cannot be processed. Manually merge the different tables into one.")
                   )
                 }
               }
@@ -200,7 +202,7 @@ NosaResultLoader = setRefClass(
           }
         }
 
-        if (timelane_to_zero) warning("The timelanes of file ", file, " are set to frame or second '0'\n")
+        if (timelane_to_zero) warning("The timelanes of file ", file, " have been set to the initial value of zero because 'NeedsTimeCorrection' is selected.\n")
         else  warning(paste0( "The timelanes of file ", file, " does not start with frame or second '0'\n"))
         .self$sections <- tmp_df
       } # end scope
