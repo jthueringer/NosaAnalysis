@@ -4,7 +4,12 @@
 \alias{performAnalysis}
 \title{Perform the analysis of the NOSA software results.}
 \usage{
-performAnalysis(directory = NULL, yaml_obj = list(), yaml_file = NULL)
+performAnalysis(
+  directory = NULL,
+  yaml_obj = list(),
+  yaml_file = NULL,
+  output_dir = NULL
+)
 }
 \arguments{
 \item{directory}{Path to nosa result files to bee analysed.}

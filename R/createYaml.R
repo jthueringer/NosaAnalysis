@@ -32,6 +32,7 @@ createYaml <- function(yc, param = list(), directory = NULL, outputs = NULL){
   default_param$data_as_xlsx = TRUE
   default_param$plot_every_input = FALSE
   default_param$status = c("pre", "post")
+  default_param$r_data_out = FALSE
 
 
 
@@ -65,6 +66,8 @@ createYaml <- function(yc, param = list(), directory = NULL, outputs = NULL){
   param$data_as_xlsx = yc$getYaml("Prep$UsedDataAsXlsx", param$data_as_xlsx)
   param$plot_every_input = yc$getYaml("Prep$PlotEveryInput", param$plot_every_input)
   param$status = yc$getYaml("Analyse$Status", param$status)
+
+  param$r_data_out = yc$getYaml("Output$DataAsRObject", param$r_data_out)
 
 
   #############

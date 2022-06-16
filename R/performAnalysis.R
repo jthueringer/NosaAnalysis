@@ -14,7 +14,7 @@
 
 #' @export
 #'
-performAnalysis = function(directory = NULL, yaml_obj = list(), yaml_file = NULL)
+performAnalysis = function(directory = NULL, yaml_obj = list(), yaml_file = NULL, output_dir = NULL)
 {
   ############
   # prepare the Yaml
@@ -51,8 +51,6 @@ performAnalysis = function(directory = NULL, yaml_obj = list(), yaml_file = NULL
 
   yaml_params = yaml_list$param
 
-  yc = yaml_list$yc
-
   ############
   # loading content of nosa results into data.frames that are stored within nested list
   ############
@@ -64,6 +62,34 @@ performAnalysis = function(directory = NULL, yaml_obj = list(), yaml_file = NULL
   else
   {
     stop(paste0("The directory '", directory, "' does not exist.\n"));
+  }
+
+  ############
+  # prepare names of output dir and filenames
+  ############
+  yo = yaml_list$yc$yamlObj
+
+  if (is.null(output_dir))
+  {
+    output_dir = paste0(dirname(directory), "/", basename(directory),"_results")
+  }
+  if (!dir.exists(output_dir))
+  {
+    dir.create(output_dir)
+  }
+
+  out_files = getOutputFilenames(output_dir, yaml_params$r_data_out)
+
+  if ("rData" %in% names(out_files))
+  {
+    if (!file.exists(out_files[["rData"]]))
+    {
+      saveRDS(nsr, file = out_files[["rData"]])
+    }
+    else
+    {
+      warning(paste0("The file '", out_files[["rData"]],"' already exists.\n\t... Skipping ...\n"))
+    }
   }
 
   return(nsr$sections)#
