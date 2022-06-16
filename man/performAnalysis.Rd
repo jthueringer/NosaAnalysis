@@ -9,7 +9,13 @@ performAnalysis(directory = NULL, yaml_obj = list(), yaml_file = NULL)
 \arguments{
 \item{directory}{Path to nosa result files to bee analysed.}
 
-\item{yaml_obj}{List of parameters; if it is empty, it is filled with defaults}
+\item{yaml_obj}{An object of nested lists that contain configuration parameters.
+Either this object or a **yaml_file** must be provided.}
+
+\item{yaml_file}{Alternative to **yaml_obj** you can provide a yaml_file that contains
+the configuration parameters.
+The function **writeDefaultYaml(filename)** can be used to create
+this file filled with all default parameters and values.}
 }
 \value{
 List with filenames

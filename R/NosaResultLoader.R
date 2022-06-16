@@ -280,31 +280,6 @@ NosaResultLoader = setRefClass(
       result = .self$sections$`Spike Detection`$`Spike Frequency (#Spikes / second)`
 
       return(result)
-    },
-
-    delete_empty_columns = function(df, col_not_empty)
-    {
-      indices = c(1:length(col_not_empty))[!col_not_empty]
-      df = df[-indices]
-      # find columns that contain time
-      #time_bool = grepl("^Time",colnames(df))
-      time_indices = grep("^Time", colnames(df))
-      # normalise timelanes and extract longest
-      #df_tmp = df[time_bool]
-      df_tmp = df[time_indices]
-      df_tmpx = data.frame(time = df_tmp[, apply(df_tmp, 2, function(myCol) {
-        sum(!is.na(myCol)) == nrow(df_tmp)
-      })])
-
-      #time_bool[1] = !time_bool[1]
-      #time_indices = c(1:length(time_bool))[time_bool]
-      out = bind_cols(df_tmpx, df[-time_indices])
-      colnames(out)[1] = sub(pattern = ")...*",
-                             replacement = ")",
-                             x = colnames(df[1]))
-
-      return (out)
     }
-
   ) # methods
 ) # class
