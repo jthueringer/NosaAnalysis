@@ -64,7 +64,7 @@ performAnalysis = function(directory = NULL, yaml_obj = list(), yaml_file = NULL
   }
   if (dir.exists(directory))
   {
-    create_result_dirs(output_dir, yaml_outs)
+    dir.create(output_dir)
     nsr$loadNosaResults(directory, yaml_sheets, yaml_prep)
   }
   else
@@ -82,6 +82,12 @@ performAnalysis = function(directory = NULL, yaml_obj = list(), yaml_file = NULL
     nsr$plots$SEM = output_SEM(nsr$data$Processed, nsr$data$metadata$Status, yaml_outs$SEM, output_dir)
   }
 
+  ## EachSample
+  if (yaml_outs$EachSample)
+  {
+    nsr$plots$EachSample = output_EachSample(nsr$data$Processed, output_dir)
+  }
+
   ############
   # write outputs
   ############
@@ -95,13 +101,25 @@ performAnalysis = function(directory = NULL, yaml_obj = list(), yaml_file = NULL
   }
 
   ## SEM
-  if (!is.null((yaml_outs$SEM)))
+  if ("SEM" %in% names(yaml_outs))
   {
+    dir.create(paste0(output_dir, "/SEM"))
     for (plot in nsr$plots$SEM)
     {
       ggsave(plot$file, plot)
     }
   }
+
+  ## EachSample
+  if (yaml_outs$EachSample)
+  {
+    dir.create(paste0(output_dir, "/EachSample"))
+    for (plot in nsr$plots$EachSample)
+    {
+      ggsave(plot$file, plot)
+    }
+  }
+
 
   return(yaml_outs)#
 }
