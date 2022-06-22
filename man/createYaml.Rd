@@ -5,24 +5,21 @@
 \title{Creates a yaml file storing the parameters that are used for the analysis of the NOSA software results
 and returns these parameters as well as a list of available Metrics objects.}
 \usage{
-createYaml(yc, param = list(), directory = NULL, outputs = NULL)
+createYaml(yc, sheets = list(), prep = list(), outputs = list())
 }
 \arguments{
 \item{yc}{A yaml class object created by YAMLClass$new()}
 
-\item{param}{list of parameters; if it is empty, it is filled with defaults}
+\item{sheets}{List sheet names that should be loaded; if empty, it is filled with defaults}
 
-\item{directory}{directory that contains all NOSA results to be analysed}
+\item{prep}{List of parameters; if empty, it is filled with defaults}
 
-\item{outputs}{list of metric names that should be plotted; if NULL, will be populated with defaults}
+\item{outputs}{List of metric names that should be plotted; if empty, it is filled with defaults}
 }
 \value{
-list of parameters used for the analysis as well as list of metrics objects
+list of all parameters used for the analysis
 }
 \description{
-Valid parameters are:
-   needs_time_correction, data_as_xlsx, plot_every_input
-}
-\details{
-Please provide them as a list() of this format: list$parameter_name
+Creates a yaml file storing the parameters that are used for the analysis of the NOSA software results
+and returns these parameters as well as a list of available Metrics objects.
 }

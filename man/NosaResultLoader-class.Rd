@@ -6,12 +6,14 @@
 \alias{NosaResultLoader}
 \title{Class to read Nosa software results stored as *.xlsx file and store the tables internally.}
 \description{
-The 'sections' field is initialized after $loadNosaResults was called
+The 'data' field is initialized after $loadNosaResults was called
 }
 \section{Fields}{
 
 \describe{
-\item{\code{sections}}{NosaResults sections as list. Valid list entries are: "Metadata", "Raw", "Processed", "Baseline", "Spikes" and "SourceName"}
+\item{\code{data}}{NosaResults data as list. Valid list entries are: "metadata", "Raw", "Processed", "Baseline", "Spike Detection" and "Smoothing"}
+
+\item{\code{plots}}{A list containing all the plots that the user has requested.}
 }}
 
 \section{Methods}{

@@ -21,6 +21,8 @@ Either this object or a **yaml_file** must be provided.}
 the configuration parameters.
 The function **writeDefaultYaml(filename)** can be used to create
 this file filled with all default parameters and values.}
+
+\item{output_dir}{Path to the location where the directories are to be created that will be filled with results.}
 }
 \value{
 List with filenames
