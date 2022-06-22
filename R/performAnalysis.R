@@ -9,6 +9,7 @@
 #'                 the configuration parameters.
 #'                 The function **writeDefaultYaml(filename)** can be used to create
 #'                 this file filled with all default parameters and values.
+#' @param output_dir Path to the location where the directories are to be created that will be filled with results.
 #'
 #' @return List with filenames
 
@@ -23,7 +24,7 @@ performAnalysis = function(directory = NULL, yaml_obj = list(), yaml_file = NULL
   {
     stop(paste0("You must provide either an yaml_obj or a yaml_file.\n
                 You can create a yaml file filled with default values using
-                'writeDefaultYaml(filename').\n"));
+                'writeDefaultYaml(filenam)'.\n"));
   }
   if (length(yaml_obj) && !is.null(yaml_file))
   {
@@ -45,19 +46,26 @@ performAnalysis = function(directory = NULL, yaml_obj = list(), yaml_file = NULL
     stop(paste0("Argument 'yaml_obj' is not a list\n"));
   }
 
-
   yaml_class = YamlClass$new(yaml_obj)
-  yaml_list = createYaml(yc=yaml_class)
+  yaml_list = createYaml(yc=yaml_class, sheets = yaml_class$yamlObj$Sheets, prep = yaml_class$yamlObj$Prep, outputs = yaml_class$yamlObj$Output)
 
-  yaml_params = yaml_list$param
+  yaml_sheets = yaml_list$sheets
+  yaml_prep = yaml_list$prep
+  yaml_outs = yaml_list$outputs
+
 
   ############
   # loading content of nosa results into data.frames that are stored within nested list
   ############
   nsr <- NosaResultLoader$new()
+  if (dir.exists(output_dir))
+  {
+    stop(paste0("The directory '", output_dir, "' already exists.\n"));
+  }
   if (dir.exists(directory))
   {
-    nsr$loadNosaResults(directory, yaml_params$sheetnames, yaml_params$needs_time_correction)
+    create_result_dirs(output_dir, yaml_outs)
+    nsr$loadNosaResults(directory, yaml_sheets, yaml_prep)
   }
   else
   {
@@ -65,32 +73,35 @@ performAnalysis = function(directory = NULL, yaml_obj = list(), yaml_file = NULL
   }
 
   ############
-  # prepare names of output dir and filenames
+  # create output
   ############
-  yo = yaml_list$yc$yamlObj
 
-  if (is.null(output_dir))
+  ## SEM
+  if ("SEM" %in% names(yaml_outs))
   {
-    output_dir = paste0(dirname(directory), "/", basename(directory),"_results")
-  }
-  if (!dir.exists(output_dir))
-  {
-    dir.create(output_dir)
+    nsr$plots$SEM = output_SEM(nsr$data$Processed, nsr$data$metadata$Status, yaml_outs$SEM, output_dir)
   }
 
-  out_files = getOutputFilenames(output_dir, yaml_params$r_data_out)
+  ############
+  # write outputs
+  ############
+  ## yaml
+  yaml_list$yc$writeYaml(paste0(output_dir, "/configs.yaml"))
 
-  if ("rData" %in% names(out_files))
+  ## rData
+  if ("DataAsRObject" %in% names(yaml_outs) && yaml_outs$DataAsRObject)
   {
-    if (!file.exists(out_files[["rData"]]))
+    saveRDS(nsr, file = paste0(output_dir, "/dataframes.rds"))
+  }
+
+  ## SEM
+  if (!is.null((yaml_outs$SEM)))
+  {
+    for (plot in nsr$plots$SEM)
     {
-      saveRDS(nsr, file = out_files[["rData"]])
-    }
-    else
-    {
-      warning(paste0("The file '", out_files[["rData"]],"' already exists.\n\t... Skipping ...\n"))
+      ggsave(plot$file, plot)
     }
   }
 
-  return(nsr$sections)#
+  return(yaml_outs)#
 }

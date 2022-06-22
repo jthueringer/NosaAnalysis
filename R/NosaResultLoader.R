@@ -1,23 +1,25 @@
 #'
 #' Class to read Nosa software results stored as *.xlsx file and store the tables internally.
 #'
-#' The 'sections' field is initialized after $loadNosaResults was called
+#' The 'data' field is initialized after $loadNosaResults was called
 #'
-#' @field sections NosaResults sections as list. Valid list entries are: "Metadata", "Raw", "Processed", "Baseline", "Spikes" and "SourceName"
+#' @field data NosaResults data as list. Valid list entries are: "metadata", "Raw", "Processed", "Baseline", "Spike Detection" and "Smoothing"
+#' @field plots A list containing all the plots that the user has requested.
 #'
 #'
 #'
 NosaResultLoader = setRefClass(
   "NosaResultLoader",
-  fields = list(sections = "list"),
+  fields = list(data = "list", plots = "list"),
   methods = list(
     initialize = function() {
-      .self$sections = list()
+      .self$data = list()
+      .self$plots = list()
 
       return(.self)
     },
     #'
-    loadNosaResults = function(.self, data_directory, sheets_list, needs_time_correction) {
+    loadNosaResults = function(.self, data_directory, sheet_p, prep_p) {
       "Read all existing nosa results of specified directory into a list of 4 data.frames (one df per nosa results sheet).
   Data.frames in the resulting list are named as the sheets:
   'Metadata', 'Raw', 'Processed', 'Baseline'.
@@ -33,7 +35,7 @@ NosaResultLoader = setRefClass(
       # a scope
       {
         # use user given sheet names, the metadata-sheet must be included
-        sheets <- names(sheets_list)
+        sheets <- names(sheet_p)
         if (!('metadata' %in% sheets))
         {
           stop(
@@ -95,9 +97,20 @@ NosaResultLoader = setRefClass(
                 names(complete_df[[sheet]])[name_positions] = complete_df[['metadata']][['source name']][i]
               }
             }
-
           }
 
+          #scope for deleting tmp_status if not needed anymore
+          {
+            "Adds the column 'Status' for grouping dataset"
+            tmp_status = complete_df$metadata[['source name']]
+            for (status in prep_p$Status)
+            {
+
+              bool_status = grepl(status, tmp_status)
+              tmp_status[bool_status] = status
+            }
+            complete_df$metadata$Status = tmp_status
+          }
 
           # if the timelanes between sources differ from each other, stop
           if (sum(!duplicated(complete_df[['metadata']][["source start frame"]])) != 1 )
@@ -114,7 +127,7 @@ NosaResultLoader = setRefClass(
             if (!identical(sheet, "metadata"))
             {
               time_indices = grep("^Time", colnames(complete_df[[sheet]]))
-              if (!is.null(time_indices) && needs_time_correction)
+              if (!is.null(time_indices) && prep_p$NeedsTimeCorrection)
               {
                 complete_df[[sheet]][time_indices] = data.frame(sapply(time_indices, function(i) {
                   round(complete_df[[sheet]][[time_indices]] - complete_df[[sheet]][[time_indices]][1], digits = 3)
@@ -128,9 +141,9 @@ NosaResultLoader = setRefClass(
           }
 
           # prepare data of spike detection sheet
-          if ("Spike Detection" %in% names(sheets_list))
+          if ("Spike Detection" %in% sheets)
           {
-            spike_detection_names = sheets_list[["Spike Detection"]]
+            spike_detection_names = sheet_p[["Spike Detection"]]
             spike_detection_sheet = names(complete_df[['Spike Detection']])
             tmp_spike = list()
             for (df_name in spike_detection_names)
@@ -175,7 +188,7 @@ NosaResultLoader = setRefClass(
               }
               else if (identical(sheet, 'Spike Detection'))
               {
-                for (table in sheets_list[['Spike Detection']])
+                for (table in sheet_p[['Spike Detection']])
                 {
                   if (identical(table, "Train"))
                   {
@@ -204,7 +217,7 @@ NosaResultLoader = setRefClass(
 
         if (timelane_to_zero) warning("The timelanes of file ", file, " have been set to the initial value of zero because 'NeedsTimeCorrection' is selected.\n")
         else  warning(paste0( "The timelanes of file ", file, " does not start with frame or second '0'\n"))
-        .self$sections <- tmp_df
+        .self$data <- tmp_df
       } # end scope
       return(NULL)
     },
@@ -214,7 +227,7 @@ NosaResultLoader = setRefClass(
     {
       "Adds the column 'Status' for grouping dataset"
 
-      result = .self$sections$metadata %>% mutate(Status = as.factor(case_when(
+      result = .self$data$metadata %>% mutate(Status = as.factor(case_when(
         grepl(`source name`, "pre") ~ "pre",
         grepl(`source name`, "post") ~ "post",
         grepl(`source name`, "train") ~ "training",
@@ -227,7 +240,7 @@ NosaResultLoader = setRefClass(
     {
       "The Raw sheet data ..."
 
-      result = .self$sections$Raw
+      result = .self$data$Raw
 
       return(result)
     },
@@ -236,7 +249,7 @@ NosaResultLoader = setRefClass(
     {
       "The Processed sheet data ..."
 
-      result = .self$sections$Processed
+      result = .self$data$Processed
 
       return(result)
     },
@@ -245,7 +258,7 @@ NosaResultLoader = setRefClass(
     {
       "The Baseline sheet data ..."
 
-      result = .self$sections$Baseline
+      result = .self$data$Baseline
 
       return(result)
     },
@@ -253,7 +266,7 @@ NosaResultLoader = setRefClass(
     getTrain = function()
     {
       "From Spike Detection sheet the train data ..."
-      result = .self$sections$`Spike Detection`$Train
+      result = .self$data$`Spike Detection`$Train
 
       return(result)
     },
@@ -261,7 +274,7 @@ NosaResultLoader = setRefClass(
     getTimeOfPeak = function()
     {
       "From Spike Detection sheet the Time of Peak (s) data ..."
-      result = .self$sections$`Spike Detection`$`Time of Peak (s)`
+      result = .self$data$`Spike Detection`$`Time of Peak (s)`
 
       return(result)
     },
@@ -269,7 +282,7 @@ NosaResultLoader = setRefClass(
     getAmplitudeOfPeak = function()
     {
       "From Spike Detection sheet the Amplitude of Peak data ..."
-      result = .self$sections$`Spike Detection`$`Amplitude of Peak`
+      result = .self$data$`Spike Detection`$`Amplitude of Peak`
 
       return(result)
     },
@@ -277,7 +290,7 @@ NosaResultLoader = setRefClass(
     getSpikeFrequency = function()
     {
       "From Spike Detection sheet the Spike Frequency (#Spikes / second) data ..."
-      result = .self$sections$`Spike Detection`$`Spike Frequency (#Spikes / second)`
+      result = .self$data$`Spike Detection`$`Spike Frequency (#Spikes / second)`
 
       return(result)
     }
