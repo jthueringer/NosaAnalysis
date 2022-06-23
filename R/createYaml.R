@@ -31,7 +31,9 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_output = list()
   default_output$DataAsRObject = FALSE
   default_output$EachSample = FALSE
-  default_output$SEM = c("pre", "post")
+  default_output$SEM = list()
+  default_output$SEM$Status =  c("pre", "post")
+  default_output$SEM$PeakZoom$range = 0.5
 
 
 
@@ -91,7 +93,9 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
 
   outputs$DataAsRObject = yc$getYaml("Output$DataAsRObject", outputs$DataAsRObject)
   outputs$EachSample = yc$getYaml("Output$EachSample", outputs$EachSample)
-  outputs$SEM = yc$getYaml("Output$SEM", outputs$SEM)
+  #outputs$SEM = yc$getYaml("Output$SEM", outputs$SEM)
+  outputs$SEM$Status =  yc$getYaml("Output$SEM$Status", outputs$SEM$Status)
+  outputs$SEM$PeakZoom$range = yc$getYaml("Output$SEM$PeakZoom$range", outputs$SEM$PeakZoom$range)
 
 
 

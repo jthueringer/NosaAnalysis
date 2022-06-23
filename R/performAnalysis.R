@@ -64,8 +64,8 @@ performAnalysis = function(directory = NULL, yaml_obj = list(), yaml_file = NULL
   }
   if (dir.exists(directory))
   {
-    dir.create(output_dir)
     nsr$loadNosaResults(directory, yaml_sheets, yaml_prep)
+    dir.create(output_dir)
   }
   else
   {
@@ -79,13 +79,18 @@ performAnalysis = function(directory = NULL, yaml_obj = list(), yaml_file = NULL
   ## SEM
   if ("SEM" %in% names(yaml_outs))
   {
-    nsr$plots$SEM = output_SEM(nsr$data$Processed, nsr$data$metadata$Status, yaml_outs$SEM, output_dir)
+    sem_dir = paste0(output_dir, "/SEM/")
+    dir.create(sem_dir)
+    peak_time = rowMeans(nsr$data[['Spike Detection']][['Peak (s)']], na.rm=TRUE)[1]
+    nsr$plots$SEM = output_SEM(nsr$data$Processed, nsr$data$metadata$Status, peak_time, yaml_outs$SEM, sem_dir)
   }
 
   ## EachSample
   if (yaml_outs$EachSample)
   {
-    nsr$plots$EachSample = output_EachSample(nsr$data$Processed, output_dir)
+    es_dir = paste0(output_dir, "/EachSample/")
+    dir.create(es_dir)
+    nsr$plots$EachSample = output_EachSample(nsr$data$Processed, es_dir)
   }
 
   ############
@@ -100,10 +105,10 @@ performAnalysis = function(directory = NULL, yaml_obj = list(), yaml_file = NULL
     saveRDS(nsr, file = paste0(output_dir, "/dataframes.rds"))
   }
 
+  # TODO: plotting all in one run?!
   ## SEM
   if ("SEM" %in% names(yaml_outs))
   {
-    dir.create(paste0(output_dir, "/SEM"))
     for (plot in nsr$plots$SEM)
     {
       ggsave(plot$file, plot)
@@ -113,7 +118,6 @@ performAnalysis = function(directory = NULL, yaml_obj = list(), yaml_file = NULL
   ## EachSample
   if (yaml_outs$EachSample)
   {
-    dir.create(paste0(output_dir, "/EachSample"))
     for (plot in nsr$plots$EachSample)
     {
       ggsave(plot$file, plot)
@@ -121,5 +125,5 @@ performAnalysis = function(directory = NULL, yaml_obj = list(), yaml_file = NULL
   }
 
 
-  return(yaml_outs)#
+  return(nsr)#
 }
