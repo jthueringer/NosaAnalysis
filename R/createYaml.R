@@ -1,7 +1,6 @@
+#'
 #' Creates a yaml file storing the parameters that are used for the analysis of the NOSA software results
 #' and returns these parameters as well as a list of available Metrics objects.
-#'
-#'
 #'
 #' @param yc A yaml class object created by YAMLClass$new()
 #' @param sheets List sheet names that should be loaded; if empty, it is filled with defaults
@@ -25,15 +24,20 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_sheets$'Spike Detection' = c("Train", "Peak (s)", "Amplitude of Peak", "Spike Frequency (#Spikes / second)")
 
   default_prep = list()
+  default_prep$InputDirectory = "/path/to/nosa/results"
+  default_prep$ResultsDirectory = "/path/to/results"
   default_prep$NeedsTimeCorrection = FALSE
   default_prep$Status = c("pre", "post", "train")
 
   default_output = list()
   default_output$DataAsRObject = FALSE
-  default_output$EachSample = FALSE
+  default_output$Trace = c("Raw", "Processed")
   default_output$SEM = list()
   default_output$SEM$Status =  c("pre", "post")
   default_output$SEM$PeakZoom$range = 0.5
+  default_output$PeakCount$Status =  c("pre", "post")
+  default_output$PeakCount$minTime = 0
+  default_output$PeakCount$maxTime = 100
 
 
 
@@ -81,6 +85,11 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
     }
   }
 
+  prep$InputDirectory = yc$getYaml("Prep$InputDirectory", prep$InputDirectory)
+  prep$ResultsDirectory = yc$getYaml("Prep$ResultsDirectory", prep$ResultsDirectory)
+  prep$NeedsTimeCorrection = yc$getYaml("Prep$NeedsTimeCorrection", prep$NeedsTimeCorrection)
+  prep$Status = yc$getYaml("Prep$Status", prep$Status)
+
   sheets$metadata = yc$getYaml("Sheets$metadata", sheets$metadata)
   sheets$Raw = yc$getYaml("Sheets$Raw", sheets$Raw)
   sheets$Processed = yc$getYaml("Sheets$Processed", sheets$Processed)
@@ -88,15 +97,13 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   sheets$Smoothing = yc$getYaml("Sheets$Smoothing", sheets$Smoothing)
   sheets$'Spike Detection'= yc$getYaml("Sheets$'Spike Detection'", sheets$'Spike Detection')
 
-  prep$NeedsTimeCorrection = yc$getYaml("Prep$NeedsTimeCorrection", prep$NeedsTimeCorrection)
-  prep$Status = yc$getYaml("Prep$Status", prep$Status)
-
   outputs$DataAsRObject = yc$getYaml("Output$DataAsRObject", outputs$DataAsRObject)
-  outputs$EachSample = yc$getYaml("Output$EachSample", outputs$EachSample)
-  #outputs$SEM = yc$getYaml("Output$SEM", outputs$SEM)
+  outputs$Trace = yc$getYaml("Output$Trace", outputs$Trace)
   outputs$SEM$Status =  yc$getYaml("Output$SEM$Status", outputs$SEM$Status)
   outputs$SEM$PeakZoom$range = yc$getYaml("Output$SEM$PeakZoom$range", outputs$SEM$PeakZoom$range)
-
+  outputs$PeakCount$Status = yc$getYaml("Output$PeakCount$Status", outputs$PeakCount$Status)
+  outputs$PeakCount$minTime = yc$getYaml("Output$PeakCount$minTime", outputs$PeakCount$minTime)
+  outputs$PeakCount$maxTime = yc$getYaml("Output$PeakCount$maxTime", outputs$PeakCount$maxTime)
 
 
   return(list("yc" = yc, "sheets" = sheets, "prep" = prep, "outputs" = outputs))

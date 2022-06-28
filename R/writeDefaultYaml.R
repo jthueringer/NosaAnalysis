@@ -3,7 +3,7 @@
 #' It is recommended to make a copy and then modify it according to the
 #' requirements of the analysis.
 #'
-#' @param filename a character string naming a file for writing
+#' @param filename A character string naming a file for writing
 #'
 #'
 

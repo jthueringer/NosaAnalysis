@@ -1,9 +1,9 @@
 #'
 #' Class to read Nosa software results stored as *.xlsx file and store the tables internally.
 #'
-#' The 'data' field is initialized after $loadNosaResults was called
+#' The 'data' field is initialized after $loadNosaResults was called.
 #'
-#' @field data NosaResults data as list. Valid list entries are: "metadata", "Raw", "Processed", "Baseline", "Spike Detection" and "Smoothing"
+#' @field data NosaResults data as list. Valid list entries are: "metadata", "Raw", "Processed", "Baseline", "Spike Detection" and "Smoothing".
 #' @field plots A list containing all the plots that the user has requested.
 #'
 #'
@@ -222,18 +222,11 @@ NosaResultLoader = setRefClass(
       return(NULL)
     },
 
-    # TODO: split, because getMetadata should not do a second job as adding a column
     getMetadata = function()
     {
-      "Adds the column 'Status' for grouping dataset"
+      "The metadata sheet data ..."
 
-      result = .self$data$metadata %>% mutate(Status = as.factor(case_when(
-        grepl(`source name`, "pre") ~ "pre",
-        grepl(`source name`, "post") ~ "post",
-        grepl(`source name`, "train") ~ "training",
-      )))
-
-      return(result)
+      return(.self$data$metadata)
     },
 
     getRaw = function()

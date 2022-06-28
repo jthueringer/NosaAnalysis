@@ -1,35 +1,25 @@
-#' Perform the analysis of the NOSA software results.
+#' Perform the analysis of NOSA software results.
 #'
-#' A yaml object can also be provided to define which analyses are to be performed.
+#' By calling this function, all data specified under "Sheets" in the loaded Yaml
+#' file are read into data.frames. Additional parameters and plots can be defined
+#' with the Yaml configuration. It is advisable to create a file with the function
+#' "writeDefaultYaml(filename)" and to adjust or deactivate the desired metrics.
 #'
-#' @param directory Path to nosa result files to bee analysed.
-#' @param yaml_obj An object of nested lists that contain configuration parameters.
-#'                 Either this object or a **yaml_file** must be provided.
-#' @param yaml_file Alternative to **yaml_obj** you can provide a yaml_file that contains
+#'
+#' @param yaml_file A character string that provides the path and name of a yaml_file containing
 #'                 the configuration parameters.
 #'                 The function **writeDefaultYaml(filename)** can be used to create
 #'                 this file filled with all default parameters and values.
-#' @param output_dir Path to the location where the directories are to be created that will be filled with results.
 #'
-#' @return List with filenames
-
+#' @return List with sections data and plots.
+#'
 #' @export
 #'
-performAnalysis = function(directory = NULL, yaml_obj = list(), yaml_file = NULL, output_dir = NULL)
+performAnalysis = function(yaml_file = NULL)
 {
   ############
   # prepare the Yaml
   ############
-  if (!length(yaml_obj) && is.null(yaml_file))
-  {
-    stop(paste0("You must provide either an yaml_obj or a yaml_file.\n
-                You can create a yaml file filled with default values using
-                'writeDefaultYaml(filenam)'.\n"));
-  }
-  if (length(yaml_obj) && !is.null(yaml_file))
-  {
-    stop(paste0("You must provide either an yaml_obj or a yaml_file, not both.\n"));
-  }
   if (!is.null(yaml_file))
   {
     if (file.exists(yaml_file))
@@ -41,9 +31,11 @@ performAnalysis = function(directory = NULL, yaml_obj = list(), yaml_file = NULL
       stop(paste0("The yaml_file '", yaml_file, "' does not exist.\n"));
     }
   }
-  else if (!inherits(yaml_obj, "list"))
+  else
   {
-    stop(paste0("Argument 'yaml_obj' is not a list\n"));
+    stop(paste0("\nYou must provide a yaml_file.\n
+                You can create a yaml file filled with default values using
+                'writeDefaultYaml(filename)'.\n"));
   }
 
   yaml_class = YamlClass$new(yaml_obj)
@@ -51,6 +43,8 @@ performAnalysis = function(directory = NULL, yaml_obj = list(), yaml_file = NULL
 
   yaml_sheets = yaml_list$sheets
   yaml_prep = yaml_list$prep
+  directory = yaml_prep$InputDirectory
+  output_dir = yaml_prep$ResultsDirectory
   yaml_outs = yaml_list$outputs
 
 
@@ -65,7 +59,6 @@ performAnalysis = function(directory = NULL, yaml_obj = list(), yaml_file = NULL
   if (dir.exists(directory))
   {
     nsr$loadNosaResults(directory, yaml_sheets, yaml_prep)
-    dir.create(output_dir)
   }
   else
   {
@@ -79,24 +72,28 @@ performAnalysis = function(directory = NULL, yaml_obj = list(), yaml_file = NULL
   ## SEM
   if ("SEM" %in% names(yaml_outs))
   {
-    sem_dir = paste0(output_dir, "/SEM/")
-    dir.create(sem_dir)
     peak_time = rowMeans(nsr$data[['Spike Detection']][['Peak (s)']], na.rm=TRUE)[1]
-    nsr$plots$SEM = output_SEM(nsr$data$Processed, nsr$data$metadata$Status, peak_time, yaml_outs$SEM, sem_dir)
+    nsr$plots$SEM = output_SEM(nsr$data$Processed, nsr$data$metadata$Status, peak_time, yaml_outs$SEM, output_dir)
   }
 
-  ## EachSample
-  if (yaml_outs$EachSample)
+  ## Trace
+  if ("Trace" %in% names(yaml_outs))# & !(is.null(yaml_outs$Trace)))
   {
-    es_dir = paste0(output_dir, "/EachSample/")
-    dir.create(es_dir)
-    nsr$plots$EachSample = output_EachSample(nsr$data$Processed, es_dir)
+    nsr$plots$Trace = output_Trace(nsr$data, yaml_outs$Trace, output_dir)
+  }
+
+  ## PeakCount
+  if ("PeakCount" %in% names(yaml_outs))
+  {
+    nsr$plots$PeakCount = output_PeakCount(nsr$data[['Spike Detection']]$Train, nsr$data$metadata$Status, yaml_outs$PeakCount, output_dir)
   }
 
   ############
   # write outputs
   ############
   ## yaml
+
+  dir.create(output_dir)
   yaml_list$yc$writeYaml(paste0(output_dir, "/configs.yaml"))
 
   ## rData
@@ -105,20 +102,22 @@ performAnalysis = function(directory = NULL, yaml_obj = list(), yaml_file = NULL
     saveRDS(nsr, file = paste0(output_dir, "/dataframes.rds"))
   }
 
-  # TODO: plotting all in one run?!
-  ## SEM
-  if ("SEM" %in% names(yaml_outs))
+  # plotting
+  for ( metric in names(nsr$plots) )
   {
-    for (plot in nsr$plots$SEM)
+    if (identical(metric, "Trace"))
     {
-      ggsave(plot$file, plot)
+      for (sheet in yaml_outs$Trace)
+      {
+        dir.create(paste0(nsr$plots$Trace[[1]]$path, sheet, "/"), recursive = TRUE)
+      }
     }
-  }
+    else
+    {
+      dir.create(eval(parse(text= paste0("nsr$plots[['", metric, "']][[1]]$path"))))
+    }
 
-  ## EachSample
-  if (yaml_outs$EachSample)
-  {
-    for (plot in nsr$plots$EachSample)
+    for (plot in eval(parse(text= paste0("nsr$plots[['", metric, "']]"))))
     {
       ggsave(plot$file, plot)
     }
