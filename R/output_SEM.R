@@ -4,63 +4,78 @@
 #' If stati is empty, all existing data is used for the analysis.
 #'
 #' @param data Data frame on which the SEM is to be determined.
-#' @param status_col Contains the status for each sample. If a value is NA, then it is not taken into account.
+#' @param factor_col Contains the factor for each sample. If a value is NA, then it is not taken into account.
 #' @param peak_time Noch ändern....
 #' @param params List that holds yaml defined parameters for SEM analysis
 #' @param dir Path to the location where the resulting plots are to be stored.
 #'
 #' @return List with SEM plots
 #'
-
-output_SEM = function(data, status_col, peak_time, params, dir)
+#' @import dplyr
+#' @import ggplot2
+#' @importFrom plotrix std.error
+#'
+#'
+output_SEM = function(data, factor_col, time_of_peak, params, dir)
 {
-  dir = paste0(dir, "/SEM/")
+  dir = paste0(dir, "/SEM/", params$DirName, "/")
   result = list()
-  peak_zoom = FALSE
-  if ("PeakZoom" %in% names(params))
-  {
-    if (params$PeakZoom$range > 0)
-    {
-      peak_zoom = TRUE
 
-    }
+  # create list containing logical vectors for column selection from data
+  data_columns = list()
+
+  if (!length(params$Factor))
+  {
+    data_columns[['all']] = !grepl('Time', names(data))
   }
-  if (!length(params$Status))
-  {
-    bool_status = !(is.na(status_col))
-    plot = get_plot(data, bool_status)
-    plot$file = paste0(dir, "all_SEM.png")
-    plot$path = dir
-    eval(parse(text = paste0("result$all = plot")))
-
-    if (peak_zoom)
-    {
-      plot =
-      get_plot(data[ (data[['Time (s']] > (peak_time-params$PeakZoom$range)) & (data[['Time (s']] < (peak_time+params$PeakZoom$range)),], bool_status)
-      plot$file = paste0(dir, "all_zoom.png")
-      plot$path = dir
-      eval(parse(text = paste0("result$all_zoom = plot")))
-    }
-   }
   else
   {
-    for (status in params$Status)
+    for (fact in params$Factor)
     {
-      bool_status = grep(status,status_col)
-      plot = get_plot(data, bool_status)
-      plot$path = dir
-      plot$file = paste0(dir, status, "_SEM.png")
+      data_columns[[ fact ]] = grepl(fact, names(data))
+    }
+  }
 
-      eval(parse(text = paste0("result$", status, " = plot")))
+  for (factor in names(data_columns))
+  {
+    df = data[data_columns[[factor]]] %>%
+      mutate(Mean = rowMeans(.), SEM = rowSem(.))
 
-      if (peak_zoom)
+    df = df %>% select(Mean, SEM) %>%
+      mutate(Time = data[[1]])
+
+    # trace plot with sem
+    if (isTRUE(params$Trace))
+    {
+      t_plot = get_plot(df)
+      t_plot$file = paste0(dir, factor, "_SEM.png")
+      t_plot$path = dir
+      eval(parse(text = paste0("result$trace", params$DirName, factor, " = t_plot")))
+    }
+
+    # average plot with sem
+    if ("PeakAverage" %in% names(params))
+    {
+      dfs = NULL
+      for (stim in params$PeakAverage$Stimulus)
       {
-        zoom_df = data[(data[['Time (s)']] > (peak_time-params$PeakZoom$range)) & (data[['Time (s)']] < (peak_time+params$PeakZoom$range)), ]
-        plot = get_plot(zoom_df, bool_status)
-        plot$path = dir
-        plot$file = paste0(dir, status, "_SEM_zoom.png")
-        eval(parse(text = paste0("result$", status, "_zoom = plot")))
+        if (is.null(dfs))
+        {
+          dfs = df %>% filter(.$Time > stim-params$PeakAverage$before & .$Time < stim+params$PeakAverage$after) %>%
+            select(Mean)
+        }
+        else
+        {
+          dfs = cbind(dfs$Mean, df %>% filter(.$Time > stim-params$PeakAverage$before & .$Time < stim+params$PeakAverage$after) %>%
+                        select(Mean))
+        }
       }
+      df_average = data.frame(Time = data[1:nrow(dfs), 1], Mean = rowMeans(dfs), SEM = rowSem(dfs))
+      a_plot = get_plot(df_average)
+      a_plot$path = dir
+      a_plot$file = paste0(dir, factor, "_peak_average.png")
+
+      eval(parse(text = paste0("result$average", params$DirName, factor, " = a_plot")))
     }
   }
 
@@ -75,9 +90,8 @@ output_SEM = function(data, status_col, peak_time, params, dir)
 #'
 #' @return List of ggplot2 data
 #'
-get_plot = function(df, columns)
+get_plot = function(df)
 {
-  df = data.frame(Time = df$`Time (s)` , Mean = apply(df[columns], 1, function(col) { mean(col)}) , SEM = apply(df[columns], 1, function(col) { plotrix::std.error(col) }))
   plot = ggplot(df, aes(x=Time, y=Mean)) +
     geom_errorbar(aes(ymin=Mean-SEM, ymax=Mean+SEM), colour="lightblue", width=.1) +
     geom_line(colour="blue") +
