@@ -6,8 +6,7 @@
 #' @param sheetnames List containing all sheetnames for this analysis.
 #' @param dir Path to the location where the resulting plots are to be stored.
 #'
-#' @return List with sample plots
-#' @import ggplot2
+#' @return List with ggplot2 sample plots
 #'
 
 output_Trace = function(data, sheetname, dir)

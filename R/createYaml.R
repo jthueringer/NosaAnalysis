@@ -47,6 +47,10 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_output$Boxplots$PeakCount$Filename = "PeakCount"
   default_output$Boxplots$PeakCount$Factor = c("training", "odor", "shock")
   default_output$Boxplots$PeakCount$Window = c(0, 260)
+  default_output$Boxplots$Responses = list()
+  default_output$Boxplots$Responses$Factor = c("pre", "post")
+  default_output$Boxplots$Responses$Stimuli = c(10, 40)
+  default_output$Boxplots$Responses$GroupByStimulus = FALSE
 
 
 
@@ -109,7 +113,6 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   outputs$DataAsRObject = yc$getYaml("Output$DataAsRObject", outputs$DataAsRObject)
   outputs$Trace = yc$getYaml("Output$Trace", outputs$Trace)
   outputs$SEM = yc$getYaml("Output$SEM", outputs$SEM)
-
   outputs$Boxplots = yc$getYaml("Output$Boxplots", outputs$Boxplot)
 
 

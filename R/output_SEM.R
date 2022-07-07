@@ -8,7 +8,7 @@
 #' @param params List that holds yaml defined parameters for SEM analysis
 #' @param dir Path to the location where the resulting plots are to be stored.
 #'
-#' @return List with SEM plots
+#' @return List with ggplot2 SEM plots
 #'
 #' @import dplyr
 #' @importFrom plotrix std.error
