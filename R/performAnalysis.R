@@ -75,7 +75,9 @@ performAnalysis = function(yaml_file = NULL)
     nsr$plots$SEM = list()
     for (params in yaml_outs$SEM)
     {
-      nsr$plots$SEM = c(nsr$plots$SEM, list(output_SEM(nsr$data$Processed, nsr$data$metadata$Factor, params, output_dir)))
+      sem_df = nsr$data$Processed %>% select(contains(c("Time", params$Factor))) %>% na.omit()
+      factor_col = extract_factor(names(sem_df)[-1], params$Factor)
+      nsr$plots$SEM = c(nsr$plots$SEM, list(output_SEM(sem_df, factor_col, params, output_dir)))
       nsr$plots$paths = c(nsr$plots$paths, nsr$plots$SEM[[length(nsr$plots$SEM)]][[1]]$path)
     }
   }
@@ -86,7 +88,7 @@ performAnalysis = function(yaml_file = NULL)
     nsr$plots$Trace = list()
     for (sheet in yaml_outs$Trace)
     {
-      nsr$plots$Trace = c(nsr$plots$Trace, output_Trace(eval(parse(text=paste0("nsr$data[['", sheet, "']]"))), sheet, output_dir))
+      nsr$plots$Trace = c(nsr$plots$Trace, output_Trace(nsr$data[[sheet]], sheet, output_dir))
       nsr$plots$paths = c(nsr$plots$paths, nsr$plots$Trace[[length(nsr$plots$Trace)]]$path)
     }
   }

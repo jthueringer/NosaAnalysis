@@ -100,25 +100,16 @@ NosaResultLoader = setRefClass(
             }
           }
 
-          #scope for deleting tmp_factor if not needed anymore
-          {
-            "Adds the column 'Factor' for grouping dataset"
-            tmp_factor = complete_df$metadata[['source name']]
-            for (factor in prep_p$Factor)
-            {
-
-              bool_factor = grepl(factor, tmp_factor)
-              tmp_factor[bool_factor] = factor
-            }
-            complete_df$metadata$Factor = tmp_factor
-          }
-
           # if the timelanes between sources differ from each other, stop
-          if (sum(!duplicated(complete_df[['metadata']][["source start frame"]])) != 1 )
+          for (sheet in sheets)
           {
-            stop(
-              paste0("\nThe dataset  of ", file, " contains different timelanes, which therefore cannot be processed. Manually merge the different tables into one.")
-            )
+            if (!identical(sheet, "metadata"))
+            {
+             if (sum(grepl("Time", names(sheet))) > 1)
+             {
+               stop( paste0("\nThe dataset  of ", file, " contains different timelanes, which therefore cannot be processed. Manually merge the different tables into one."))
+             }
+            }
           }
 
           # check, that timelanes start with zero

@@ -16,7 +16,7 @@ output_Trace = function(data, sheetname, dir)
   dir = paste0(dir, "/Trace/", sheetname, "/")
   for (col in names(data)[-1])
   {
-    df = data.frame(Time = data[,1], Value = data[[col]])
+    df = data.frame(Time = data[,1], Value = data[[col]]) %>% na.omit()
     plot = get_traceplot(df, "Time", "Value")
     plot$path = dir
     plot$file = paste0(dir, col, ".png")

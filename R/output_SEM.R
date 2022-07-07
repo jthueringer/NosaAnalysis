@@ -1,7 +1,7 @@
 
 #'
 #' Function to create the standard error of mean of a given dataset.
-#' If stati is empty, all existing data is used for the analysis.
+#' If no factor is provided, all existing data is used for the analysis.
 #'
 #' @param data Data frame on which the SEM is to be determined.
 #' @param factor_col Contains the factor for each sample. If a value is NA, then it is not taken into account.
@@ -11,7 +11,6 @@
 #' @return List with SEM plots
 #'
 #' @import dplyr
-#' @import ggplot2
 #' @importFrom plotrix std.error
 #'
 #'

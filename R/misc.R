@@ -20,6 +20,8 @@ rowSem <- function(x) {
 #'
 #' @return List of ggplot2 data
 #'
+#' @import ggplot2
+#'
 get_traceplot = function(df, var1, var2, sem = NULL)
 {
   plot = ggplot(df, aes(x=.data[[var1]], y=.data[[var2]]))
@@ -46,6 +48,8 @@ get_traceplot = function(df, var1, var2, sem = NULL)
 #'
 #' @return List of ggplot2 data
 #'
+#' @import ggplot2
+#'
 get_boxplot = function(df, factor, var, group = NULL)
 {
   plot = ggplot(df, aes(x=.data[[factor]], y=.data[[var]])) +
@@ -56,3 +60,24 @@ get_boxplot = function(df, factor, var, group = NULL)
 
   return(plot)
 }
+
+
+#'
+#' Extract factors from given name list.
+#'
+#' @param names List with names to search for factors.
+#' @param factors List with factors.
+#'
+#' @return List of found factors. If not found
+#'
+extract_factor = function(names, factors)
+{
+  tmp_factor = rep(NA, length(names))
+  for (factor in factors)
+  {
+    bool_factor = grepl(factor, names)
+    tmp_factor[bool_factor] = factor
+  }
+  return(tmp_factor)
+}
+
