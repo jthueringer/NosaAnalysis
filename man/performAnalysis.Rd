@@ -2,31 +2,22 @@
 % Please edit documentation in R/performAnalysis.R
 \name{performAnalysis}
 \alias{performAnalysis}
-\title{Perform the analysis of the NOSA software results.}
+\title{Perform the analysis of NOSA software results.}
 \usage{
-performAnalysis(
-  directory = NULL,
-  yaml_obj = list(),
-  yaml_file = NULL,
-  output_dir = NULL
-)
+performAnalysis(yaml_file = NULL)
 }
 \arguments{
-\item{directory}{Path to nosa result files to bee analysed.}
-
-\item{yaml_obj}{An object of nested lists that contain configuration parameters.
-Either this object or a **yaml_file** must be provided.}
-
-\item{yaml_file}{Alternative to **yaml_obj** you can provide a yaml_file that contains
+\item{yaml_file}{A character string that provides the path and name of a yaml_file containing
 the configuration parameters.
 The function **writeDefaultYaml(filename)** can be used to create
 this file filled with all default parameters and values.}
-
-\item{output_dir}{Path to the location where the directories are to be created that will be filled with results.}
 }
 \value{
-List with filenames
+List with sections data and plots.
 }
 \description{
-A yaml object can also be provided to define which analyses are to be performed.
+By calling this function, all data specified under "Sheets" in the loaded Yaml
+file are read into data.frames. Additional parameters and plots can be defined
+with the Yaml configuration. It is advisable to create a file with the function
+"writeDefaultYaml(filename)" and to adjust or deactivate the desired metrics.
 }

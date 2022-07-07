@@ -5,16 +5,16 @@
 \title{Function to create the standard error of mean of a given dataset.
 If stati is empty, all existing data is used for the analysis.}
 \usage{
-output_SEM(data, status_col, stati, output_dir)
+output_SEM(data, factor_col, params, dir)
 }
 \arguments{
 \item{data}{Data frame on which the SEM is to be determined.}
 
-\item{status_col}{Contains the status for each sample. If a value is NA, then it is not taken into account.}
+\item{factor_col}{Contains the factor for each sample. If a value is NA, then it is not taken into account.}
 
-\item{stati}{List of stati that should be seperated from each other.}
+\item{params}{List that holds yaml defined parameters for SEM analysis}
 
-\item{output_dir}{Path to the location where the resulting plots are to be stored.}
+\item{dir}{Path to the location where the resulting plots are to be stored.}
 }
 \value{
 List with SEM plots

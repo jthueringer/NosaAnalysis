@@ -17,7 +17,7 @@ createYaml(yc, sheets = list(), prep = list(), outputs = list())
 \item{outputs}{List of metric names that should be plotted; if empty, it is filled with defaults}
 }
 \value{
-list of all parameters used for the analysis
+list of all parameters used for the analysis#'
 }
 \description{
 Creates a yaml file storing the parameters that are used for the analysis of the NOSA software results

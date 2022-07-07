@@ -6,12 +6,12 @@
 \alias{NosaResultLoader}
 \title{Class to read Nosa software results stored as *.xlsx file and store the tables internally.}
 \description{
-The 'data' field is initialized after $loadNosaResults was called
+The 'data' field is initialized after $loadNosaResults was called.
 }
 \section{Fields}{
 
 \describe{
-\item{\code{data}}{NosaResults data as list. Valid list entries are: "metadata", "Raw", "Processed", "Baseline", "Spike Detection" and "Smoothing"}
+\item{\code{data}}{NosaResults data as list. Valid list entries are: "metadata", "Raw", "Processed", "Baseline", "Spike Detection" and "Smoothing".}
 
 \item{\code{plots}}{A list containing all the plots that the user has requested.}
 }}
@@ -23,7 +23,7 @@ The 'data' field is initialized after $loadNosaResults was called
 
 \item{\code{getBaseline()}}{The Baseline sheet data ...}
 
-\item{\code{getMetadata()}}{Adds the column 'Status' for grouping dataset}
+\item{\code{getMetadata()}}{The metadata sheet data ...}
 
 \item{\code{getProcessed()}}{The Processed sheet data ...}
 

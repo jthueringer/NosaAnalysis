@@ -7,7 +7,7 @@
 writeDefaultYaml(filename)
 }
 \arguments{
-\item{filename}{a character string naming a file for writing}
+\item{filename}{A character string naming a file for writing}
 }
 \description{
 It is recommended to make a copy and then modify it according to the
