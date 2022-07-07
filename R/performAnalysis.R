@@ -68,31 +68,39 @@ performAnalysis = function(yaml_file = NULL)
   ############
   # create output
   ############
-
+  nsr$plots$paths = list()
   ## SEM
   if ("SEM" %in% names(yaml_outs))
   {
-    peak_time = rowMeans(nsr$data[['Spike Detection']][['Peak (s)']], na.rm=TRUE)[1]
-    nsr$plots$SEM = output_SEM(nsr$data$Processed, nsr$data$metadata$Status, peak_time, yaml_outs$SEM, output_dir)
+    nsr$plots$SEM = list()
+    for (params in yaml_outs$SEM)
+    {
+      nsr$plots$SEM = c(nsr$plots$SEM, list(output_SEM(nsr$data$Processed, nsr$data$metadata$Factor, params, output_dir)))
+      nsr$plots$paths = c(nsr$plots$paths, nsr$plots$SEM[[length(nsr$plots$SEM)]][[1]]$path)
+    }
   }
 
   ## Trace
   if ("Trace" %in% names(yaml_outs))# & !(is.null(yaml_outs$Trace)))
   {
-    nsr$plots$Trace = output_Trace(nsr$data, yaml_outs$Trace, output_dir)
+    nsr$plots$Trace = list()
+    for (sheet in yaml_outs$Trace)
+    {
+      nsr$plots$Trace = c(nsr$plots$Trace, output_Trace(eval(parse(text=paste0("nsr$data[['", sheet, "']]"))), sheet, output_dir))
+      nsr$plots$paths = c(nsr$plots$paths, nsr$plots$Trace[[length(nsr$plots$Trace)]]$path)
+    }
   }
 
-  ## PeakCount
-  if ("PeakCount" %in% names(yaml_outs))
-  {
-    nsr$plots$PeakCount = output_PeakCount(nsr$data[['Spike Detection']]$Train, nsr$data$metadata$Status, yaml_outs$PeakCount, output_dir)
-  }
+  # ## PeakCount
+  # if ("PeakCount" %in% names(yaml_outs))
+  # {
+  #   nsr$plots$PeakCount = output_PeakCount(nsr$data[['Spike Detection']]$Train, nsr$data$metadata$Factor, yaml_outs$PeakCount, output_dir)
+  # }
 
   ############
   # write outputs
   ############
   ## yaml
-
   dir.create(output_dir)
   yaml_list$yc$writeYaml(paste0(output_dir, "/configs.yaml"))
 
@@ -103,26 +111,21 @@ performAnalysis = function(yaml_file = NULL)
   }
 
   # plotting
-  for ( metric in names(nsr$plots) )
+  for (path in nsr$plots$paths)
   {
-    if (identical(metric, "Trace"))
-    {
-      for (sheet in yaml_outs$Trace)
-      {
-        dir.create(paste0(nsr$plots$Trace[[1]]$path, sheet, "/"), recursive = TRUE)
-      }
-    }
-    else
-    {
-      dir.create(eval(parse(text= paste0("nsr$plots[['", metric, "']][[1]]$path"))))
-    }
-
-    for (plot in eval(parse(text= paste0("nsr$plots[['", metric, "']]"))))
-    {
-      ggsave(plot$file, plot)
-    }
+    dir.create(path, recursive = TRUE)
   }
 
-
+  for ( metric in names(nsr$plots) )
+  {
+    if(!identical(metric, "paths"))
+    {
+      if (!is.ggplot(nsr$plots[[metric]][[1]])) nsr$plots[[metric]] = Reduce(append, nsr$plots[[metric]])
+      for (plot in nsr$plots[[ metric ]])
+      {
+        ggsave(plot$file, plot)
+      }
+    }
+  }
   return(nsr)#
 }

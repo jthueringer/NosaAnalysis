@@ -7,27 +7,22 @@
 #' @param dir Path to the location where the resulting plots are to be stored.
 #'
 #' @return List with sample plots
+#' @import ggplot2
 #'
 
-output_Trace = function(data, sheetnames, dir)
+output_Trace = function(data, sheetname, dir)
 {
   result = list()
-  dir = paste0(dir, "/Trace/")
-  for (sheet in sheetnames)
+  dir = paste0(dir, "/Trace/", sheetname, "/")
+  for (col in names(data)[-1])
   {
-    sheet_data = eval(parse(text=paste0("data[['", sheet, "']]")))
-    for (col in names(sheet_data)[-1])
-    {
-      df = data.frame(Time = sheet_data[,1], Fly = sheet_data[[col]])
-      plot = ggplot(df, aes(x=Time, y=Fly)) +
-        geom_line(colour="blue") +
-        labs(y="\u0394 F/F", x="Time [s]",)
-      plot$path = dir
-      plot$file = paste0(plot$path, sheet, "/", col, ".png")
+    df = data.frame(Time = data[,1], Value = data[[col]])
+    plot = get_traceplot(df, "Time", "Value")
+    plot$path = dir
+    plot$file = paste0(dir, col, ".png")
 
-      plotname = paste0(col, "_", sheet)
-      eval(parse(text = paste0("result[['", plotname, "']] = plot")))
-    }
+    plotname = paste0(col, "_", sheetname)
+    eval(parse(text = paste0("result[['", plotname, "']] = plot")))
   }
 
   return(result)

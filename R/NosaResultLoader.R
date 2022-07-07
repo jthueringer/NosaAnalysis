@@ -6,6 +6,7 @@
 #' @field data NosaResults data as list. Valid list entries are: "metadata", "Raw", "Processed", "Baseline", "Spike Detection" and "Smoothing".
 #' @field plots A list containing all the plots that the user has requested.
 #'
+#' @importFrom gdata cbindX
 #'
 #'
 NosaResultLoader = setRefClass(
@@ -99,17 +100,17 @@ NosaResultLoader = setRefClass(
             }
           }
 
-          #scope for deleting tmp_status if not needed anymore
+          #scope for deleting tmp_factor if not needed anymore
           {
-            "Adds the column 'Status' for grouping dataset"
-            tmp_status = complete_df$metadata[['source name']]
-            for (status in prep_p$Status)
+            "Adds the column 'Factor' for grouping dataset"
+            tmp_factor = complete_df$metadata[['source name']]
+            for (factor in prep_p$Factor)
             {
 
-              bool_status = grepl(status, tmp_status)
-              tmp_status[bool_status] = status
+              bool_factor = grepl(factor, tmp_factor)
+              tmp_factor[bool_factor] = factor
             }
-            complete_df$metadata$Status = tmp_status
+            complete_df$metadata$Factor = tmp_factor
           }
 
           # if the timelanes between sources differ from each other, stop
@@ -122,23 +123,27 @@ NosaResultLoader = setRefClass(
 
           # check, that timelanes start with zero
           # if needs time correction, then every timepoint starts at 0, but values don't change
-          for (sheet in sheets)
+          if (prep_p$NeedsTimeCorrection)
           {
-            if (!identical(sheet, "metadata"))
+            for (sheet in sheets)
             {
-              time_indices = grep("^Time", colnames(complete_df[[sheet]]))
-              if (!is.null(time_indices) && prep_p$NeedsTimeCorrection)
+              if (!identical(sheet, "metadata"))
               {
-                complete_df[[sheet]][time_indices] = data.frame(sapply(time_indices, function(i) {
-                  round(complete_df[[sheet]][[time_indices]] - complete_df[[sheet]][[time_indices]][1], digits = 3)
-                }))
-                # correct the metatdata
-                complete_df[['metadata']][['source end frame']] = complete_df[['metadata']][['source end frame']] - complete_df[['metadata']][['source start frame']]
-                complete_df[['metadata']][['source start frame']][complete_df[['metadata']][['source start frame']] > 0] = 0
-                timelane_to_zero = TRUE
+                time_indices = grep("^Time", colnames(complete_df[[sheet]]))
+                if (!is.null(time_indices))
+                {
+                  complete_df[[sheet]][time_indices] = data.frame(sapply(time_indices, function(i) {
+                    round(complete_df[[sheet]][[time_indices]] - complete_df[[sheet]][[time_indices]][1], digits = 3)
+                  }))
+                }
               }
             }
+            # correct the metatdata
+            complete_df[['metadata']][['source end frame']] = complete_df[['metadata']][['source end frame']] - complete_df[['metadata']][['source start frame']]
+            complete_df[['metadata']][['source start frame']][complete_df[['metadata']][['source start frame']] > 0] = 0
+            timelane_to_zero = TRUE
           }
+
 
           # prepare data of spike detection sheet
           if ("Spike Detection" %in% sheets)
@@ -178,6 +183,7 @@ NosaResultLoader = setRefClass(
             {
               if (identical(sheet, 'metadata'))
               {
+                # TODO: check same start frame between tmp_df and complete_df
                 tmp_df[[sheet]] = do.call("rbind", list(tmp_df[[sheet]], complete_df[[sheet]]))
                 if (sum(!duplicated(tmp_df[[sheet]][['source start frame']])) != 1 )
                 {
@@ -199,7 +205,7 @@ NosaResultLoader = setRefClass(
                   }
                   else
                   {
-                    tmp_df[['Spike Detection']][[table]] = do.call("cbindX", list(tmp_df[['Spike Detection']][[table]], complete_df[['Spike Detection']][[table]]))
+                    tmp_df[['Spike Detection']][[table]] = gdata::cbindX( tmp_df[['Spike Detection']][[table]], complete_df[['Spike Detection']][[table]])
                   }
                 }
               }
@@ -267,7 +273,7 @@ NosaResultLoader = setRefClass(
     getTimeOfPeak = function()
     {
       "From Spike Detection sheet the Time of Peak (s) data ..."
-      result = .self$data$`Spike Detection`$`Time of Peak (s)`
+      result = .self$data[['Spike Detection']][['Peak (s)']]
 
       return(result)
     },

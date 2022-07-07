@@ -5,7 +5,6 @@
 #'
 #' @param data Data frame on which the SEM is to be determined.
 #' @param factor_col Contains the factor for each sample. If a value is NA, then it is not taken into account.
-#' @param peak_time Noch ändern....
 #' @param params List that holds yaml defined parameters for SEM analysis
 #' @param dir Path to the location where the resulting plots are to be stored.
 #'
@@ -16,7 +15,7 @@
 #' @importFrom plotrix std.error
 #'
 #'
-output_SEM = function(data, factor_col, time_of_peak, params, dir)
+output_SEM = function(data, factor_col, params, dir)
 {
   dir = paste0(dir, "/SEM/", params$DirName, "/")
   result = list()
@@ -41,13 +40,13 @@ output_SEM = function(data, factor_col, time_of_peak, params, dir)
     df = data[data_columns[[factor]]] %>%
       mutate(Mean = rowMeans(.), SEM = rowSem(.))
 
-    df = df %>% select(Mean, SEM) %>%
+    df = df %>% #select(Mean, SEM) %>%
       mutate(Time = data[[1]])
 
     # trace plot with sem
     if (isTRUE(params$Trace))
     {
-      t_plot = get_plot(df)
+      t_plot = get_traceplot(df, "Time", "Mean", "SEM")
       t_plot$file = paste0(dir, factor, "_SEM.png")
       t_plot$path = dir
       eval(parse(text = paste0("result$trace", params$DirName, factor, " = t_plot")))
@@ -61,17 +60,23 @@ output_SEM = function(data, factor_col, time_of_peak, params, dir)
       {
         if (is.null(dfs))
         {
-          dfs = df %>% filter(.$Time > stim-params$PeakAverage$before & .$Time < stim+params$PeakAverage$after) %>%
-            select(Mean)
+          dfs$Mean = df %>% filter(.$Time > stim-params$PeakAverage$before & .$Time < stim+params$PeakAverage$after) %>% select(Mean)
+          dfs$SEM = data[data_columns[[factor]]] %>%
+            mutate(Time = data[[1]]) %>%
+            filter(.$Time > stim-params$PeakAverage$before & .$Time < stim+params$PeakAverage$after) %>%
+            select(-Time)
         }
         else
         {
-          dfs = cbind(dfs$Mean, df %>% filter(.$Time > stim-params$PeakAverage$before & .$Time < stim+params$PeakAverage$after) %>%
-                        select(Mean))
+          dfs$Mean = cbind(dfs$Mean, (df %>% filter(.$Time > stim-params$PeakAverage$before & .$Time < stim+params$PeakAverage$after) %>% select(Mean)))
+          dfs$SEM = cbind(dfs$SEM, data[data_columns[[factor]]] %>%
+                            mutate(Time = data[[1]]) %>%
+                            filter(.$Time > stim-params$PeakAverage$before & .$Time < stim+params$PeakAverage$after) %>%
+                            select(-Time))
         }
       }
-      df_average = data.frame(Time = data[1:nrow(dfs), 1], Mean = rowMeans(dfs), SEM = rowSem(dfs))
-      a_plot = get_plot(df_average)
+      df_average = data.frame(Time = data[1:nrow(dfs$Mean), 1], Mean = rowMeans(dfs$Mean), SEM = rowSem(dfs$SEM))
+      a_plot = get_traceplot(df_average, "Time", "Mean", "SEM")
       a_plot$path = dir
       a_plot$file = paste0(dir, factor, "_peak_average.png")
 
@@ -79,23 +84,29 @@ output_SEM = function(data, factor_col, time_of_peak, params, dir)
     }
   }
 
+  # boxplot
+  peaks=data.frame(Names = names(data[-1]))
+  #TODO: frage Lisa, ob range um Stimulus oder max peak!!!
+  for (stim in params$PeakAverage$Stimulus)
+  {
+    peaks = cbind(peaks, apply(data[data$`Time (s)`>stim-params$PeakAverage$before & data$`Time (s)`<stim+params$PeakAverage$after,][-1],
+                          2, function(col) { col=max(col)}))
+  }
+  h = data.frame(Name = names(data[-1]),
+                 Mean = rowMeans(peaks[-1]),
+                 Factor = factor_col,
+                 row.names = NULL
+  )
+  h$Name = mapply(function(name, fact) gsub(fact, "", name),
+                  name=h$Name,
+                  fact=h$Factor)
+  h = h[which(h$Factor %in% params$Factor),] %>% mutate(Name = as.factor(Name), Factor = as.factor(Factor)) %>%
+    group_by(Name)
+  b_plot = get_boxplot(h, "Factor", "Mean", group = "Name")
+  b_plot$path = dir
+  b_plot$file = paste0(dir, "boxplot.png")
+  eval(parse(text = paste0("result$sem_box", params$DirName, " = b_plot")))
+
   return(result)
 }
 
-#'
-#' Function to create the plot of standard error of mean of a given dataset.
-#'
-#' @param df Data frame on which the SEM is to be determined.
-#' @param columns Vector of booleans to select columns for analysis.
-#'
-#' @return List of ggplot2 data
-#'
-get_plot = function(df)
-{
-  plot = ggplot(df, aes(x=Time, y=Mean)) +
-    geom_errorbar(aes(ymin=Mean-SEM, ymax=Mean+SEM), colour="lightblue", width=.1) +
-    geom_line(colour="blue") +
-    labs(y="\u0394 F/F", x="Time [s]",)
-
-  return(plot)
-}

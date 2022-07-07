@@ -6,8 +6,7 @@
 #' @param sheets List sheet names that should be loaded; if empty, it is filled with defaults
 #' @param prep List of parameters; if empty, it is filled with defaults
 #' @param outputs List of metric names that should be plotted; if empty, it is filled with defaults
-#' @return list of all parameters used for the analysis
-#'
+#' @return list of all parameters used for the analysis#'
 #'
 #'
 createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
@@ -27,17 +26,21 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_prep$InputDirectory = "/path/to/nosa/results"
   default_prep$ResultsDirectory = "/path/to/results"
   default_prep$NeedsTimeCorrection = FALSE
-  default_prep$Status = c("pre", "post", "train")
+  default_prep$Factor = c("pre", "post", "train")
 
   default_output = list()
   default_output$DataAsRObject = FALSE
   default_output$Trace = c("Raw", "Processed")
   default_output$SEM = list()
-  default_output$SEM$Status =  c("pre", "post")
-  default_output$SEM$PeakZoom$range = 0.5
-  default_output$PeakCount$Status =  c("pre", "post")
-  default_output$PeakCount$minTime = 0
-  default_output$PeakCount$maxTime = 100
+  default_output$SEM$First = list()
+  default_output$SEM$First$DirName = ""
+  default_output$SEM$First$Factor =  c("pre", "post")
+  default_output$SEM$First$Trace =  "yes"
+  default_output$SEM$First$PeakAverage = list()
+  default_output$SEM$First$PeakAverage$Stimulus = c(10, 41)
+  default_output$SEM$First$PeakAverage$before = 2
+  default_output$SEM$First$PeakAverage$after = 8
+  default_output$SEM$Second = list()
 
 
 
@@ -88,7 +91,7 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   prep$InputDirectory = yc$getYaml("Prep$InputDirectory", prep$InputDirectory)
   prep$ResultsDirectory = yc$getYaml("Prep$ResultsDirectory", prep$ResultsDirectory)
   prep$NeedsTimeCorrection = yc$getYaml("Prep$NeedsTimeCorrection", prep$NeedsTimeCorrection)
-  prep$Status = yc$getYaml("Prep$Status", prep$Status)
+  prep$Factor = yc$getYaml("Prep$Factor", prep$Factor)
 
   sheets$metadata = yc$getYaml("Sheets$metadata", sheets$metadata)
   sheets$Raw = yc$getYaml("Sheets$Raw", sheets$Raw)
@@ -99,11 +102,7 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
 
   outputs$DataAsRObject = yc$getYaml("Output$DataAsRObject", outputs$DataAsRObject)
   outputs$Trace = yc$getYaml("Output$Trace", outputs$Trace)
-  outputs$SEM$Status =  yc$getYaml("Output$SEM$Status", outputs$SEM$Status)
-  outputs$SEM$PeakZoom$range = yc$getYaml("Output$SEM$PeakZoom$range", outputs$SEM$PeakZoom$range)
-  outputs$PeakCount$Status = yc$getYaml("Output$PeakCount$Status", outputs$PeakCount$Status)
-  outputs$PeakCount$minTime = yc$getYaml("Output$PeakCount$minTime", outputs$PeakCount$minTime)
-  outputs$PeakCount$maxTime = yc$getYaml("Output$PeakCount$maxTime", outputs$PeakCount$maxTime)
+  outputs$SEM = yc$getYaml("Output$SEM", outputs$SEM)
 
 
   return(list("yc" = yc, "sheets" = sheets, "prep" = prep, "outputs" = outputs))

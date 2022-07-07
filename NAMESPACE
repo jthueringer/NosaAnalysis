@@ -2,3 +2,7 @@
 
 export(performAnalysis)
 export(writeDefaultYaml)
+import(dplyr)
+import(ggplot2)
+importFrom(gdata,cbindX)
+importFrom(plotrix,std.error)
