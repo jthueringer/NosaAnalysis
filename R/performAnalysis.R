@@ -93,11 +93,26 @@ performAnalysis = function(yaml_file = NULL)
     }
   }
 
-  # ## PeakCount
-  # if ("PeakCount" %in% names(yaml_outs))
-  # {
-  #   nsr$plots$PeakCount = output_PeakCount(nsr$data[['Spike Detection']]$Train, nsr$data$metadata$Factor, yaml_outs$PeakCount, output_dir)
-  # }
+  ## Boxplots
+  if ("Boxplots" %in% names(yaml_outs))
+  {
+    nsr$plots$paths = c(nsr$plots$paths, paste0(output_dir,  "/Boxplots/"))
+
+    if ("PeakCount" %in% names(yaml_outs$Boxplots))
+    {
+      nsr$plots$Boxplots = list()
+      params = yaml_outs$Boxplots$PeakCount
+      peak_df = nsr$data[['Spike Detection']][['Peak (s)']] %>% select(contains(params$Factor)) %>%
+        filter(if_any(everything(), ~ . > params$Window[1] & . < params$Window[2]))
+
+      df = data.frame(Factor = extract_factor(names(peak_df), params$Factor))
+      df = cbind(df, Counts = colSums(!is.na(peak_df)), row.names = NULL)
+
+      nsr$plots$Boxplots$PeakCount = get_boxplot(df, "Factor", "Counts")
+      nsr$plots$Boxplots$PeakCount$path = paste0(output_dir,  "/Boxplots/")
+      nsr$plots$Boxplots$PeakCount$file = paste0(output_dir,  "/Boxplots/", params$Filename, ".png")
+    }
+  }
 
   ############
   # write outputs

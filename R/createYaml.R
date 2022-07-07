@@ -14,6 +14,12 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   ############
   ## YAML default config
   ############
+  default_prep = list()
+  default_prep$InputDirectory = "/path/to/nosa/results"
+  default_prep$ResultsDirectory = "/path/to/results"
+  default_prep$NeedsTimeCorrection = TRUE
+  default_prep$Factor = c("pre", "post", "train")
+
   default_sheets = list()
   default_sheets$metadata = list()
   default_sheets$Raw = list()
@@ -22,25 +28,25 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_sheets$Smoothing = list()
   default_sheets$'Spike Detection' = c("Train", "Peak (s)", "Amplitude of Peak", "Spike Frequency (#Spikes / second)")
 
-  default_prep = list()
-  default_prep$InputDirectory = "/path/to/nosa/results"
-  default_prep$ResultsDirectory = "/path/to/results"
-  default_prep$NeedsTimeCorrection = FALSE
-  default_prep$Factor = c("pre", "post", "train")
-
   default_output = list()
   default_output$DataAsRObject = FALSE
   default_output$Trace = c("Raw", "Processed")
   default_output$SEM = list()
   default_output$SEM$First = list()
-  default_output$SEM$First$DirName = ""
+  default_output$SEM$First$DirName = "TwoStimuli"
   default_output$SEM$First$Factor =  c("pre", "post")
-  default_output$SEM$First$Trace =  "yes"
+  default_output$SEM$First$Trace =  TRUE
   default_output$SEM$First$PeakAverage = list()
   default_output$SEM$First$PeakAverage$Stimulus = c(10, 41)
   default_output$SEM$First$PeakAverage$before = 2
   default_output$SEM$First$PeakAverage$after = 8
   default_output$SEM$Second = list()
+
+  default_output$Boxplots = list()
+  default_output$Boxplots$PeakCount = list()
+  default_output$Boxplots$PeakCount$Filename = "PeakCount"
+  default_output$Boxplots$PeakCount$Factor = c("training", "odor", "shock")
+  default_output$Boxplots$PeakCount$Window = c(0, 260)
 
 
 
@@ -103,6 +109,8 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   outputs$DataAsRObject = yc$getYaml("Output$DataAsRObject", outputs$DataAsRObject)
   outputs$Trace = yc$getYaml("Output$Trace", outputs$Trace)
   outputs$SEM = yc$getYaml("Output$SEM", outputs$SEM)
+
+  outputs$Boxplots = yc$getYaml("Output$Boxplots", outputs$Boxplot)
 
 
   return(list("yc" = yc, "sheets" = sheets, "prep" = prep, "outputs" = outputs))

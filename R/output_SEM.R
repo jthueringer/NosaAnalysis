@@ -39,7 +39,7 @@ output_SEM = function(data, factor_col, params, dir)
     df = data[data_columns[[factor]]] %>%
       mutate(Mean = rowMeans(.), SEM = rowSem(.))
 
-    df = df %>% #select(Mean, SEM) %>%
+    df = df %>%
       mutate(Time = data[[1]])
 
     # trace plot with sem
