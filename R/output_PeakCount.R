@@ -3,7 +3,7 @@
 #' Function to count Peaks within user defined time window and return resulting boxplot.
 #'
 #' @param data Data frame.
-#' @param params List that holds yaml defined parameters for SEM analysis
+#' @param params List that holds yaml defined parameters
 #' @param dir Path to the location where the resulting plots are to be stored.
 #'
 #' @return List with ggplot2 peak count boxplot

@@ -44,19 +44,20 @@ get_traceplot = function(df, var1, var2, sem = NULL)
 #' @param df Data frame.
 #' @param factor Column name of x axis values.
 #' @param var Column name of y axis values.
+#' @param connect Column name of factors that are connected with a line. Optional
 #' @param group Column name of factors that are connected with a line. Optional
 #'
 #' @return List of ggplot2 data
 #'
 #' @import ggplot2
 #'
-get_boxplot = function(df, factor, var, group = NULL)
+get_boxplot = function(df, factor, var, connect = NULL, group = NULL)
 {
   plot = ggplot(df, aes(x=.data[[factor]], y=.data[[var]])) +
     geom_boxplot() +
     geom_point(size = 2)
-  if(!is.null(group)) plot = plot +
-      geom_line(aes(group = .data[[group]]))
+  if(!is.null(connect)) plot = plot +
+      geom_line(aes(group = .data[[connect]]))
 
   return(plot)
 }

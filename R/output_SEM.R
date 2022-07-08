@@ -52,25 +52,25 @@ output_SEM = function(data, factor_col, params, dir)
     }
 
     # average plot with sem
-    if ("PeakAverage" %in% names(params))
+    if (params$PeakAverage)
     {
       dfs = NULL
-      for (stim in params$PeakAverage$Stimulus)
+      for (stim in params$Stimuli)
       {
         if (is.null(dfs))
         {
-          dfs$Mean = df %>% filter(.$Time > stim-params$PeakAverage$before & .$Time < stim+params$PeakAverage$after) %>% select(Mean)
+          dfs$Mean = df %>% filter(.$Time > stim-params$before & .$Time < stim+params$after) %>% select(Mean)
           dfs$SEM = data[data_columns[[factor]]] %>%
             mutate(Time = data[[1]]) %>%
-            filter(.$Time > stim-params$PeakAverage$before & .$Time < stim+params$PeakAverage$after) %>%
+            filter(.$Time > stim-params$before & .$Time < stim+params$after) %>%
             select(-Time)
         }
         else
         {
-          dfs$Mean = cbind(dfs$Mean, (df %>% filter(.$Time > stim-params$PeakAverage$before & .$Time < stim+params$PeakAverage$after) %>% select(Mean)))
+          dfs$Mean = cbind(dfs$Mean, (df %>% filter(.$Time > stim-params$before & .$Time < stim+params$after) %>% select(Mean)))
           dfs$SEM = cbind(dfs$SEM, data[data_columns[[factor]]] %>%
                             mutate(Time = data[[1]]) %>%
-                            filter(.$Time > stim-params$PeakAverage$before & .$Time < stim+params$PeakAverage$after) %>%
+                            filter(.$Time > stim-params$before & .$Time < stim+params$after) %>%
                             select(-Time))
         }
       }
@@ -83,28 +83,7 @@ output_SEM = function(data, factor_col, params, dir)
     }
   }
 
-  # boxplot
-  peaks=data.frame(Names = names(data[-1]))
-  #TODO: frage Lisa, ob range um Stimulus oder max peak!!!
-  for (stim in params$PeakAverage$Stimulus)
-  {
-    peaks = cbind(peaks, apply(data[data$`Time (s)`>stim-params$PeakAverage$before & data$`Time (s)`<stim+params$PeakAverage$after,][-1],
-                          2, function(col) { col=max(col)}))
-  }
-  h = data.frame(Name = names(data[-1]),
-                 Mean = rowMeans(peaks[-1]),
-                 Factor = factor_col,
-                 row.names = NULL
-  )
-  h$Name = mapply(function(name, fact) gsub(fact, "", name),
-                  name=h$Name,
-                  fact=h$Factor)
-  h = h[which(h$Factor %in% params$Factor),] %>% mutate(Name = as.factor(Name), Factor = as.factor(Factor)) %>%
-    group_by(Name)
-  b_plot = get_boxplot(h, "Factor", "Mean", group = "Name")
-  b_plot$path = dir
-  b_plot$file = paste0(dir, "boxplot.png")
-  eval(parse(text = paste0("result$sem_box", params$DirName, " = b_plot")))
+  result = c(result, output_Responses(data, params, dir))
 
   return(result)
 }

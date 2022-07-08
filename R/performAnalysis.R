@@ -104,6 +104,11 @@ performAnalysis = function(yaml_file = NULL)
     {
       nsr$plots$Boxplots = c(nsr$plots$Boxplot, output_PeakCount(nsr$data[['Spike Detection']][['Peak (s)']], yaml_outs$Boxplots$PeakCount, box_dir))
     }
+
+    if ("Responses" %in% names(yaml_outs$Boxplots))
+    {
+      nsr$plots$Boxplots = c(nsr$plots$Boxplot, output_Responses(nsr$data$Processed, yaml_outs$Boxplots$Responses, box_dir))
+    }
   }
 
   ############

@@ -36,10 +36,10 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_output$SEM$First$DirName = "TwoStimuli"
   default_output$SEM$First$Factor =  c("pre", "post")
   default_output$SEM$First$Trace =  TRUE
-  default_output$SEM$First$PeakAverage = list()
-  default_output$SEM$First$PeakAverage$Stimulus = c(10, 41)
-  default_output$SEM$First$PeakAverage$before = 2
-  default_output$SEM$First$PeakAverage$after = 8
+  default_output$SEM$First$PeakAverage = TRUE
+  default_output$SEM$First$Stimuli = c(10, 41)
+  default_output$SEM$First$before = 2
+  default_output$SEM$First$after = 8
   default_output$SEM$Second = list()
 
   default_output$Boxplots = list()
@@ -48,8 +48,11 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_output$Boxplots$PeakCount$Factor = c("training", "odor", "shock")
   default_output$Boxplots$PeakCount$Window = c(0, 260)
   default_output$Boxplots$Responses = list()
+  default_output$Boxplots$Responses$Filename = "lala"
   default_output$Boxplots$Responses$Factor = c("pre", "post")
   default_output$Boxplots$Responses$Stimuli = c(10, 40)
+  default_output$Boxplots$Responses$before = 2
+  default_output$Boxplots$Responses$after = 8
   default_output$Boxplots$Responses$GroupByStimulus = FALSE
 
 
