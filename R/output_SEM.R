@@ -83,8 +83,6 @@ output_SEM = function(data, factor_col, params, dir)
     }
   }
 
-  result = c(result, output_Responses(data, params, dir))
-
   return(result)
 }
 

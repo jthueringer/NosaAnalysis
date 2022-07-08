@@ -11,6 +11,7 @@
 #' @return List with ggplot2 reesponses boxplot
 #'
 #' @import dplyr
+#' @importFrom tidyr pivot_longer
 #'
 #'
 output_Responses = function(data, params, dir)
@@ -30,25 +31,32 @@ output_Responses = function(data, params, dir)
     names(peaks)[length(peaks)] = stim
   }
   b_plot = NULL
-  if (isTRUE(params$GroupByStimulus))
+  for (group in params$GroupByStimulus)
   {
-    h = tidyr::pivot_longer(peaks, 3:length(names(peaks)), names_to = "Stimuli", values_to = "values") %>%
-      mutate(Stimuli = factor(Stimuli, levels = params$Stimuli)) %>%
-      mutate(FactorStim = interaction(Factor, Stimuli), NameStim = interaction(Name, Stimuli))
+    if (isTRUE(group))
+    {
+      h = tidyr::pivot_longer(peaks, 3:length(names(peaks)), names_to = "Stimuli", values_to = "values") %>%
+        mutate(Stimuli = factor(Stimuli, levels = params$Stimuli)) %>%
+        mutate(FactorStim = interaction(Factor, Stimuli), NameStim = interaction(Name, Stimuli))
 
-    b_plot = get_boxplot(h, "FactorStim", "values", connect = "NameStim")
-    b_plot$file = paste0(dir, params$Filename,"_groupByStimulus_Response.png")
+      b_plot = get_boxplot(h, "FactorStim", "values", connect = "NameStim")
+      b_plot$file = paste0(dir, params$Filename,"_groupByStimulus_Response.png")
+    }
+    else if (isFALSE(group))
+    {
+      h = peaks
+      h$Mean = rowMeans(h[3:length(h)])
+      b_plot = get_boxplot(h, "Factor", "Mean", connect = "Name")
+      b_plot$file = paste0(dir, params$Filename,"_Response.png")
+    }
+    else
+    {
+      message(paste0("Invalid response parameter 'GroupByStimulus'!\n\n
+                     Skipping boxplot ", params$Filename))
+    }
+    b_plot$path = dir
+    result[[b_plot$file]] = b_plot
   }
-  else
-  {
-    h = peaks
-    h$Mean = rowMeans(h[3:length(h)])
-    b_plot = get_boxplot(h, "Factor", "Mean", connect = "Name")
-    b_plot$file = paste0(dir, params$Filename,"_Response.png")
-  }
-  b_plot$path = dir
-
-  result[[b_plot$file]] = b_plot
 
   return(result)
 }

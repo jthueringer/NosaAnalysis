@@ -107,7 +107,11 @@ performAnalysis = function(yaml_file = NULL)
 
     if ("Responses" %in% names(yaml_outs$Boxplots))
     {
-      nsr$plots$Boxplots = c(nsr$plots$Boxplot, output_Responses(nsr$data$Processed, yaml_outs$Boxplots$Responses, box_dir))
+      for (params in yaml_outs$Boxplots$Responses)
+      {
+        nsr$plots$Boxplots = c(nsr$plots$Boxplot, output_Responses(nsr$data$Processed, params, box_dir))
+      }
+
     }
   }
 

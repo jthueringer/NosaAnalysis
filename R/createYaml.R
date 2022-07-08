@@ -18,7 +18,6 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_prep$InputDirectory = "/path/to/nosa/results"
   default_prep$ResultsDirectory = "/path/to/results"
   default_prep$NeedsTimeCorrection = TRUE
-  default_prep$Factor = c("pre", "post", "train")
 
   default_sheets = list()
   default_sheets$metadata = list()
@@ -48,12 +47,15 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_output$Boxplots$PeakCount$Factor = c("training", "odor", "shock")
   default_output$Boxplots$PeakCount$Window = c(0, 260)
   default_output$Boxplots$Responses = list()
-  default_output$Boxplots$Responses$Filename = "lala"
-  default_output$Boxplots$Responses$Factor = c("pre", "post")
-  default_output$Boxplots$Responses$Stimuli = c(10, 40)
-  default_output$Boxplots$Responses$before = 2
-  default_output$Boxplots$Responses$after = 8
-  default_output$Boxplots$Responses$GroupByStimulus = FALSE
+  default_output$Boxplots$Responses$First = list()
+  default_output$Boxplots$Responses$First$Filename = "TwoStim"
+  default_output$Boxplots$Responses$First$Factor = c("pre", "post")
+  default_output$Boxplots$Responses$First$Stimuli = c(10, 40)
+  default_output$Boxplots$Responses$First$before = 2
+  default_output$Boxplots$Responses$First$after = 8
+  default_output$Boxplots$Responses$First$GroupByStimulus = c(FALSE, TRUE)
+  default_output$Boxplots$Responses$Second = list()
+  default_output$Boxplots$Responses$Second$Filename = "OneStim"
 
 
 
@@ -104,7 +106,6 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   prep$InputDirectory = yc$getYaml("Prep$InputDirectory", prep$InputDirectory)
   prep$ResultsDirectory = yc$getYaml("Prep$ResultsDirectory", prep$ResultsDirectory)
   prep$NeedsTimeCorrection = yc$getYaml("Prep$NeedsTimeCorrection", prep$NeedsTimeCorrection)
-  prep$Factor = yc$getYaml("Prep$Factor", prep$Factor)
 
   sheets$metadata = yc$getYaml("Sheets$metadata", sheets$metadata)
   sheets$Raw = yc$getYaml("Sheets$Raw", sheets$Raw)
@@ -117,6 +118,7 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   outputs$Trace = yc$getYaml("Output$Trace", outputs$Trace)
   outputs$SEM = yc$getYaml("Output$SEM", outputs$SEM)
   outputs$Boxplots = yc$getYaml("Output$Boxplots", outputs$Boxplot)
+  outputs$Boxplots$Responses = yc$getYaml("Output$Boxplots$Responses", outputs$Boxplot$Responses)
 
 
   return(list("yc" = yc, "sheets" = sheets, "prep" = prep, "outputs" = outputs))
