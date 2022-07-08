@@ -3,7 +3,7 @@
 \name{output_SEM}
 \alias{output_SEM}
 \title{Function to create the standard error of mean of a given dataset.
-If stati is empty, all existing data is used for the analysis.}
+If no factor is provided, all existing data is used for the analysis.}
 \usage{
 output_SEM(data, factor_col, params, dir)
 }
@@ -17,9 +17,9 @@ output_SEM(data, factor_col, params, dir)
 \item{dir}{Path to the location where the resulting plots are to be stored.}
 }
 \value{
-List with SEM plots
+List with ggplot2 SEM plots
 }
 \description{
 Function to create the standard error of mean of a given dataset.
-If stati is empty, all existing data is used for the analysis.
+If no factor is provided, all existing data is used for the analysis.
 }

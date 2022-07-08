@@ -14,7 +14,7 @@ output_Trace(data, sheetname, dir)
 \item{sheetnames}{List containing all sheetnames for this analysis.}
 }
 \value{
-List with sample plots
+List with ggplot2 sample plots
 }
 \description{
 Function that converts the time sequence for each entry per specified sheet into a plot.

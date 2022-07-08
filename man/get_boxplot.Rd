@@ -4,7 +4,7 @@
 \alias{get_boxplot}
 \title{Function to create a boxplot}
 \usage{
-get_boxplot(df, factor, var, group = NULL)
+get_boxplot(df, factor, var, connect = NULL, group = NULL)
 }
 \arguments{
 \item{df}{Data frame.}
@@ -12,6 +12,8 @@ get_boxplot(df, factor, var, group = NULL)
 \item{factor}{Column name of x axis values.}
 
 \item{var}{Column name of y axis values.}
+
+\item{connect}{Column name of factors that are connected with a line. Optional}
 
 \item{group}{Column name of factors that are connected with a line. Optional}
 }
