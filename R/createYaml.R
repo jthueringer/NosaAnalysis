@@ -29,6 +29,7 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
 
   default_output = list()
   default_output$DataAsRObject = FALSE
+  default_output$DataAsXlsx = FALSE
   default_output$Trace = c("Raw", "Processed")
   default_output$SEM = list()
   default_output$SEM$First = list()
@@ -115,6 +116,7 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   sheets$'Spike Detection'= yc$getYaml("Sheets$'Spike Detection'", sheets$'Spike Detection')
 
   outputs$DataAsRObject = yc$getYaml("Output$DataAsRObject", outputs$DataAsRObject)
+  outputs$DataAsXlsx= yc$getYaml("Output$DataAsXlsx", outputs$DataAsXlsx)
   outputs$Trace = yc$getYaml("Output$Trace", outputs$Trace)
   outputs$SEM = yc$getYaml("Output$SEM", outputs$SEM)
   outputs$Boxplots = yc$getYaml("Output$Boxplots", outputs$Boxplot)

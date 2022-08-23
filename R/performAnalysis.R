@@ -118,14 +118,37 @@ performAnalysis = function(yaml_file = NULL)
   ############
   # write outputs
   ############
-  ## yaml
   dir.create(output_dir)
+
   yaml_list$yc$writeYaml(paste0(output_dir, "/configs.yaml"))
 
-  ## rData
   if ("DataAsRObject" %in% names(yaml_outs) && yaml_outs$DataAsRObject)
   {
     saveRDS(nsr, file = paste0(output_dir, "/dataframes.rds"))
+  }
+
+  if (yaml_outs$DataAsXlsx)
+  {
+    wb = createWorkbook(type = "xlsx")
+    for(df_name in names(nsr$data))
+    {
+      sheet = createSheet(wb, df_name)
+      if (df_name == "Spike Detection")
+      {
+        start_col = 1
+        for (table_name in names(nsr$data[[df_name]]))
+        {
+          addDataFrame(data.frame(table_name), sheet=sheet, row.names=FALSE, col.names=FALSE, startColumn = start_col, startRow = 1)
+          addDataFrame(nsr$data[[df_name]][[table_name]], sheet=sheet, row.names=FALSE, showNA = FALSE, startColumn = start_col, startRow = 2)
+          start_col = start_col + ncol(nsr$data[[df_name]][[table_name]]) + 2
+        }
+      }
+      else
+      {
+        addDataFrame(nsr$data[[df_name]], sheet=sheet, row.names=FALSE, showNA = FALSE)
+      }
+    }
+    saveWorkbook(wb, paste0(output_dir, "/data.xlsx"))
   }
 
   # plotting
