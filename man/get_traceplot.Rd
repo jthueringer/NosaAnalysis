@@ -4,7 +4,7 @@
 \alias{get_traceplot}
 \title{Function to create a trace plot. Plotting the standard error of mean is optional.}
 \usage{
-get_traceplot(df, var1, var2, sem = NULL)
+get_traceplot(df, var1, var2, sem = NULL, auc = NULL)
 }
 \arguments{
 \item{df}{Data frame.}
