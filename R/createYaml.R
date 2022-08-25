@@ -32,31 +32,37 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_output$DataAsXlsx = FALSE
   default_output$Trace = c("Raw", "Processed")
   default_output$SEM = list()
-  default_output$SEM$First = list()
-  default_output$SEM$First$DirName = "TwoStimuli"
-  default_output$SEM$First$Factor =  c("pre", "post")
-  default_output$SEM$First$Trace =  TRUE
-  default_output$SEM$First$PeakAverage = TRUE
-  default_output$SEM$First$Stimuli = c(10, 41)
-  default_output$SEM$First$before = 2
-  default_output$SEM$First$after = 8
-  default_output$SEM$Second = list()
+  default_output$SEM$FirstAnalysis = list()
+  default_output$SEM$FirstAnalysis$DirName = "TwoStimuli"
+  default_output$SEM$FirstAnalysis$Factor =  c("pre", "post")
+  default_output$SEM$FirstAnalysis$Trace =  TRUE
+  default_output$SEM$FirstAnalysis$PeakAverage = TRUE
+  default_output$SEM$FirstAnalysis$Stimuli = c(10, 41)
+  default_output$SEM$FirstAnalysis$before = 2
+  default_output$SEM$FirstAnalysis$after = 8
+  default_output$SEM$SecondAnalysis = list()
 
   default_output$Boxplots = list()
   default_output$Boxplots$PeakCount = list()
   default_output$Boxplots$PeakCount$Filename = "PeakCount"
   default_output$Boxplots$PeakCount$Factor = c("training", "odor", "shock")
   default_output$Boxplots$PeakCount$Window = c(0, 260)
+  default_output$Boxplots$AUC = list()
+  default_output$Boxplots$AUC$Filename = "TwoStim"
+  default_output$Boxplots$AUC$Factor = c("pre", "post")
+  default_output$Boxplots$AUC$Stimuli = c(10, 40)
+  default_output$Boxplots$AUC$Window = c(1.5, 1.5)
+  default_output$Boxplots$AUC$GroupByStimulus = c(FALSE, TRUE)
   default_output$Boxplots$Responses = list()
-  default_output$Boxplots$Responses$First = list()
-  default_output$Boxplots$Responses$First$Filename = "TwoStim"
-  default_output$Boxplots$Responses$First$Factor = c("pre", "post")
-  default_output$Boxplots$Responses$First$Stimuli = c(10, 40)
-  default_output$Boxplots$Responses$First$before = 2
-  default_output$Boxplots$Responses$First$after = 8
-  default_output$Boxplots$Responses$First$GroupByStimulus = c(FALSE, TRUE)
-  default_output$Boxplots$Responses$Second = list()
-  default_output$Boxplots$Responses$Second$Filename = "OneStim"
+  default_output$Boxplots$Responses$FirstAnalysis = list()
+  default_output$Boxplots$Responses$FirstAnalysis$Filename = "TwoStim"
+  default_output$Boxplots$Responses$FirstAnalysis$Factor = c("pre", "post")
+  default_output$Boxplots$Responses$FirstAnalysis$Stimuli = c(10, 40)
+  default_output$Boxplots$Responses$FirstAnalysis$before = 2
+  default_output$Boxplots$Responses$FirstAnalysis$after = 8
+  default_output$Boxplots$Responses$FirstAnalysis$GroupByStimulus = c(FALSE, TRUE)
+  default_output$Boxplots$Responses$SecondAnalysis = list()
+  default_output$Boxplots$Responses$SecondAnalysis$Filename = "OneStim"
 
 
 
@@ -121,6 +127,7 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   outputs$SEM = yc$getYaml("Output$SEM", outputs$SEM)
   outputs$Boxplots = yc$getYaml("Output$Boxplots", outputs$Boxplot)
   outputs$Boxplots$Responses = yc$getYaml("Output$Boxplots$Responses", outputs$Boxplot$Responses)
+  outputs$Boxplots$AUC = yc$getYaml("Output$Boxplots$AUC", outputs$Boxplot$AUC)
 
 
   return(list("yc" = yc, "sheets" = sheets, "prep" = prep, "outputs" = outputs))
