@@ -17,6 +17,7 @@ rowSem <- function(x) {
 #' @param var1 Column name of x axis values.
 #' @param var2 Column name of y axis values.
 #' @param sem Column name of standard error of mean values. Optional.
+#' @param auc Column name of auc booleans. Optional.
 #'
 #' @return List of ggplot2 data
 #'
@@ -110,13 +111,16 @@ get_columns_by_factor = function(data, factors)
 #'
 #' @return Data.frame: first column holds substring reduced names, second column holds extracted substrings
 #'
+#' @importFrom rlang .data
+#'
 get_factor_df = function(names, factors)
 {
+  Name = Factor = NULL
   df = data.frame(Name = names, Factor = extract_factor(names, factors)) %>%
-    mutate(Factor = factor(Factor, levels = factors)) %>%
+    mutate(Factor = factor(.data$Factor, levels = factors)) %>%
     mutate(Name = mapply(function(name, fact) gsub(fact, "", name),
-                         name=Name,
-                         fact=Factor))
+                         name=.data$Name,
+                         fact=.data$Factor))
   return(df)
 }
 
@@ -130,6 +134,7 @@ get_factor_df = function(names, factors)
 #'
 #' @return List of data.frames.
 #'
+#'
 reduce_data_by_window = function(df, window, timepoints, larger_window = FALSE)
 {
   dfs = list()
@@ -141,7 +146,7 @@ reduce_data_by_window = function(df, window, timepoints, larger_window = FALSE)
   for (tp in timepoints)
   {
     tmp = df[df[1]>tp-window[1]-ext & df[1]<tp+window[2]+ext,] %>%
-      mutate(Extended = if_else(.[1]>tp-window[1] & .[1]<tp+window[2], TRUE, FALSE))
+      mutate(Extended = if_else(.data[["Time (s)"]]>tp-window[1] & .data[["Time (s)"]]<tp+window[2], TRUE, FALSE))
     eval(parse(text = paste0("dfs[['", tp, "']] = tmp")))
   }
   return(dfs)
@@ -151,9 +156,7 @@ reduce_data_by_window = function(df, window, timepoints, larger_window = FALSE)
 #' At any given time, with a defined time period, the data is extracted and written separately into individual tables.
 #'
 #' @param df Data.frame
-#' @param window List with two doubles. The first determines the range before, and the second the range after a specific point in time.
-#' @param timepoints List with one ore more timepoints.
-#' @param larger_window Optional boolean. If TRUE, the amount of data is extended by two seconds in each direction.#'
+#' @param factors List of Strings.
 #'
 #' @return List of data.frames.
 #'
