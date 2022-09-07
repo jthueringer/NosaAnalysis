@@ -146,6 +146,11 @@ performAnalysis = function(yaml_file = character() )
       }
       b_plot$path = auc_dir
       nsr$plots$AUC[[b_plot$file]] = b_plot
+
+      if (yaml_outs$DataAsXlsx)
+      {
+        eval(parse(text = paste0("nsr$plot_data$AUC$", basename(b_plot$file), " = b_plot$data")))
+      }
     }
     ####
 
@@ -163,6 +168,10 @@ performAnalysis = function(yaml_file = character() )
       t_plot$file = paste0(auc_dir, "average_", factor, ".png" )
       t_plot$path = paste0(auc_dir)
       eval(parse(text = paste0("nsr$plots$AUC$", factor, " = t_plot")))
+      if (yaml_outs$DataAsXlsx)
+      {
+        eval(parse(text = paste0("nsr$plot_data$AUC$", basename(t_plot$file), " = t_plot$data")))
+      }
     }
 
     # # prints area under curve for each stim and factor
@@ -192,12 +201,24 @@ performAnalysis = function(yaml_file = character() )
   if ("SEM" %in% names(yaml_outs))
   {
     nsr$plots$SEM = list()
+    nsr$plot_data$SEM = list()
     for (analysis in yaml_outs$SEM)
     {
       sem_df = get_columns_by_factor(nsr$data$Processed, analysis$Factor)
       factor_col = extract_factor(names(sem_df)[-1], analysis$Factor)
       nsr$plots$SEM = c(nsr$plots$SEM, list(output_SEM(sem_df, factor_col, analysis, output_dir)))
       nsr$plots$paths = c(nsr$plots$paths, nsr$plots$SEM[[length(nsr$plots$SEM)]][[1]]$path)
+    }
+
+    if (yaml_outs$DataAsXlsx)
+    {
+      for (i in 1:length(nsr$plots$SEM))
+      {
+        for (plot in nsr$plots$SEM[[i]])
+        {
+          eval(parse(text = paste0("nsr$plot_data$SEM$", names(yaml_outs$SEM)[i], "_",  basename(plot$file), " = plot$data")))
+        }
+      }
     }
   }
 
@@ -230,7 +251,15 @@ performAnalysis = function(yaml_file = character() )
       {
         nsr$plots$Boxplots = c(nsr$plots$Boxplot, output_Responses(nsr$data$Processed, params, box_dir))
       }
+    }
 
+    if (yaml_outs$DataAsXlsx)
+    {
+      nsr$plot_data$Boxplots = list()
+      for (plot in nsr$plots$Boxplots)
+      {
+        eval(parse(text = paste0("nsr$plot_data$Boxplots$", basename(plot$file), " = plot$data")))
+      }
     }
   }
 
@@ -249,22 +278,20 @@ performAnalysis = function(yaml_file = character() )
   if (yaml_outs$DataAsXlsx)
   {
     wb = xlsx::createWorkbook(type = "xlsx")
-    for(df_name in names(nsr$data))
+    sheet = xlsx::createSheet(wb, "metadata")
+    xlsx::addDataFrame(nsr$data[["metadata"]], sheet=sheet, row.names=FALSE, showNA = FALSE)
+    sheet = xlsx::createSheet(wb, "Processed")
+    xlsx::addDataFrame(nsr$data[["Processed"]], sheet=sheet, row.names=FALSE, showNA = FALSE)
+
+    for (dt in names(nsr$plot_data))
     {
-      sheet = xlsx::createSheet(wb, df_name)
-      if (df_name == "Spike Detection")
+      sheet = xlsx::createSheet(wb, dt)
+      start_col = 1
+      for (table_name in names(nsr$plot_data[[dt]]))
       {
-        start_col = 1
-        for (table_name in names(nsr$data[[df_name]]))
-        {
-          xlsx::addDataFrame(data.frame(table_name), sheet=sheet, row.names=FALSE, col.names=FALSE, startColumn = start_col, startRow = 1)
-          xlsx::addDataFrame(nsr$data[[df_name]][[table_name]], sheet=sheet, row.names=FALSE, showNA = FALSE, startColumn = start_col, startRow = 2)
-          start_col = start_col + ncol(nsr$data[[df_name]][[table_name]]) + 2
-        }
-      }
-      else
-      {
-        xlsx::addDataFrame(nsr$data[[df_name]], sheet=sheet, row.names=FALSE, showNA = FALSE)
+        xlsx::addDataFrame(data.frame(table_name), sheet=sheet, row.names=FALSE, col.names=FALSE, startColumn = start_col, startRow = 1)
+        xlsx::addDataFrame(data.frame(nsr$plot_data[[dt]][[table_name]]), sheet=sheet, row.names=FALSE, showNA = FALSE, startColumn = start_col, startRow = 2)
+        start_col = start_col + ncol(nsr$plot_data[[dt]][[table_name]]) + 2
       }
     }
     xlsx::saveWorkbook(wb, paste0(output_dir, "/data.xlsx"))
@@ -287,5 +314,4 @@ performAnalysis = function(yaml_file = character() )
       }
     }
   }
-  return(nsr)#
 }

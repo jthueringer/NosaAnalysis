@@ -5,6 +5,7 @@
 #'
 #' @field data NosaResults data as list. Valid list entries are: "metadata", "Raw", "Processed", "Baseline", "Spike Detection" and "Smoothing".
 #' @field plots A list containing all the plots that the user has requested.
+#' @field plot_data A list containing all data used to generate plots. Data will be written to xlsx if user definded.
 #'
 #' @importFrom gdata cbindX
 #' @importFrom methods new
@@ -12,11 +13,12 @@
 #'
 NosaResultLoader = setRefClass(
   "NosaResultLoader",
-  fields = list(data = "list", plots = "list"),
+  fields = list(data = "list", plots = "list", plot_data = "list"),
   methods = list(
     initialize = function() {
       .self$data = list()
       .self$plots = list()
+      .self$plot_data = list()
 
       return(.self)
     },
