@@ -3,10 +3,12 @@
 #' Function that converts the time sequence for each entry per specified sheet into a plot.
 #'
 #' @param data List containing all read data from nosa results.
-#' @param sheetnames List containing all sheetnames for this analysis.
+#' @param sheetname String of sheetname holding data to read for this analysis.
 #' @param dir Path to the location where the resulting plots are to be stored.
 #'
 #' @return List with ggplot2 sample plots
+#'
+#' @importFrom stats na.omit
 #'
 
 output_Trace = function(data, sheetname, dir)

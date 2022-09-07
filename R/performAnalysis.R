@@ -14,6 +14,8 @@
 #' @return List with sections data and plots.
 #'
 #' @import xlsx
+#' @importFrom stats approxfun integrate
+#' @importFrom rlang .data
 #'
 #' @export
 #'
@@ -66,7 +68,6 @@ performAnalysis = function(yaml_file = NULL)
   {
     stop(paste0("The directory '", directory, "' does not exist.\n"));
   }
-
   ############
   # create output
   ############
@@ -90,60 +91,63 @@ performAnalysis = function(yaml_file = NULL)
 
     data = NULL
     # TODO: copied from output_responses and changed -> needs refactoring
+    ####
+    auc = data.frame(Name = names(nsr$data$Processed[-1]),
+                     Factor = extract_factor(names(nsr$data$Processed[-1]), auc_params$Factor)) %>%
+      mutate(Factor = factor(.data$Factor, levels = auc_params$Factor))
+    for (stim in names(auc_dfs))
     {
-      auc = data.frame(Name = names(nsr$data$Processed[-1]),
-                      Factor = extract_factor(names(nsr$data$Processed[-1]), auc_params$Factor)) %>%
-                      mutate(Factor = factor(Factor, levels = auc_params$Factor))
-      for (stim in names(auc_dfs))
+      # calculate auc
+      auc2 = NULL
+      for (factor in auc_params$Factor)
       {
-        # calculate auc
-        auc2 = NULL
-        for (factor in auc_params$Factor)
+        for (set in names(auc_dfs[[stim]][[factor]]))
         {
-          for (set in names(auc_dfs[[stim]][[factor]]))
-          {
-            #calculate auc
-            timeline = auc_dfs[[stim]]$Time[auc_dfs[[stim]]$Extended]
-            f1 = approxfun(timeline, auc_dfs[[stim]][[factor]][[set]][auc_dfs[[stim]]$Extended])
-            f1_integral = integrate(f1, timeline[1], timeline[length(timeline)])
-            auc2 = rbind(auc2, data.frame(Name = set, Factor = factor, stim = f1_integral$value))
-          }
+          #calculate auc
+          timeline = auc_dfs[[stim]]$Time[auc_dfs[[stim]]$Extended]
+          f1 = approxfun(timeline, auc_dfs[[stim]][[factor]][[set]][auc_dfs[[stim]]$Extended])
+          f1_integral = integrate(f1, timeline[1], timeline[length(timeline)])
+          auc2 = rbind(auc2, data.frame(Name = set, Factor = factor, stim = f1_integral$value))
         }
-        names(auc2) = sub("stim", stim, names(auc2))
-        auc = merge(auc, auc2, by=c("Name", "Factor"))
       }
-      auc = auc  %>%
-        mutate(Name = mapply(function(name, fact) gsub(fact, "", name),
-        name=Name, fact=Factor))
-
-      b_plot = NULL
-      for (group in auc_params$GroupByStimulus)
-      {
-        if (isTRUE(group))
-        {
-          h = tidyr::pivot_longer(auc, 3:length(names(auc)), names_to = "Stimuli", values_to = "values") %>%
-            mutate(Stimuli = factor(Stimuli, levels = auc_params$Stimuli)) %>%
-            mutate(FactorStim = interaction(Factor, Stimuli), NameStim = interaction(Name, Stimuli))
-
-          b_plot = get_boxplot(h, "FactorStim", "values", connect = "NameStim")
-          b_plot$file = paste0(auc_dir, auc_params$Filename,"_groupByStimulus.png")
-        }
-        else if (isFALSE(group))
-        {
-          h = auc
-          h$Mean = rowMeans(h[3:length(h)])
-          b_plot = get_boxplot(h, "Factor", "Mean", connect = "Name")
-          b_plot$file = paste0(auc_dir, auc_params$Filename,"_byFactor.png")
-        }
-        else
-        {
-          message(paste0("Invalid response parameter 'GroupByStimulus'!\n\n
-                       Skipping boxplot ", auc_params$Filename))
-        }
-        b_plot$path = auc_dir
-        nsr$plots$AUC[[b_plot$file]] = b_plot
-      }
+      names(auc2) = sub("stim", stim, names(auc2))
+      auc = merge(auc, auc2, by=c("Name", "Factor"))
     }
+    auc = auc  %>%
+      mutate(Name = mapply(function(name, fact) gsub(fact, "", name),
+                           name=.data$Name, fact=.data$Factor))
+    nsr$data$AUC = auc
+    nsr$data$AUC = nsr$data$AUC %>%
+      mutate(Name = unname(.data$Name), Factor = as.character(.data$Factor))
+
+    b_plot = NULL
+    for (group in auc_params$GroupByStimulus)
+    {
+      if (isTRUE(group))
+      {
+        h = tidyr::pivot_longer(auc, 3:length(names(auc)), names_to = "Stimuli", values_to = "values") %>%
+          mutate(Stimuli = factor(.data$Stimuli, levels = auc_params$Stimuli)) %>%
+          mutate(FactorStim = interaction(.data$Factor, .data$Stimuli), NameStim = interaction(.data$Name, .data$Stimuli))
+
+        b_plot = get_boxplot(h, "FactorStim", "values", connect = "NameStim")
+        b_plot$file = paste0(auc_dir, auc_params$Filename,"_groupByStimulus.png")
+      }
+      else if (isFALSE(group))
+      {
+        h = auc
+        h$Mean = rowMeans(h[3:length(h)])
+        b_plot = get_boxplot(h, "Factor", "Mean", connect = "Name")
+        b_plot$file = paste0(auc_dir, auc_params$Filename,"_byFactor.png")
+      }
+      else
+      {
+        message(paste0("Invalid response parameter 'GroupByStimulus'!\n\n
+                       Skipping boxplot ", auc_params$Filename))
+      }
+      b_plot$path = auc_dir
+      nsr$plots$AUC[[b_plot$file]] = b_plot
+    }
+    ####
 
     #prints averaged auc for each factor
     for (factor in auc_params$Factor )

@@ -6,6 +6,8 @@
 #'
 #' @field yamlObj A Yaml object
 #'
+#' @import yaml
+#' @importFrom methods new
 #'
 #'
 YamlClass = setRefClass(
@@ -38,12 +40,10 @@ YamlClass = setRefClass(
         ## param not known --> add
         expr = paste0(".self$yamlObj$", param_name, " = ", quote(default))
         eval(parse(text=expr))
-        #cat("\n")
         return (default)
       }
       else {
         # TODO: check is.numeric or string?
-        #cat(paste0(" new value: ", paste(param_val, sep="", collapse=","), "\n"))
         return (param_val)
       }
     },

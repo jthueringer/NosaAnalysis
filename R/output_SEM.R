@@ -12,6 +12,7 @@
 #'
 #' @import dplyr
 #' @importFrom plotrix std.error
+#' @importFrom rlang .data
 #'
 #'
 output_SEM = function(data, factor_col, params, dir)
@@ -36,6 +37,10 @@ output_SEM = function(data, factor_col, params, dir)
 
   for (factor in names(data_columns))
   {
+
+    # fac_cols = data[data_columns[[factor]]] %>% names()
+    # df = data[data_columns[[factor]]] %>%
+    #   mutate(Mean = rowMeans(!!!rlang::syms(fac_cols)), SEM = rowSem(!!!rlang::syms(fac_cols)))
     df = data[data_columns[[factor]]] %>%
       mutate(Mean = rowMeans(.), SEM = rowSem(.))
 
@@ -59,19 +64,19 @@ output_SEM = function(data, factor_col, params, dir)
       {
         if (is.null(dfs))
         {
-          dfs$Mean = df %>% filter(.$Time > stim-params$before & .$Time < stim+params$after) %>% select(Mean)
+          dfs$Mean = df %>% filter(.data$Time > stim-params$before & .data$Time < stim+params$after) %>% select(.data$Mean)
           dfs$SEM = data[data_columns[[factor]]] %>%
             mutate(Time = data[[1]]) %>%
-            filter(.$Time > stim-params$before & .$Time < stim+params$after) %>%
-            select(-Time)
+            filter(.data$Time > stim-params$before & .data$Time < stim+params$after) %>%
+            select(-.data$Time)
         }
         else
         {
-          dfs$Mean = cbind(dfs$Mean, (df %>% filter(.$Time > stim-params$before & .$Time < stim+params$after) %>% select(Mean)))
+          dfs$Mean = cbind(dfs$Mean, (df %>% filter(.data$Time > stim-params$before & .data$Time < stim+params$after) %>% select(.data$Mean)))
           dfs$SEM = cbind(dfs$SEM, data[data_columns[[factor]]] %>%
                             mutate(Time = data[[1]]) %>%
-                            filter(.$Time > stim-params$before & .$Time < stim+params$after) %>%
-                            select(-Time))
+                            filter(.data$Time > stim-params$before & .data$Time < stim+params$after) %>%
+                            select(-.data$Time))
         }
       }
       df_average = data.frame(Time = data[1:nrow(dfs$Mean), 1], Mean = rowMeans(dfs$Mean), SEM = rowSem(dfs$SEM))

@@ -12,6 +12,8 @@
 #'
 #' @import dplyr
 #' @importFrom tidyr pivot_longer
+#' @importFrom stats na.omit
+#' @importFrom rlang .data
 #'
 #'
 output_Responses = function(data, params, dir)
@@ -20,10 +22,10 @@ output_Responses = function(data, params, dir)
   processed = data %>% select(contains(c("Time", params$Factor))) %>% na.omit()
 
   peaks = data.frame(Name = names(processed)[-1], Factor = extract_factor(names(processed[-1]), params$Factor)) %>%
-    mutate(Factor = factor(Factor, levels = params$Factor)) %>%
+    mutate(Factor = factor(.data$Factor, levels = params$Factor)) %>%
     mutate(Name = mapply(function(name, fact) gsub(fact, "", name),
-                         name=Name,
-                         fact=Factor))
+                         name=.data$Name,
+                         fact=.data$Factor))
   for (stim in params$Stimuli)
   {
     peaks = cbind(peaks, unname(apply(processed[processed$`Time (s)`>stim-params$before & processed$`Time (s)`<stim+params$after,][-1],
@@ -36,8 +38,8 @@ output_Responses = function(data, params, dir)
     if (isTRUE(group))
     {
       h = tidyr::pivot_longer(peaks, 3:length(names(peaks)), names_to = "Stimuli", values_to = "values") %>%
-        mutate(Stimuli = factor(Stimuli, levels = params$Stimuli)) %>%
-        mutate(FactorStim = interaction(Factor, Stimuli), NameStim = interaction(Name, Stimuli))
+        mutate(Stimuli = factor(.data$Stimuli, levels = params$Stimuli)) %>%
+        mutate(FactorStim = interaction(.data$Factor, .data$Stimuli), NameStim = interaction(.data$Name, .data$Stimuli))
 
       b_plot = get_boxplot(h, "FactorStim", "values", connect = "NameStim")
       b_plot$file = paste0(dir, params$Filename,"_groupByStimulus_Response.png")

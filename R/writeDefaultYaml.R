@@ -6,7 +6,6 @@
 #' @param filename A character string naming a file for writing
 #'
 #'
-
 #' @export
 #'
 writeDefaultYaml = function(filename)
