@@ -9,9 +9,9 @@ output_Trace(data, sheetname, dir)
 \arguments{
 \item{data}{List containing all read data from nosa results.}
 
-\item{dir}{Path to the location where the resulting plots are to be stored.}
+\item{sheetname}{String of sheetname holding data to read for this analysis.}
 
-\item{sheetnames}{List containing all sheetnames for this analysis.}
+\item{dir}{Path to the location where the resulting plots are to be stored.}
 }
 \value{
 List with ggplot2 sample plots

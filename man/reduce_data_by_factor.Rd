@@ -9,11 +9,7 @@ reduce_data_by_factor(df, factors)
 \arguments{
 \item{df}{Data.frame}
 
-\item{window}{List with two doubles. The first determines the range before, and the second the range after a specific point in time.}
-
-\item{timepoints}{List with one ore more timepoints.}
-
-\item{larger_window}{Optional boolean. If TRUE, the amount of data is extended by two seconds in each direction.#'}
+\item{factors}{List of Strings.}
 }
 \value{
 List of data.frames.

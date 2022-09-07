@@ -8,5 +8,5 @@ performAnalysis()
 Nosa softwaree analysis.
 }
 \examples{
-performAnalysis(directory = "/home/julez/Lisa/Material_korrekt", yaml_obj = list())
+performAnalysis(yaml_file = "/home/julez/Lisa/Material_korrekt/defaults.yaml")
 }

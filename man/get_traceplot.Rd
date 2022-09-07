@@ -14,6 +14,8 @@ get_traceplot(df, var1, var2, sem = NULL, auc = NULL)
 \item{var2}{Column name of y axis values.}
 
 \item{sem}{Column name of standard error of mean values. Optional.}
+
+\item{auc}{Column name of auc booleans. Optional.}
 }
 \value{
 List of ggplot2 data

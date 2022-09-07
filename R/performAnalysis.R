@@ -8,7 +8,7 @@
 #'
 #' @param yaml_file A character string that provides the path and name of a yaml_file containing
 #'                 the configuration parameters.
-#'                 The function **writeDefaultYaml(filename)** can be used to create
+#'                 The function 'writeDefaultYaml(filename)' can be used to create
 #'                 this file filled with all default parameters and values.
 #'
 #' @return List with sections data and plots.
@@ -19,7 +19,7 @@
 #'
 #' @export
 #'
-performAnalysis = function(yaml_file = NULL)
+performAnalysis = function(yaml_file = character() )
 {
   ############
   # prepare the Yaml
