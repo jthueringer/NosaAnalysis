@@ -2,9 +2,10 @@
 % Please edit documentation in R/misc.R
 \name{get_columns_by_factor}
 \alias{get_columns_by_factor}
-\title{Extract all columns that contain a given string and return new data.frame.}
+\title{Extract all columns that contain a given string (a factor) and return new data.frame.
+If no factor is provided, all data are returned.}
 \usage{
-get_columns_by_factor(data, factors)
+get_columns_by_factor(data, factors, needs_time = FALSE)
 }
 \arguments{
 \item{data}{Data frame.}
@@ -15,5 +16,6 @@ get_columns_by_factor(data, factors)
 Data.frame that consists only of the columns that contain the factors you are looking for in their names.
 }
 \description{
-Extract all columns that contain a given string and return new data.frame.
+Extract all columns that contain a given string (a factor) and return new data.frame.
+If no factor is provided, all data are returned.
 }

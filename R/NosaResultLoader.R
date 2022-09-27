@@ -7,6 +7,7 @@
 #' @field plots A list containing all the plots that the user has requested.
 #' @field plot_data A list containing all data used to generate plots. Data will be written to xlsx if user definded.
 #'
+#' @importFrom readxl read_xlsx
 #' @importFrom gdata cbindX
 #' @importFrom methods new
 #'
@@ -56,7 +57,7 @@ NosaResultLoader = setRefClass(
             if (grepl("etadata", x)) y = 2
             else y = 0
             suppressMessages(
-              readxl::read_excel(
+              readxl::read_xlsx(
               paste(data_directory, "/", file, sep = ""),
               col_names = TRUE,
               skip = y,

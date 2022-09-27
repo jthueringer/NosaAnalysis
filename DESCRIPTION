@@ -15,7 +15,8 @@ Imports:
     tidyr (>= 1.2.0),
     rlang (>= 1.0.2),
     plotrix (>= 3.8-2),
-    xlsx (>= 0.6.5)
+    readxl,
+    openxlsx
 License: BSD_3_clause
 Encoding: UTF-8
 LazyData: true

@@ -12,7 +12,7 @@ extract_factor(names, factors)
 \item{factors}{List with factors.}
 }
 \value{
-List of found factors. If not found
+List of found factors. If not found, entry is 'NA'.
 }
 \description{
 Extract factors from given name list.

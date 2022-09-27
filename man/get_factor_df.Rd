@@ -2,8 +2,8 @@
 % Please edit documentation in R/misc.R
 \name{get_factor_df}
 \alias{get_factor_df}
-\title{From a given list of column names extract substrings and return a new data.frame containing a column with substring reduced names
-and a second column containing the extracted substrings}
+\title{From a given list of column names extract substrings and return a new data.frame containing the column Name with substring reduced names
+and the second column Factor containing the extracted substrings}
 \usage{
 get_factor_df(names, factors)
 }
@@ -16,6 +16,6 @@ get_factor_df(names, factors)
 Data.frame: first column holds substring reduced names, second column holds extracted substrings
 }
 \description{
-From a given list of column names extract substrings and return a new data.frame containing a column with substring reduced names
-and a second column containing the extracted substrings
+From a given list of column names extract substrings and return a new data.frame containing the column Name with substring reduced names
+and the second column Factor containing the extracted substrings
 }
