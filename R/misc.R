@@ -7,8 +7,42 @@
 #' @return SEM of row.
 #'
 rowSem <- function(x) {
-  return(sqrt(rowSums((x - rowMeans(x))^2)/(dim(x)[2] - 1)))
+  return(sqrt(rowSums((x - rowMeans(x))^2)/(dim(x)[2]*(dim(x)[2] - 1))))
 }
+
+#'
+#' Extract data computed by ggpubr functions (e.g. mean_se)
+#'
+#' @param plot Plot generated with ggpubr and additional function as mean_se
+#'
+#' @return Data frame with columns Time(x-values), Mean(y-values), SEM
+#'
+#' @importFrom ggpubr mean_se_
+#'
+get_plot_data = function(plot)
+{
+  plotdata = ggplot2::ggplot_build(plot)$data[[1]]
+  return(data.frame(Time = plotdata$x, Mean = plotdata$y, SEM = plotdata$ymax-plotdata$y))
+}
+
+#'
+#' Creates trace plot with standard error of mean.
+#'
+#' @param df Data frame
+#' @param x_values Name of x value column
+#' @param y_values Name of y valu column
+#'
+#' @return List of ggpubr data
+#'
+#' @importFrom ggpubr mean_se_
+#'
+get_SEM_plot = function(df, x_values, y_values)
+{
+  plot = ggpubr::ggline(df, x=x_values, y=y_values, add="mean_se_", add.params = list(color="lightblue"), error.plot="linerange",
+                          plot_type = "l", color = "blue", numeric.x.axis=TRUE)
+  return(plot)
+}
+
 
 #'
 #' Function to create a trace plot. Plotting the standard error of mean is optional.
@@ -93,23 +127,24 @@ extract_factor = function(names, factors)
 #' Get all requested analyser from outputs parameter list
 #'
 #' @param params List of analyser to be requested as well as their user defined parameters
+#' @param statistics Named list: paired is of type boolean (TRUE samples are paired samples), method is String that names the method to use (t.test, wilcox.test).
 #' @return List of analyser objects
 #'
-get_analyser_objects = function(out_params)
+get_analyser_objects = function(params, statistics)
 {
   analysers = list()
-  for (analyser in names(out_params))
+  for (analyser in names(params))
   {
     dir_name = analyser
-    for (ana_name in names(out_params[[analyser]]))
+    for (ana_name in names(params[[analyser]]))
     {
-      if ("DirName" %in% names(out_params[[analyser]][[ana_name]]))
+      if ("DirName" %in% names(params[[analyser]][[ana_name]]))
       {
-        dir_name = paste0(dir_name,"/", out_params[[analyser]][[ana_name]]$DirName)
+        dir_name = paste0(dir_name,"/", params[[analyser]][[ana_name]]$DirName)
       }
       else if (analyser == "Trace")
       {
-        dir_name = paste0(dir_name,"/", out_params[[analyser]][[ana_name]]$Sheet)
+        dir_name = paste0(dir_name,"/", params[[analyser]][[ana_name]]$Sheet)
       }
       else
       {
@@ -119,8 +154,9 @@ get_analyser_objects = function(out_params)
       if (inherits(ana, "refObjectGenerator"))
       {
         analysers[[dir_name]] = ana$new()
-        analysers[[dir_name]]$setParams(out_params[[analyser]][[ana_name]])
+        analysers[[dir_name]]$setParams(params[[analyser]][[ana_name]])
         analysers[[dir_name]]$setDirName(paste0(dir_name, "/"))
+        analysers[[dir_name]]$setStatistics(statistics)
       }
       else
       {
@@ -132,13 +168,46 @@ get_analyser_objects = function(out_params)
 }
 
 #'
+#' Takes a list of columnnames as well as a list of strings to search for in columnnames.
+#' Returns ist list that holds for each search string a named list containg booleans for
+#' the present of the string.
+#' If no search strings are available the returning list contains of TRUEs except for
+#' the excluded_column.
+#'
+#' @param columnnames List of strings.
+#' @param factors List of search strings.
+#' @param excluded_column String
+#'
+#' @return List that holds for each search string a named list containg booleans for
+#' the present of the string.
+#'
+get_bool_for_columns_by_factor <- function(columnnames, factors=NULL, excluded_column = FALSE) {
+  data_columns = list()
+  if (!length(factors))
+  {
+    data_columns[['all']] = !grepl(excluded_column, columnnames)
+  }
+  else
+  {
+    for (fact in factors)
+    {
+      data_columns[[ fact ]] = grepl(fact, columnnames)
+    }
+  }
+  return(data_columns)
+}
+
+#'
 #' Extract all columns that contain a given string (a factor) and return new data.frame.
 #' If no factor is provided, all data are returned.
 #'
 #' @param data Data frame.
 #' @param factors List with strings that are searched for in the column names of a given data.frame.
+#' @param needs_time Boolean with which it is determined whether the column "Time" should be present in the returned data frame.
 #'
 #' @return Data.frame that consists only of the columns that contain the factors you are looking for in their names.
+#'
+#' @importFrom stats na.omit
 #'
 get_columns_by_factor = function(data, factors, needs_time = FALSE)
 {
@@ -184,15 +253,16 @@ get_factor_df = function(names, factors)
 #' @param df Data frame containing the column "Time" as well as other columns in which the maximum value is to be found.
 #' @param stim Double representing the start time.
 #' @param window Double that defines the end time (stim+window)
+#' @param time String containing the column name of time.
 #'
 #' @return Named list. Names were column names from input data frame; values is the timepoint, where the max value was found
 #'
 #' @importFrom rlang .data
 #'
-get_times_of_max_in_window <- function(df, stim, window) {
+get_times_of_max_in_window <- function(df, stim, window, time) {
   subs = df %>%
-    filter(.data$Time >= stim & .data$Time <= stim+window)
-  times_of_max = lapply(subset(subs, select=-Time), function(col) { subs[which.max(col), "Time"] })
+    filter(.data[[time]] >= stim & .data[[time]] <= stim+window)
+  times_of_max = lapply(subs[grep(time, names(subs),invert=TRUE)], function(col) { subs[which.max(col), time] })
   return(times_of_max)
 }
 

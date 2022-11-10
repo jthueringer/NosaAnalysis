@@ -18,6 +18,9 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_prep$InputDirectory = "/path/to/nosa/results"
   default_prep$ResultsDirectory = "/path/to/results"
   default_prep$NeedsTimeCorrection = TRUE
+  default_prep$BoxplotWithStatistics = list()
+  default_prep$paired = TRUE
+  default_prep$method = "choose between t.test or wilcox.test or anova"
 
   default_sheets = list()
   default_sheets$metadata = list()
@@ -41,6 +44,7 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_output$SEM$FirstAna$DirName = "TwoStimuli"
   default_output$SEM$FirstAna$Factor =  c("pre", "post")
   default_output$SEM$FirstAna$Trace =  TRUE
+  default_output$SEM$FirstAna$CropTrace = 1
   default_output$SEM$FirstAna$PeakAverage = TRUE
   default_output$SEM$FirstAna$Stimuli = c(10, 41)
   default_output$SEM$FirstAna$PeakSearchWindow = 5
@@ -62,9 +66,11 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_output$Auc$FirstAna$DirName = "TwoStim"
   default_output$Auc$FirstAna$Factor = c("pre", "post")
   default_output$Auc$FirstAna$Stimuli = c(10, 40)
+  default_output$Auc$FirstAna$PeakSearchWindow = 5
   default_output$Auc$FirstAna$before = 1.5
   default_output$Auc$FirstAna$after = 1.5
   default_output$Auc$FirstAna$GroupByStimulus = c(FALSE, TRUE)
+  default_output$Auc$FirstAna$ControlPlots = FALSE
 
   # default_output$Boxplots = list()
   # default_output$Boxplots$PeakCount = list()
@@ -121,6 +127,7 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   prep$InputDirectory = yc$getYaml("Prep$InputDirectory", prep$InputDirectory)
   prep$ResultsDirectory = yc$getYaml("Prep$ResultsDirectory", prep$ResultsDirectory)
   prep$NeedsTimeCorrection = yc$getYaml("Prep$NeedsTimeCorrection", prep$NeedsTimeCorrection)
+  prep$BoxplotWithStatistics = yc$getYaml("Prep$BoxplotWithStatistics", default_prep$BoxplotWithStatistics)
 
   sheets$metadata = yc$getYaml("Sheets$metadata", sheets$metadata)
   sheets$Raw = yc$getYaml("Sheets$Raw", sheets$Raw)

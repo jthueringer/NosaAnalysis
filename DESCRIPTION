@@ -12,12 +12,13 @@ Imports:
     gdata (>= 2.18.0),
     dplyr (>= 1.0.8),
     ggplot2 (>= 3.3.5),
+    ggpubr (>= 0.4.0),
     tidyr (>= 1.2.0),
     rlang (>= 1.0.2),
     plotrix (>= 3.8-2),
     readxl,
     openxlsx
-License: BSD_3_clause
+License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.2

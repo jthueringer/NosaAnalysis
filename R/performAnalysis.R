@@ -16,6 +16,7 @@
 #' @import openxlsx
 #' @importFrom stats approxfun integrate
 #' @importFrom rlang .data
+#' @importFrom ggpubr mean_se_
 #'
 #' @export
 #'
@@ -51,8 +52,7 @@ performAnalysis = function(yaml_file = character() )
   output_dir = paste0(yaml_prep$ResultsDirectory, "/")
   yaml_outs = yaml_list$outputs
 
-  analysis_list = get_analyser_objects(yaml_outs)
-
+  analysis_list = get_analyser_objects(yaml_outs, yaml_prep$BoxplotWithStatistics)
 
   ############
   # loading content of nosa results into data.frames that are stored within nested list
@@ -101,7 +101,7 @@ performAnalysis = function(yaml_file = character() )
     dir.create(paste0(output_dir, analysis$dir_name), recursive = TRUE)
     for (plot in analysis$plots)
     {
-      ggsave(paste0(output_dir, analysis$dir_name, plot$file_name), plot)
+      ggpubr::ggexport(plot, filename=paste0(output_dir, analysis$dir_name, plot$file_name))
     }
   }
 
@@ -135,5 +135,6 @@ performAnalysis = function(yaml_file = character() )
     saveWorkbook(wb, paste0(output_dir, "/data.xlsx"))
   }
 
-  return(analysis_list)
+  # return(analysis_list)
+  return(nsr)
 }
