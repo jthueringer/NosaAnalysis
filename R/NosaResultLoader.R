@@ -4,8 +4,6 @@
 #' The 'data' field is initialized after $loadNosaResults was called.
 #'
 #' @field data NosaResults data as list. Valid list entries are: "metadata", "Raw", "Processed", "Baseline", "Spike Detection" and "Smoothing".
-#' @field plots A list containing all the plots that the user has requested.
-#' @field plot_data A list containing all data used to generate plots. Data will be written to xlsx if user definded.
 #'
 #' @importFrom readxl read_xlsx
 #' @importFrom gdata cbindX
@@ -14,12 +12,10 @@
 #'
 NosaResultLoader = setRefClass(
   "NosaResultLoader",
-  fields = list(data = "list", plots = "list", plot_data = "list"),
+  fields = list(data = "list"),
   methods = list(
     initialize = function() {
       .self$data = list()
-      .self$plots = list()
-      .self$plot_data = list()
 
       return(.self)
     },
@@ -212,8 +208,8 @@ NosaResultLoader = setRefClass(
         }
       }
 
-      if (timelane_to_zero) warning("The timelanes of file ", file, " have been set to the initial value of zero because 'NeedsTimeCorrection' is selected.\n")
-      else  warning(paste0( "The timelanes of file ", file, " does not start with frame or second '0'\n"))
+      # if (timelane_to_zero) warning("The timelanes of file ", file, " have been set to the initial value of zero because 'NeedsTimeCorrection' is selected.\n")
+      # else  warning(paste0( "The timelanes of file ", file, " does not start with frame or second '0'\n"))
       .self$data <- tmp_df
       return(NULL)
     },

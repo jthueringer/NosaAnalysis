@@ -11,6 +11,8 @@ get_columns_by_factor(data, factors, needs_time = FALSE)
 \item{data}{Data frame.}
 
 \item{factors}{List with strings that are searched for in the column names of a given data.frame.}
+
+\item{needs_time}{Boolean with which it is determined whether the column "Time" should be present in the returned data frame.}
 }
 \value{
 Data.frame that consists only of the columns that contain the factors you are looking for in their names.

@@ -12,10 +12,6 @@ The 'data' field is initialized after $loadNosaResults was called.
 
 \describe{
 \item{\code{data}}{NosaResults data as list. Valid list entries are: "metadata", "Raw", "Processed", "Baseline", "Spike Detection" and "Smoothing".}
-
-\item{\code{plots}}{A list containing all the plots that the user has requested.}
-
-\item{\code{plot_data}}{A list containing all data used to generate plots. Data will be written to xlsx if user definded.}
 }}
 
 \section{Methods}{
