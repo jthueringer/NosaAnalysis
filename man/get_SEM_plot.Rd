@@ -9,9 +9,13 @@ get_SEM_plot(df, x_values, y_values, xlab, ylab)
 \arguments{
 \item{df}{Data frame}
 
-\item{x_values}{Name of x value column}
+\item{x_values}{Name of x value column.}
 
-\item{y_values}{Name of y valu column}
+\item{y_values}{Name of y valu column.}
+
+\item{xlab}{String title of x axis.}
+
+\item{ylab}{String title of y axis.}
 }
 \value{
 List of ggpubr data

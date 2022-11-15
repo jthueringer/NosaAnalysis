@@ -4,18 +4,18 @@
 \alias{get_traceplot}
 \title{Function to create a trace plot. Plotting the standard error of mean is optional.}
 \usage{
-get_traceplot(df, var1, var2, sem = NULL, auc = NULL)
+get_traceplot(df, x_values, y_values, xlab, ylab)
 }
 \arguments{
 \item{df}{Data frame.}
 
-\item{var1}{Column name of x axis values.}
+\item{x_values}{Column name of x axis values.}
 
-\item{var2}{Column name of y axis values.}
+\item{y_values}{Column name of y axis values.}
 
-\item{sem}{Column name of standard error of mean values. Optional.}
+\item{xlab}{String title of x axis.}
 
-\item{auc}{Column name of auc booleans. Optional.}
+\item{ylab}{String title of y axis.}
 }
 \value{
 List of ggplot2 data

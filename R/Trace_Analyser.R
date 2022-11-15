@@ -8,17 +8,21 @@ Trace_Analyser = setRefClass(
 
       plot_fnc = function(.self, data)
       {
-        time = grepl("Time", names(data))
-        pl = list()
-        for (col in names(data)[!time])
+        plotl = list()
+        datal = list()
+        xlab = grep("Time", names(data), value = TRUE)
+        ylab = "\u0394 F/F"
+        data = data %>%
+          rename(Time = contains("Time"))
+        for (col in names(data %>% select(-Time)))
         {
-          df = data.frame(Time = data[,time], Value = data[[col]]) %>% na.omit()
-          plot = get_traceplot(df, "Time", "Value")
+          df = data.frame(Time = data$Time, Value = data[[col]]) %>% na.omit()
+          plot = get_traceplot(df, "Time", "Value", xlab, ylab)
           plot$file_name = paste0(basename(.self$dir_name), col, ".png")
 
-          pl[[plot$file_name]] = plot
+          plotl[[plot$file_name]] = plot
         }
-        return(list(plots = pl))
+        return(list(plots = plotl, data = datal))
       },
 
       ana_name = "Trace"

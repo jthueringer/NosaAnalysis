@@ -45,8 +45,10 @@ get_plot_data = function(plot, additional = NULL)
 #' Creates trace plot with standard error of mean.
 #'
 #' @param df Data frame
-#' @param x_values Name of x value column
-#' @param y_values Name of y valu column
+#' @param x_values Name of x value column.
+#' @param y_values Name of y valu column.
+#' @param xlab String title of x axis.
+#' @param ylab String title of y axis.
 #'
 #' @return List of ggpubr data
 #'
@@ -66,32 +68,19 @@ get_SEM_plot = function(df, x_values, y_values, xlab, ylab)
 #' Function to create a trace plot. Plotting the standard error of mean is optional.
 #'
 #' @param df Data frame.
-#' @param var1 Column name of x axis values.
-#' @param var2 Column name of y axis values.
-#' @param sem Column name of standard error of mean values. Optional.
-#' @param auc Column name of auc booleans. Optional.
+#' @param x_values Column name of x axis values.
+#' @param y_values Column name of y axis values.
+#' @param xlab String title of x axis.
+#' @param ylab String title of y axis.
 #'
 #' @return List of ggplot2 data
 #'
 #' @import ggplot2
 #'
-get_traceplot = function(df, var1, var2, sem = NULL, auc = NULL)
+get_traceplot = function(df, x_values, y_values, xlab, ylab)
 {
-  plot = ggplot(df, aes(x=.data[[var1]], y=.data[[var2]]))
-  if(!is.null(sem))
-  {
-    plot = plot +
-      geom_errorbar(aes(ymin=.data[[var2]]-.data[[sem]], ymax=.data[[var2]]+.data[[sem]]), colour="lightblue", width=.1)
-  }
-  if(!is.null(auc))
-  {
-    plot = plot +
-      geom_area(aes(y = ifelse(.data[[auc]] == TRUE, .data[[var2]], 0)), inherit.aes = TRUE, fill = "grey")
-  }
-  plot = plot +
-    geom_line(colour="blue") +
-    #coord_cartesian(xlim = c(df[[var1]][1], df[[var1]][length(df[[var1]])])) +
-    labs(y="\u0394 F/F", x="Time [s]",)
+  plot = ggpubr::ggline(df, x=x_values, y=y_values, plot_type = "l", color = "blue", numeric.x.axis=TRUE,
+                        xlab = xlab, ylab = ylab)
 
   return(plot)
 }
