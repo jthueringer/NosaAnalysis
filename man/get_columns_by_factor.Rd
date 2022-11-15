@@ -2,22 +2,22 @@
 % Please edit documentation in R/misc.R
 \name{get_columns_by_factor}
 \alias{get_columns_by_factor}
-\title{Extract all columns that contain a given string (a factor) and return new data.frame.
-If no factor is provided, all data are returned.}
+\title{Extract all columns that contain a given string and return new data.frame.
+If no list of strings is provided, all data are returned.}
 \usage{
-get_columns_by_factor(data, factors, needs_time = FALSE)
+get_columns_by_factor(data, substr_colnames, include_col = NULL)
 }
 \arguments{
 \item{data}{Data frame.}
 
-\item{factors}{List with strings that are searched for in the column names of a given data.frame.}
+\item{substr_colnames}{List with strings that are searched for in the column names of a given data.frame.}
 
-\item{needs_time}{Boolean with which it is determined whether the column "Time" should be present in the returned data frame.}
+\item{include_col}{String for an additional colum. Optional.}
 }
 \value{
-Data.frame that consists only of the columns that contain the factors you are looking for in their names.
+Data.frame that consists only of the columns that contain the substr_colnames you are looking for in their names.
 }
 \description{
-Extract all columns that contain a given string (a factor) and return new data.frame.
-If no factor is provided, all data are returned.
+Extract all columns that contain a given string and return new data.frame.
+If no list of strings is provided, all data are returned.
 }

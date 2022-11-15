@@ -4,7 +4,7 @@
 \alias{get_SEM_plot}
 \title{Creates trace plot with standard error of mean.}
 \usage{
-get_SEM_plot(df, x_values, y_values)
+get_SEM_plot(df, x_values, y_values, xlab, ylab)
 }
 \arguments{
 \item{df}{Data frame}

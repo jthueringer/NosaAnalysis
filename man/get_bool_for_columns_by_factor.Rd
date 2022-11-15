@@ -3,7 +3,7 @@
 \name{get_bool_for_columns_by_factor}
 \alias{get_bool_for_columns_by_factor}
 \title{Takes a list of columnnames as well as a list of strings to search for in columnnames.
-Returns ist list that holds for each search string a named list containg booleans for
+Returns a list that holds for each search string a named list containg booleans for
 the present of the string.
 If no search strings are available the returning list contains of TRUEs except for
 the excluded_column.}
@@ -27,7 +27,7 @@ the present of the string.
 }
 \description{
 Takes a list of columnnames as well as a list of strings to search for in columnnames.
-Returns ist list that holds for each search string a named list containg booleans for
+Returns a list that holds for each search string a named list containg booleans for
 the present of the string.
 If no search strings are available the returning list contains of TRUEs except for
 the excluded_column.

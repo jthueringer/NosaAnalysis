@@ -4,13 +4,15 @@
 \alias{get_plot_data}
 \title{Extract data computed by ggpubr functions (e.g. mean_se)}
 \usage{
-get_plot_data(plot)
+get_plot_data(plot, additional = NULL)
 }
 \arguments{
-\item{plot}{Plot generated with ggpubr and additional function as mean_se}
+\item{plot}{Plot generated with ggpubr}
+
+\item{additional}{List containing names of other values to be extracted (e.g. 'y-max', 'y-min')}
 }
 \value{
-Data frame with columns Time(x-values), Mean(y-values), SEM
+Data frame with columns x and y, optional: requested additional values
 }
 \description{
 Extract data computed by ggpubr functions (e.g. mean_se)
