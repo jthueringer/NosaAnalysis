@@ -8,10 +8,12 @@ Auc_Analyser = setRefClass(
 
       plot_fnc = function(.self, data)
       {
-        result = list()
+        plotl = list()
+        datal = list()
+        ylab = expression(Delta ~ "F/F")
         ###########################
         # AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa
-        # irgendwo werden pre und post vertauscht!!!!!!!!!!!!!!1
+        # irgendwo werden pre und post vertauscht!!!!!!!!!!!!!!???
         df_auc = get_columns_by_factor(data, params$Factor, TRUE)
         names(df_auc)[grep("Time", names(df_auc))] = "Time"
 
@@ -38,12 +40,15 @@ Auc_Analyser = setRefClass(
             if (params$ControlPlots)
             {
               #ggpubr::ggline(df, x="Time", y="Fly", numeric.x.axis=TRUE)
-              c_plot = get_traceplot(data.frame(Time=tmp$Time, Value=tmp[[elem]], Extended=df_stim_reduced[[stim_col_name]]$Extended), "Time", "Value", auc="Extended")
+              df_tmp = data.frame(Time=tmp$Time, Value=tmp[[elem]], Extended=df_stim_reduced[[stim_col_name]]$Extended)
+              # c_plot = get_traceplot(data.frame(Time=tmp$Time, Value=tmp[[elem]], Extended=df_stim_reduced[[stim_col_name]]$Extended), "Time", "Value", auc="Extended")
+              c_plot = ggpubr::ggline(df_tmp, x="Time", y="Value", plot_type = "l", numeric.x.axis=TRUE) +
+                ggpubr::geom_exec(geom_area, data=df_tmp[df_tmp$Extended,], mapping=aes(y = ifelse(.data$Extended == TRUE, .data$Fly, 0)), fill = "grey")
               c_plot$file_name = paste0("control_", time_of_max[[elem]], "_", elem, ".png")
-              eval(parse(text = paste0("result$control", time_of_max[[elem]], "_auc", elem, " = c_plot")))
+              eval(parse(text = paste0("plotl$control", time_of_max[[elem]], "_auc", elem, " = c_plot")))
             }
           }
-          df_stim_reduced[[stim_col_name]] = reduce_data_by_factor(df_stim_reduced[[stim_col_name]], params$Factor)
+          df_stim_reduced[[stim_col_name]] = separate_data_by_factor(df_stim_reduced[[stim_col_name]], params$Factor)
         }
 
         sample_names = grep("Time", names(df_auc), value=TRUE, invert=TRUE)
@@ -67,10 +72,7 @@ Auc_Analyser = setRefClass(
           }
           names(auc2) = sub("stim", stim, names(auc2))
           auc = merge(auc, auc2, by=c("Name", "Factor"))
-        }
-        # auc = auc  %>%
-        #   mutate(Name = mapply(function(name, fact) gsub(fact, "", name),
-        #                        name=.data$Name, fact=.data$Factor))
+        }                      name=.data$Name, fact=.data$Factor))
         auc = auc %>% rowwise() %>%
           mutate(Name = gsub(Factor,"",Name)) %>%
           ungroup()
@@ -100,8 +102,7 @@ Auc_Analyser = setRefClass(
           }
           else if (isFALSE(group))
           {
-            h = auc #>%
-              # arrange(Factor, Name)
+            h = auc
             h$Mean = rowMeans(h[3:length(h)])
             if(statistics$paired)
             {
@@ -122,36 +123,32 @@ Auc_Analyser = setRefClass(
             message(paste0("Invalid response parameter 'GroupByStimulus'!\n\n
                              Skipping AUC boxplot", params$DirName, "\n\n"))
           }
-          result[[b_plot$file_name]] = b_plot
+          plotl[[b_plot$file_name]] = b_plot
         }
         ####
 
         #prints averaged auc for each factor
         for (factor in params$Factor )
         {
-          tmp = df_stim_reduced[[1]] %>% select(Time)
-          tmp1 = df_stim_reduced[[1]] %>% select(c(Time, Extended)) %>%
-            filter(Extended==TRUE) %>%
-            select(-Extended)
+          tmp = df_stim_reduced[[1]] %>% select(c(Time, Extended))
 
           for (stim in params$Stimuli)
           {
-            tmp = cbind(tmp, df_stim_reduced[[stim_col_name]][[factor]])
-            tmp1 = cbind(tmp1, df_stim_reduced[[stim_col_name]][[factor]][df_stim_reduced[[1]]$Extended,])
+            tmp = cbind(tmp, df_stim_reduced[[stim_col_name]][[factor]]) #[df_stim_reduced[[1]]$Extended,])
           }
-          tmp$AUC = "no"
-          tmp1$AUC = "yes"
-          tmp = rbind(tmp, tmp1)
-          longer_df = tidyr::pivot_longer(tmp, -c(Time,AUC), names_to = "Name", values_to = "Values")
+          longer_df = tidyr::pivot_longer(tmp, -c(Time,Extended), names_to = "Name", values_to = "Values")
           t_plot = ggpubr::ggline(longer_df, x="Time", y="Values", add="mean",
-                                  plot_type = "l", color = "AUC", numeric.x.axis=TRUE)
-          #t_plotArea= t_plot + geom_area(aes(y = ifelse(.data$AUC == "yes", .data$Values, 0)), inherit.aes = TRUE, fill = "grey")
-          # t_plot = get_traceplot(a, "Time", "Mean", auc="Extended")
+                                  plot_type = "l", numeric.x.axis=TRUE)
+          pl_data = get_plot_data(t_plot)
+          pl_data =  data.frame(rename(pl_data, c(Time = x, Values = y))) %>%
+            mutate(Extended = df_stim_reduced[[1]]$Extended)
+          t_plot = t_plot +
+            ggpubr::geom_exec(geom_area, data=pl_data[pl_data$Extended,], mapping=aes(y = ifelse(.data$Extended == TRUE, .data$Values, 0)), fill = "grey")
           t_plot$file_name = paste0(params$DirName, "Avg_", factor, ".png" )
           t_plot$asXlsx = TRUE
-          result[[t_plot$file_name]] = t_plot
+          plotl[[t_plot$file_name]] = t_plot
         }
-        return(list(plots = result))
+        return(list(plots = plotl, data = datal))
       },
 
       ana_name = "AUC"

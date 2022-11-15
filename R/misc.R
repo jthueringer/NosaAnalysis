@@ -13,16 +13,32 @@ rowSem <- function(x) {
 #'
 #' Extract data computed by ggpubr functions (e.g. mean_se)
 #'
-#' @param plot Plot generated with ggpubr and additional function as mean_se
+#' @param plot Plot generated with ggpubr
+#' @param additional List containing names of other values to be extracted (e.g. 'y-max', 'y-min')
 #'
-#' @return Data frame with columns Time(x-values), Mean(y-values), SEM
+#' @return Data frame with columns x and y, optional: requested additional values
 #'
-#' @importFrom ggpubr mean_se_
+#' @import ggplot2
 #'
-get_plot_data = function(plot)
+get_plot_data = function(plot, additional = NULL)
 {
   plotdata = ggplot2::ggplot_build(plot)$data[[1]]
-  return(data.frame(Time = plotdata$x, Mean = plotdata$y, SEM = plotdata$ymax-plotdata$y))
+  df = data.frame(x = plotdata$x, y = plotdata$y)
+  if (!is.null(additional))
+  {
+    for (add in additional)
+    {
+      if (!is.null(plotdata[[add]]))
+      {
+        df = cbind(df, add = plotdata[[add]])
+      }
+      else
+      {
+        message(paste0("There is no data named", add, " in the plot. Skipping"))
+      }
+    }
+  }
+  return(df)
 }
 
 #'
@@ -36,10 +52,12 @@ get_plot_data = function(plot)
 #'
 #' @importFrom ggpubr mean_se_
 #'
-get_SEM_plot = function(df, x_values, y_values)
+get_SEM_plot = function(df, x_values, y_values, xlab, ylab)
 {
   plot = ggpubr::ggline(df, x=x_values, y=y_values, add="mean_se_", add.params = list(color="lightblue"), error.plot="linerange",
-                          plot_type = "l", color = "blue", numeric.x.axis=TRUE)
+                        plot_type = "l", color = "blue", numeric.x.axis=TRUE,
+                        xlab = xlab, ylab = ylab)
+
   return(plot)
 }
 
@@ -169,7 +187,7 @@ get_analyser_objects = function(params, statistics)
 
 #'
 #' Takes a list of columnnames as well as a list of strings to search for in columnnames.
-#' Returns ist list that holds for each search string a named list containg booleans for
+#' Returns a list that holds for each search string a named list containg booleans for
 #' the present of the string.
 #' If no search strings are available the returning list contains of TRUEs except for
 #' the excluded_column.
@@ -198,30 +216,30 @@ get_bool_for_columns_by_factor <- function(columnnames, factors=NULL, excluded_c
 }
 
 #'
-#' Extract all columns that contain a given string (a factor) and return new data.frame.
-#' If no factor is provided, all data are returned.
+#' Extract all columns that contain a given string and return new data.frame.
+#' If no list of strings is provided, all data are returned.
 #'
 #' @param data Data frame.
-#' @param factors List with strings that are searched for in the column names of a given data.frame.
-#' @param needs_time Boolean with which it is determined whether the column "Time" should be present in the returned data frame.
+#' @param substr_colnames List with strings that are searched for in the column names of a given data.frame.
+#' @param include_col String for an additional colum. Optional.
 #'
-#' @return Data.frame that consists only of the columns that contain the factors you are looking for in their names.
+#' @return Data.frame that consists only of the columns that contain the substr_colnames you are looking for in their names.
 #'
 #' @importFrom stats na.omit
 #'
-get_columns_by_factor = function(data, factors, needs_time = FALSE)
+get_columns_by_factor = function(data, substr_colnames, include_col = NULL)
 {
-  if (is.null(factors))
+  if (is.null(substr_colnames))
   {
-    ifelse(needs_time, return(data), return(data[!grepl('Time', names(data))]))
+    ifelse(include_col, return(data), return(data[!grepl('Time', names(data))]))
   }
-  if (needs_time)
+  if (include_col)
   {
-    return(data %>% select(contains(c("Time", factors))) %>% na.omit())
+    return(data %>% select(contains(c("Time", substr_colnames))) %>% na.omit())
   }
   else
   {
-    return(data %>% select(contains(factors)) %>% na.omit())
+    return(data %>% select(contains(substr_colnames)) %>% na.omit())
   }
 }
 
@@ -303,7 +321,7 @@ reduce_data_by_window = function(df, window, timepoints, larger_window = FALSE)
 #'
 #' @return List of data.frames.
 #'
-reduce_data_by_factor = function(df, factors)
+separate_data_by_factor = function(df, factors)
 {
   dfs = df %>% select(c(Time = contains("Time"), Extended = contains("Extended")))
   for (factor in factors)

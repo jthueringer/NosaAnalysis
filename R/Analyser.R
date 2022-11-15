@@ -15,22 +15,28 @@ Analyser = setRefClass(
   fields = list(description = "character",
                 plot_fnc = "function",
                 plots = "list",
+                plot_data = "list",
                 params = "list",
+                statistics = "list",
                 dir_name = "character",
                 ana_name = "character"
                 ),
   methods = list(
     initialize = function(description = NA_character_,
-                          plot_fnc=function(){},
-                          plots=list(),
+                          plot_fnc = function(){},
+                          plots = list(),
+                          plot_data = list(),
                           params = list(),
+                          statistics = list(),
                           dir_name = NA_character_,
                           ana_name = NA_character_)
     {
       .self$description = description;
       .self$plot_fnc = plot_fnc;
       .self$plots = list();
+      .self$plot_data = list();
       .self$params = params;
+      .self$statistics = statistics;
       .self$dir_name = dir_name;
       .self$ana_name = ana_name;
       return(.self)
@@ -39,6 +45,12 @@ Analyser = setRefClass(
     getSheetName = function()
     {
       return(.self$params$Sheet)
+    },
+
+    setStatistics = function(statistics)
+    {
+      .self$statistics = statistics
+      return(NULL)
     },
 
     setParams = function(params)
@@ -69,6 +81,7 @@ Analyser = setRefClass(
 
       result = plot_fnc(.self, df, ...)
       .self$plots = result$plots
+      .self$plot_data = result$data
       return(NULL)
     }
   )

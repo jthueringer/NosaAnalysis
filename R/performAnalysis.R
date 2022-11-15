@@ -101,7 +101,7 @@ performAnalysis = function(yaml_file = character() )
     dir.create(paste0(output_dir, analysis$dir_name), recursive = TRUE)
     for (plot in analysis$plots)
     {
-      ggpubr::ggexport(plot, filename=paste0(output_dir, analysis$dir_name, plot$file_name))
+      ggpubr::ggexport(plot, filename=paste0(output_dir, analysis$dir_name, plot$file_name), width = 800, height = 800)
     }
   }
 
@@ -135,6 +135,6 @@ performAnalysis = function(yaml_file = character() )
     saveWorkbook(wb, paste0(output_dir, "/data.xlsx"))
   }
 
-  # return(analysis_list)
-  return(nsr)
+  return(analysis_list)
+  # return(nsr)
 }
