@@ -15,7 +15,7 @@ SEM_Analyser = setRefClass(
       {
         plotl = list()
         datal = list()
-        xlab = "Time in [s]"
+        xlab = grep("Time", names(data), value = TRUE)
         ylab = expression(Delta ~ "F/F")
 
         # create list containing logical vectors for column selection from data

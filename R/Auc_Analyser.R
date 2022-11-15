@@ -13,7 +13,7 @@ Auc_Analyser = setRefClass(
         ylab = expression(Delta ~ "F/F")
         ###########################
         # AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa
-        # irgendwo werden pre und post vertauscht!!!!!!!!!!!!!!???
+        # irgendwo werden pre und post vertauscht!!!!!!!!!!!!!!1
         df_auc = get_columns_by_factor(data, params$Factor, TRUE)
         names(df_auc)[grep("Time", names(df_auc))] = "Time"
 
@@ -72,7 +72,7 @@ Auc_Analyser = setRefClass(
           }
           names(auc2) = sub("stim", stim, names(auc2))
           auc = merge(auc, auc2, by=c("Name", "Factor"))
-        }                      name=.data$Name, fact=.data$Factor))
+        }
         auc = auc %>% rowwise() %>%
           mutate(Name = gsub(Factor,"",Name)) %>%
           ungroup()
@@ -98,7 +98,6 @@ Auc_Analyser = setRefClass(
               ggpubr::stat_compare_means(method = statistics$method, paired=statistics$paired) +
               ggpubr::stat_compare_means(label =  "p.signif", label.y = max(h$AUC)*0.93)
             b_plot$file_name = paste0(params$DirName,"_groupByStim.png")
-            b_plot$asXlsx = TRUE
           }
           else if (isFALSE(group))
           {

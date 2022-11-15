@@ -288,27 +288,21 @@ get_times_of_max_in_window <- function(df, stim, window, time) {
 #' At any given time, with a defined time period, the data is extracted and written separately into individual tables.
 #'
 #' @param df Data.frame
-#' @param window List with two doubles. The first determines the range before, and the second the range after a specific point in time.
+#' @param windowlength Double.
 #' @param timepoints List with one ore more timepoints.
 #' @param larger_window Optional boolean. If TRUE, the amount of data is extended by two seconds in each direction.#'
 #'
 #' @return List of data.frames.
 #'
 #'
-reduce_data_by_window = function(df, window, timepoints, larger_window = FALSE)
+reduce_data_by_window = function(df, windowlength, timepoints, larger_window = 0)
 {
   dfs = list()
-  ext = 0
-  if (larger_window)
-  {
-    ext = 2
-  }
   for (tp in timepoints)
   {
-    tmp = df[df[1]>tp-window[1]-ext & df[1]<tp+window[2]+ext,] %>%
-      mutate(Extended = if_else(.data[["Time (s)"]]>tp-window[1] & .data[["Time (s)"]]<tp+window[2], TRUE, FALSE))
+    tmp = df[df$Time>tp-larger_window & df$Time<tp+windowlength+larger_window,] %>%
+      mutate(Extended = if_else(.data$Time>tp & .data$Time<tp+windowlength, TRUE, FALSE))
     dfs[[as.character(tp)]] = tmp
-    #eval(parse(text = paste0("dfs[['", tp, "']] = tmp")))
   }
   return(dfs)
 }

@@ -4,12 +4,12 @@
 \alias{reduce_data_by_window}
 \title{At any given time, with a defined time period, the data is extracted and written separately into individual tables.}
 \usage{
-reduce_data_by_window(df, window, timepoints, larger_window = FALSE)
+reduce_data_by_window(df, windowlength, timepoints, larger_window = 0)
 }
 \arguments{
 \item{df}{Data.frame}
 
-\item{window}{List with two doubles. The first determines the range before, and the second the range after a specific point in time.}
+\item{windowlength}{Double.}
 
 \item{timepoints}{List with one ore more timepoints.}
 

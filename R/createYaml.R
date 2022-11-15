@@ -19,8 +19,8 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_prep$ResultsDirectory = "/path/to/results"
   default_prep$NeedsTimeCorrection = TRUE
   default_prep$BoxplotWithStatistics = list()
-  default_prep$paired = TRUE
-  default_prep$method = "choose between t.test or wilcox.test or anova"
+  default_prep$BoxplotWithStatistics$paired = FALSE
+  default_prep$BoxplotWithStatistics$method = "choose between 't.test' or 'wilcox.test' or 'anova'"
 
   default_sheets = list()
   default_sheets$metadata = list()
@@ -71,6 +71,14 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_output$Auc$FirstAna$after = 1.5
   default_output$Auc$FirstAna$GroupByStimulus = c(FALSE, TRUE)
   default_output$Auc$FirstAna$ControlPlots = FALSE
+  default_output$TimeSlots$FirstAna = list()
+  default_output$TimeSlots$FirstAna$Sheet = "Processed"
+  default_output$TimeSlots$FirstAna$DirName = "Training"
+  default_output$TimeSlots$FirstAna$StartAtSecond = 0
+  default_output$TimeSlots$FirstAna$EndAtSecond = Inf
+  default_output$TimeSlots$FirstAna$Windowlength = 5
+  default_output$TimeSlots$FirstAna$BaseStart = 10
+  default_output$TimeSlots$FirstAna$ToCompareStart = 35
 
   # default_output$Boxplots = list()
   # default_output$Boxplots$PeakCount = list()
@@ -142,6 +150,7 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   outputs$SEM = yc$getYaml("Output$SEM", outputs$SEM)
   outputs$Responses = yc$getYaml("Output$Responses", outputs$Responses)
   outputs$Auc = yc$getYaml("Output$Auc", outputs$Auc)
+  outputs$TimeSlots = yc$getYaml("Output$TimeSlots", outputs$TimeSlots)
 
 
   return(list("yc" = yc, "sheets" = sheets, "prep" = prep, "outputs" = outputs))
