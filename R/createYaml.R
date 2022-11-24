@@ -18,9 +18,14 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_prep$InputDirectory = "/path/to/nosa/results"
   default_prep$ResultsDirectory = "/path/to/results"
   default_prep$NeedsTimeCorrection = TRUE
+  default_prep$DataCrop = list()
+  default_prep$DataCrop$start = 0
+  default_prep$DataCrop$end = Inf
   default_prep$BoxplotWithStatistics = list()
   default_prep$BoxplotWithStatistics$paired = FALSE
-  default_prep$BoxplotWithStatistics$method = "choose between 't.test' or 'wilcox.test' or 'anova'"
+  default_prep$BoxplotWithStatistics$method = "Allowed methods are one of t.test, wilcox.test, anova, kruskal.test"
+  default_prep$FigureSettings = list()
+  default_prep$FigureSettings$Theme = "theme_classic"
 
   default_sheets = list()
   default_sheets$metadata = list()
@@ -74,11 +79,8 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_output$TimeSlots$FirstAna = list()
   default_output$TimeSlots$FirstAna$Sheet = "Processed"
   default_output$TimeSlots$FirstAna$DirName = "Training"
-  default_output$TimeSlots$FirstAna$StartAtSecond = 0
-  default_output$TimeSlots$FirstAna$EndAtSecond = Inf
-  default_output$TimeSlots$FirstAna$Windowlength = 5
-  default_output$TimeSlots$FirstAna$BaseStart = 10
-  default_output$TimeSlots$FirstAna$ToCompareStart = 35
+  default_output$TimeSlots$FirstAna$NormalisationFactor = "pre"
+  default_output$TimeSlots$FirstAna$Factor = c("pre", "post")
 
   # default_output$Boxplots = list()
   # default_output$Boxplots$PeakCount = list()

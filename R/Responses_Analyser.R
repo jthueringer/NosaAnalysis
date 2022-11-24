@@ -10,8 +10,11 @@ Responses_Analyser = setRefClass(
 
       plot_fnc = function(.self, data)
       {
-
-        result = list()
+        plotl = list()
+        datal = list()
+        xlab = grep("Time", names(data), value = TRUE)
+        ylab = "\u0394 F/F (Max Peak)"
+        path = paste(.self$ana_name, basename(.self$dir_name), sep = "_")
 
         sample_names = grep("Time", names(data), value=TRUE, invert=TRUE)
         peaks = data.frame(Name = sample_names, Factor = extract_factor(sample_names, params$Factor)) %>%
@@ -21,7 +24,7 @@ Responses_Analyser = setRefClass(
           ungroup()
         for (stim in params$Stimuli)
         {
-          peaks = cbind(peaks, unname(apply(data[data$`Time (s)`>stim-params$before & data$`Time (s)`<stim+params$after,][-1],
+          peaks = cbind(peaks, unname(apply(data[data[[xlab]]>stim-params$before & data[[xlab]]<stim+params$after,][-1],
                                             2, function(col) { col=max(col)})))
           names(peaks)[length(peaks)] = paste0("x", stim)
         }
@@ -48,8 +51,8 @@ Responses_Analyser = setRefClass(
             b_plot = b_plot +
               ggpubr::stat_compare_means(method = statistics$method, paired=statistics$paired) +
               ggpubr::stat_compare_means(label =  "p.signif", label.y = max(h$MaxPeak)*0.93)
-            b_plot$file_name = paste0(params$Filename,"_groupByStim.png")
-            b_plot$asXlsx = TRUE
+            b_plot$file_name = "Boxplot_groupByStim.png"
+            datal[[paste(path, b_plot$file_name, sep = "_")]] = peaks
           }
           else if (isFALSE(group))
           {
@@ -66,17 +69,19 @@ Responses_Analyser = setRefClass(
             b_plot = b_plot +
               ggpubr::stat_compare_means(method = statistics$method, paired=statistics$paired) +
               ggpubr::stat_compare_means(label =  "p.signif", label.y = max(h$Mean)*0.93)
-            b_plot$file_name = paste0(params$Filename,".png")
-            b_plot$asXlsx = TRUE
+            b_plot =  ggpubr::ggpar(b_plot, xlab = "", ylab = ylab)
+            b_plot$file_name = "Boxplot.png"
+            datal[[paste(path, b_plot$file_name, sep = "_")]] = peaks %>% mutate(Mean = h$Mean)
           }
           else
           {
             message(paste0("Invalid response parameter 'GroupByStimulus'!\n\n
                      Skipping boxplot ", params$Filename))
           }
-          result[[paste0(basename(dir_name), b_plot$file_name)]] = b_plot
+          b_plot$width = 1
+          plotl[[paste(path, b_plot$file_name, sep = "_")]] = b_plot
         }
-        return(list(plots = result))
+        return(list(plots = plotl, data = datal))
       },
 
       ana_name = "Resp"

@@ -45,6 +45,7 @@ Auc_Analyser = setRefClass(
               c_plot = ggpubr::ggline(df_tmp, x="Time", y="Value", plot_type = "l", numeric.x.axis=TRUE) +
                 ggpubr::geom_exec(geom_area, data=df_tmp[df_tmp$Extended,], mapping=aes(y = ifelse(.data$Extended == TRUE, .data$Fly, 0)), fill = "grey")
               c_plot$file_name = paste0("control_", time_of_max[[elem]], "_", elem, ".png")
+              c_plot$width = 0.5
               eval(parse(text = paste0("plotl$control", time_of_max[[elem]], "_auc", elem, " = c_plot")))
             }
           }
@@ -98,6 +99,7 @@ Auc_Analyser = setRefClass(
               ggpubr::stat_compare_means(method = statistics$method, paired=statistics$paired) +
               ggpubr::stat_compare_means(label =  "p.signif", label.y = max(h$AUC)*0.93)
             b_plot$file_name = paste0(params$DirName,"_groupByStim.png")
+
           }
           else if (isFALSE(group))
           {
@@ -115,13 +117,13 @@ Auc_Analyser = setRefClass(
               ggpubr::stat_compare_means(method = statistics$method, paired=statistics$paired) +
               ggpubr::stat_compare_means(label =  "p.signif", label.y = max(h$Mean)*0.93)
             b_plot$file_name = paste0(params$DirName,"_byFactor.png")
-            b_plot$asXlsx = TRUE
           }
           else
           {
             message(paste0("Invalid response parameter 'GroupByStimulus'!\n\n
                              Skipping AUC boxplot", params$DirName, "\n\n"))
           }
+          b_plot$width = 1
           plotl[[b_plot$file_name]] = b_plot
         }
         ####
@@ -144,7 +146,7 @@ Auc_Analyser = setRefClass(
           t_plot = t_plot +
             ggpubr::geom_exec(geom_area, data=pl_data[pl_data$Extended,], mapping=aes(y = ifelse(.data$Extended == TRUE, .data$Values, 0)), fill = "grey")
           t_plot$file_name = paste0(params$DirName, "Avg_", factor, ".png" )
-          t_plot$asXlsx = TRUE
+          t_plot$width = 0.5
           plotl[[t_plot$file_name]] = t_plot
         }
         return(list(plots = plotl, data = datal))

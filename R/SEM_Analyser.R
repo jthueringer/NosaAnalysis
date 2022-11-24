@@ -17,6 +17,7 @@ SEM_Analyser = setRefClass(
         datal = list()
         xlab = grep("Time", names(data), value = TRUE)
         ylab = expression(Delta ~ "F/F")
+        path = paste(.self$ana_name, basename(.self$dir_name), sep = "_")
 
         # create list containing logical vectors for column selection from data
         data_columns = get_bool_for_columns_by_factor(names(data), params$Factor, "Time")
@@ -36,8 +37,8 @@ SEM_Analyser = setRefClass(
                                             -Time, names_to = "Name", values_to = "Values")
             t_plot = get_SEM_plot(longer_df, "Time", "Values", xlab, ylab)
             t_plot$file_name = paste0("Trace_", factor, ".png")
-            datal[[paste(.self$ana_name, basename(.self$dir_name), t_plot$file_name, sep = "_")]] = longer_df
-            plotl[[paste0(basename(.self$dir_name), t_plot$file_name)]] = t_plot
+            t_plot$width = 2
+            plotl[[t_plot$file_name]] = t_plot
           }
 
           #############
@@ -67,6 +68,7 @@ SEM_Analyser = setRefClass(
                 {
                   c_plot = ggpubr::ggline(tmp, x="Time", y=elem, plot_type = "l", color = "blue", numeric.x.axis=TRUE)
                   c_plot$file_name = paste0("control_", time_of_max[[elem]], "_", elem, ".png")
+                  c_plot$width = 0.5
                   plotl[[c_plot$file_name]] = c_plot
                 }
               }
@@ -77,15 +79,20 @@ SEM_Analyser = setRefClass(
               longer_df = tidyr::pivot_longer(df_stims, -Time, names_to = "Name", values_to = "Values")
               c_plot = get_SEM_plot(longer_df, "Time", "Values", xlab, ylab)
               c_plot$file_name = paste0("control_avg", stim, "_", factor, ".png")
+              c_plot$width = 0.5
               plotl[[c_plot$file_name]] = c_plot
-              datal[[paste(.self$ana_name, basename(.self$dir_name), c_plot$file_name, sep = "_")]] = longer_df
+              c_plot_data = get_plot_data(c_plot, "ymax")
+              datal[[paste(path, c_plot$file_name, sep = "_")]] = c_plot_data
             }
             df_average = tidyr::pivot_longer(df_average, -Time, names_to = "Name", values_to = "Values")
             a_plot = get_SEM_plot(df_average, "Time", "Values", xlab, ylab)
             a_plot$file_name = paste0("PeakAvg_", factor, ".png")
+            a_plot$width = 0.5
 
-            eval(parse(text = paste0("plotl$", basename(.self$dir_name), "Avg_", factor, " = a_plot")))
-            datal[[paste(.self$ana_name, basename(.self$dir_name), a_plot$file_name, sep = "_")]] = df_average
+            plotl[[paste(path, a_plot$file_name, sep = "_")]] = a_plot
+            #eval(parse(text = paste0("plotl$", basename(.self$dir_name), "Avg_", factor, " = a_plot")))
+            a_plot_data = get_plot_data(a_plot, "ymax")
+            datal[[paste(path, a_plot$file_name, sep = "_")]] = a_plot_data
           }
         }
         return(list(plots = plotl, data = datal))

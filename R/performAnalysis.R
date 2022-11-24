@@ -14,9 +14,10 @@
 #' @return List with sections data and plots.
 #'
 #' @import openxlsx
+#' @import ggpubr
 #' @importFrom stats approxfun integrate
+#' @importFrom stats na.omit
 #' @importFrom rlang .data
-#' @importFrom ggpubr mean_se_
 #'
 #' @export
 #'
@@ -78,15 +79,19 @@ performAnalysis = function(yaml_file = character() )
   for (i in 1:length(analysis_list))
   {
     sheet = analysis_list[[i]]$getSheetName()
-    df = get_columns_by_factor(nsr$data[[sheet]], analysis_list[[i]]$getParams()$Factor, TRUE)
-    analysis_list[[i]]$setData(df)
+    if (is.null(analysis_list[[i]]$getParams()$Factor))  analysis_list[[i]]$setData(nsr$data[[sheet]])
+    else
+    {
+      df = nsr$data[[sheet]] %>%
+        select(contains(c("Time", analysis_list[[i]]$getParams()$Factor)))
+      analysis_list[[i]]$setData(df)
+    }
   }
 
 
   ############
   # write output
   ############
-
   if (length(yaml_outs)>0)
     dir.create(output_dir)
   yaml_list$yc$writeYaml(paste0(output_dir, "configs.yaml"))
@@ -101,7 +106,7 @@ performAnalysis = function(yaml_file = character() )
     dir.create(paste0(output_dir, analysis$dir_name), recursive = TRUE)
     for (plot in analysis$plots)
     {
-      ggpubr::ggexport(plot, filename=paste0(output_dir, analysis$dir_name, plot$file_name), width = 800, height = 800)
+      ggexport(plot, filename=paste0(output_dir, analysis$dir_name, plot$file_name), width = 800*plot$width, height = 800, res = 150)
     }
   }
 
@@ -118,18 +123,15 @@ performAnalysis = function(yaml_file = character() )
     }
     for(analysis in analysis_list)
     {
-      for (plotname in names(analysis$plots))
+      for (dataname in names(analysis$plot_data))
       {
-        if ("asXlsx" %in% names(analysis$plots[[plotname]]))
+        sheetname = gsub("/", "_", dataname)
+        if(nchar(sheetname) > 31)
         {
-          sheetname = gsub("/", "_", paste0(analysis$ana_name, plotname))
-          if(nchar(sheetname) > 31)
-          {
-            sheetname = substr(sheetname, 1, 31)
-          }
-          openxlsx::addWorksheet(wb, sheetname)
-          openxlsx::writeData(wb, sheet = sheetname, analysis$plots[[plotname]]$data)
+          sheetname = substr(sheetname, 1, 31)
         }
+        openxlsx::addWorksheet(wb, sheetname)
+        openxlsx::writeData(wb, sheet = sheetname, analysis$plot_data[[dataname]])
       }
     }
     saveWorkbook(wb, paste0(output_dir, "/data.xlsx"))

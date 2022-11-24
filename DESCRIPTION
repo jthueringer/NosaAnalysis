@@ -10,14 +10,15 @@ Imports:
     methods,
     yaml (>= 2.3.5),
     gdata (>= 2.18.0),
-    dplyr (>= 1.0.8),
+    dplyr (>= 1.0.7),
     ggplot2 (>= 3.3.5),
-    ggpubr (>= 0.4.0),
     tidyr (>= 1.2.0),
-    rlang (>= 1.0.2),
+    rlang (>= 0.4.11),
     plotrix (>= 3.8-2),
     readxl,
     openxlsx
+Depends:
+    ggpubr (>= 0.4.0)
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true

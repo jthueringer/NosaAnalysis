@@ -18,8 +18,6 @@ rowSem <- function(x) {
 #'
 #' @return Data frame with columns x and y, optional: requested additional values
 #'
-#' @import ggplot2
-#'
 get_plot_data = function(plot, additional = NULL)
 {
   plotdata = ggplot2::ggplot_build(plot)$data[[1]]
@@ -30,7 +28,7 @@ get_plot_data = function(plot, additional = NULL)
     {
       if (!is.null(plotdata[[add]]))
       {
-        df = cbind(df, add = plotdata[[add]])
+        df[[add]] = plotdata[[add]]
       }
       else
       {
@@ -49,20 +47,19 @@ get_plot_data = function(plot, additional = NULL)
 #' @param y_values Name of y valu column.
 #' @param xlab String title of x axis.
 #' @param ylab String title of y axis.
+#' @param facetBy String specifying grouping variables for faceting the plot into multiple panels. Should be in the data.
+#' @param scales 	should axis scales of panels be fixed ("fixed", the default), free ("free"), or free in one dimension ("free_x", "free_y").
 #'
 #' @return List of ggpubr data
 #'
-#' @importFrom ggpubr mean_se_
-#'
-get_SEM_plot = function(df, x_values, y_values, xlab, ylab)
+get_SEM_plot = function(df, x_values, y_values, xlab, ylab, facetBy = NULL, scales = NULL)
 {
-  plot = ggpubr::ggline(df, x=x_values, y=y_values, add="mean_se_", add.params = list(color="lightblue"), error.plot="linerange",
-                        plot_type = "l", color = "blue", numeric.x.axis=TRUE,
-                        xlab = xlab, ylab = ylab)
+  plot = ggpubr::ggline(df, x=x_values, y=y_values, add="mean_se", add.params = list(color="grey"), error.plot="linerange",
+                        plot_type = "l", color = "green", numeric.x.axis=TRUE,
+                        xlab = xlab, ylab = ylab, facet.by = facetBy, scales = scales)
 
   return(plot)
 }
-
 
 #'
 #' Function to create a trace plot. Plotting the standard error of mean is optional.
@@ -75,11 +72,9 @@ get_SEM_plot = function(df, x_values, y_values, xlab, ylab)
 #'
 #' @return List of ggplot2 data
 #'
-#' @import ggplot2
-#'
 get_traceplot = function(df, x_values, y_values, xlab, ylab)
 {
-  plot = ggpubr::ggline(df, x=x_values, y=y_values, plot_type = "l", color = "blue", numeric.x.axis=TRUE,
+  plot = ggpubr::ggline(df, x=x_values, y=y_values, plot_type = "l", color = "green", numeric.x.axis=TRUE,
                         xlab = xlab, ylab = ylab)
 
   return(plot)
@@ -110,6 +105,33 @@ get_boxplot = function(df, factor, var, connect = NULL, group = NULL)
   return(plot)
 }
 
+#'
+#' Extract all columns that contain a given string and return new data.frame.
+#' If no list of strings is provided, all data are returned.
+#'
+#' @param data Data frame.
+#' @param substr_colnames List with strings that are searched for in the column names of a given data.frame.
+#' @param include_col String for an additional colum. Optional.
+#'
+#' @return Data.frame that consists only of the columns that contain the substr_colnames you are looking for in their names.
+#'
+#' @importFrom stats na.omit
+#'
+get_columns_by_factor = function(data, substr_colnames, include_col = NULL)
+{
+  if (is.null(substr_colnames))
+  {
+    ifelse(include_col, return(data), return(data[!grepl('Time', names(data))]))
+  }
+  if (include_col)
+  {
+    return(data %>% select(contains(c("Time", substr_colnames))) %>% na.omit())
+  }
+  else
+  {
+    return(data %>% select(contains(substr_colnames)) %>% na.omit())
+  }
+}
 
 #'
 #' Extract factors from given name list.
@@ -204,33 +226,6 @@ get_bool_for_columns_by_factor <- function(columnnames, factors=NULL, excluded_c
   return(data_columns)
 }
 
-#'
-#' Extract all columns that contain a given string and return new data.frame.
-#' If no list of strings is provided, all data are returned.
-#'
-#' @param data Data frame.
-#' @param substr_colnames List with strings that are searched for in the column names of a given data.frame.
-#' @param include_col String for an additional colum. Optional.
-#'
-#' @return Data.frame that consists only of the columns that contain the substr_colnames you are looking for in their names.
-#'
-#' @importFrom stats na.omit
-#'
-get_columns_by_factor = function(data, substr_colnames, include_col = NULL)
-{
-  if (is.null(substr_colnames))
-  {
-    ifelse(include_col, return(data), return(data[!grepl('Time', names(data))]))
-  }
-  if (include_col)
-  {
-    return(data %>% select(contains(c("Time", substr_colnames))) %>% na.omit())
-  }
-  else
-  {
-    return(data %>% select(contains(substr_colnames)) %>% na.omit())
-  }
-}
 
 #'
 #' From a given list of column names extract substrings and return a new data.frame containing the column Name with substring reduced names
@@ -248,9 +243,9 @@ get_factor_df = function(names, factors)
   Name = Factor = NULL
   df = data.frame(Name = names, Factor = extract_factor(names, factors)) %>%
     mutate(Factor = factor(.data$Factor, levels = factors)) %>%
-    mutate(Name = mapply(function(name, fact) gsub(fact, "", name),
+    mutate(Name = unname(mapply(function(name, fact) gsub(fact, "", name),
                          name=.data$Name,
-                         fact=.data$Factor))
+                         fact=.data$Factor)))
   return(df)
 }
 
