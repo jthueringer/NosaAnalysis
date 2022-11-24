@@ -181,34 +181,22 @@ extract_factor = function(names, factors)
 get_analyser_objects = function(params, statistics)
 {
   analysers = list()
-  for (analyser in names(params))
+  for (ana_name in names(params))
   {
-    dir_name = analyser
-    for (ana_name in names(params[[analyser]]))
+    if (!ana_name %in% c("DataAsRObject", "DataAsXlsx"))
     {
-      if ("DirName" %in% names(params[[analyser]][[ana_name]]))
+      dir_name = ana_name
+      if ("DirName" %in% names(params[[ana_name]]))
       {
-        dir_name = paste0(dir_name,"/", params[[analyser]][[ana_name]]$DirName)
+        dir_name = params[[ana_name]]$DirName
       }
-      else if (analyser == "Trace")
-      {
-        dir_name = paste0(dir_name,"/", params[[analyser]][[ana_name]]$Sheet)
-      }
-      else
-      {
-        dir_name = paste0(dir_name,"/", ana_name)
-      }
-      ana = get(paste0(analyser, "_Analyser"))
+      ana = get(paste0(ana_name, "_Analyser"))
       if (inherits(ana, "refObjectGenerator"))
       {
         analysers[[dir_name]] = ana$new()
-        analysers[[dir_name]]$setParams(params[[analyser]][[ana_name]])
+        analysers[[dir_name]]$setParams(params[[ana_name]])
         analysers[[dir_name]]$setDirName(paste0(dir_name, "/"))
         analysers[[dir_name]]$setStatistics(statistics)
-      }
-      else
-      {
-        analysers[[dir_name]] = NULL
       }
     }
   }
