@@ -4,7 +4,7 @@
 \alias{get_SEM_plot}
 \title{Creates trace plot with standard error of mean.}
 \usage{
-get_SEM_plot(df, x_values, y_values, xlab, ylab)
+get_SEM_plot(df, x_values, y_values, xlab, ylab, facetBy = NULL, scales = NULL)
 }
 \arguments{
 \item{df}{Data frame}
@@ -16,6 +16,10 @@ get_SEM_plot(df, x_values, y_values, xlab, ylab)
 \item{xlab}{String title of x axis.}
 
 \item{ylab}{String title of y axis.}
+
+\item{facetBy}{String specifying grouping variables for faceting the plot into multiple panels. Should be in the data.}
+
+\item{scales}{should axis scales of panels be fixed ("fixed", the default), free ("free"), or free in one dimension ("free_x", "free_y").}
 }
 \value{
 List of ggpubr data

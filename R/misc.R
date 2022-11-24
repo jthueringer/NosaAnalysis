@@ -11,6 +11,25 @@ rowSem <- function(x) {
 }
 
 #'
+#' Converts a ggplot object to grob object, extracts the amount of unique x-axis values per facet,
+#' and change the relative width of the facet columns according to the amount.
+#'
+#' @param ggplot Facetted ggplot object
+#' @param data sldlds
+#'
+#' @return ggplot object with (according to amount of x-axis values per facet) adjusted widths
+#'
+adjust_facet_width_of_plot = function(ggplot, data)
+{
+  gp <- ggplotGrob(ggplot)
+  facet.columns <- gp$layout$l[grepl("panel", gp$layout$name)]
+  x_var <- sapply(data,
+                  function(l) nrow(l))
+  gp$widths[facet.columns] <- gp$widths[facet.columns] * x_var
+  return(ggpubr::as_ggplot(gp))
+}
+
+#'
 #' Extract data computed by ggpubr functions (e.g. mean_se)
 #'
 #' @param plot Plot generated with ggpubr

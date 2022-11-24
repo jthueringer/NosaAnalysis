@@ -4,8 +4,10 @@ TimeSlots_Analyser = setRefClass(
   methods = list(initialize = function()
   {
     callSuper(
-      description = "Two time windows are analysed for each sample. For both, each time window and sample
-      the mean value is determined and then displayed in a boxplot, separated by time window.",
+      description = "Two time windows are analysed for each sample. For both, each time window and sample,
+      the mean of the specified normalisation key is determined and substracted from both time window values
+      (normalised). The mean is then displayed in a boxplot, separated by time window, as well as a trace plot
+      with standard error of the mean (SEM)",
 
       plot_fnc = function(.self, data)
       {
@@ -18,7 +20,6 @@ TimeSlots_Analyser = setRefClass(
 
         df_by_fact = list()
         df_means = setNames(data.frame(matrix(ncol = 3, nrow = 0)), c("Name", "Factor", "Mean"))
-        x.var = list()
 
         norm_means = list()
 
@@ -33,7 +34,7 @@ TimeSlots_Analyser = setRefClass(
         }
         else
         {
-          stop(paste0( " The NormalisationFactor must be specified, but is missing."))
+          stop(paste0( " The NormalisationFactor of the analysis 'TimeSlots' must be specified, but is missing."))
         }
 
         for (fact in params$Factor)
@@ -77,12 +78,7 @@ TimeSlots_Analyser = setRefClass(
         sem_plot = get_SEM_plot(longer_df, "Time", "Values", xlab, ylab, facetBy = "Factor", scales = "free_x") +
           theme_classic()
 
-        gp <- ggplotGrob(sem_plot)
-        facet.columns <- gp$layout$l[grepl("panel", gp$layout$name)]
-        x.var <- sapply(df_by_fact,
-                        function(l) nrow(l))
-        gp$widths[facet.columns] <- gp$widths[facet.columns] * x.var
-        sem_plot = ggpubr::as_ggplot(gp)
+        sem_plot = adjust_facet_width_of_plot(sem_plot, df_by_fact)
 
         sem_plot$file_name = paste0(params$DirName, "_Trace.png" )
         sem_plot$width = 2
