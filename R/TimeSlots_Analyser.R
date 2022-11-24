@@ -4,47 +4,90 @@ TimeSlots_Analyser = setRefClass(
   methods = list(initialize = function()
   {
     callSuper(
-      description = "The SEMs are determined for two time windows and then compared in a boxplot.",
+      description = "Two time windows are analysed for each sample. For both, each time window and sample
+      the mean value is determined and then displayed in a boxplot, separated by time window.",
 
       plot_fnc = function(.self, data)
       {
         plotl = list()
         datal = list()
         xlab = grep("Time", names(data), value = TRUE)
-        ylab = expression(Delta ~ "F/F (Mean)")
+        ylab = "Mean norm. Fluorescence"
         data = data %>%
-          rename(Time = contains("Time")) %>%
-          filter(Time>=params$StartAtSecond & Time<params$EndAtSecond)
+          rename(Time = contains("Time"))
 
-        sem_df = tidyr::pivot_longer(data, -Time, names_to = "Name", values_to = "Values")
-        sem_plot = get_SEM_plot(sem_df, "Time", "Values", xlab, ylab)
-        sem_plot_data = get_plot_data(sem_plot)
-        sem_plot = sem_plot +
-          suppressWarnings(ggpubr::geom_exec(geom_vline, data=NULL, mapping=NULL,
-                            xintercept = c(params$BaseStart, params$BaseStart+params$Windowlength,
-                                           params$ToCompareStart, params$ToCompareStart+params$Windowlength),
-                            color = "grey", linetype = "dotted")) +
-          ggpubr::geom_exec(geom_text, x=params$BaseStart+params$Windowlength/2, y=max(sem_plot_data$y), label="Base", color = "grey") +
-          ggpubr::geom_exec(geom_text, x=params$ToCompareStart+params$Windowlength/2, y=max(sem_plot_data$y), label="ToCompare", color = "grey")
-        sem_plot$file_name = paste0(params$DirName, "_Trace_TimeSlots.png" )
-        plotl[[sem_plot$file_name]] = sem_plot
+        df_by_fact = list()
+        df_means = setNames(data.frame(matrix(ncol = 3, nrow = 0)), c("Name", "Factor", "Mean"))
+        x.var = list()
 
-        res = reduce_data_by_window(data, params$Windowlength, list(params$BaseStart, params$ToCompareStart))
-        names(res) = c("Base", "ToCompare")
-        result = rbind(data.frame(Name = names(res$Base %>% select(c(-Extended, -Time)))) %>%
-          mutate(Mean = colMeans(res$Base %>% select(c(-Extended, -Time)))) %>%
-          mutate(Factor = "Base"),
-          data.frame(Name = names(res$ToCompare %>% select(c(-Extended, -Time)))) %>%
-          mutate(Mean = colMeans(res$ToCompare %>% select(c(-Extended, -Time)))) %>%
-          mutate(Factor = "ToCompare")) %>%
-          mutate(Factor = as.factor(.data$Factor))
+        norm_means = list()
 
-        b_plot = ggpubr::ggboxplot(result, x="Factor", y="Mean", add = "jitter", xlab = "", ylab = ylab) +
-          ggpubr::stat_compare_means(method = statistics$method,
-                                     label.y = max(result$Mean)+max(result$Mean)/10) +
-          ggpubr::stat_compare_means(label =  "p.signif", label.y = max(result$Mean))
-        b_plot$file_name = paste0(params$DirName, "_TimeSlots.png" )
+        if (!is.null(params$NormalisationFactor))
+        {
+          tmp = data %>%
+            select(contains(c(params$NormalisationFactor))) %>%
+            rename_with(~ gsub(params$NormalisationFactor, "", .x, fixed = TRUE), contains(params$NormalisationFactor)) %>% na.omit()
+          norm_means = data.frame(t(tmp)) %>%
+            mutate(Mean = rowMeans(.), Name = rownames(.)) %>%
+            select(Mean)
+        }
+        else
+        {
+          stop(paste0( " The NormalisationFactor must be specified, but is missing."))
+        }
+
+        for (fact in params$Factor)
+        {
+          df_by_fact[[fact]] = data %>%
+            select(contains(c("Time", fact))) %>%
+            rename_with(~ gsub(fact, "", .x, fixed = TRUE), contains(fact)) %>% na.omit()
+          normalised = data.frame(sapply(names(norm_means$Mean),
+                                         function(name){df_by_fact[[fact]][[name]]-unname(norm_means$Mean[name])}))
+          names(normalised) = names(norm_means$Mean)
+          df_by_fact[[fact]] = cbind(Time = df_by_fact[[fact]]$Time, normalised)
+
+          means_tmp = data.frame(t(df_by_fact[[fact]] %>% select(-c(Time)))) %>%
+            mutate(Mean = rowMeans(.), Factor = fact, Name = rownames(.)) %>%
+            select(Name, Factor, Mean)
+          df_means = rbind(df_means, means_tmp)
+        }
+
+        if(statistics$paired)
+        {
+          b_plot = ggpubr::ggpaired (df_means, x="Factor", y="Mean", line.color = "gray")
+        }
+        else
+        {
+          b_plot = ggpubr::ggboxplot(df_means, x="Factor", y="Mean", add = "jitter")
+        }
+        b_plot = b_plot +
+          ggpubr::stat_compare_means(method = statistics$method, paired=statistics$paired) +
+          ggpubr::stat_compare_means(label =  "p.signif", label.y = max(df_means$Mean)*0.93)
+        b_plot =  ggpubr::ggpar(b_plot, xlab = "", ylab = ylab)
+        b_plot$file_name = paste0(params$DirName, "_Boxplot.png" )
+        b_plot$width = 1
         plotl[[b_plot$file_name]] = b_plot
+        datal[[paste(.self$ana_name, b_plot$file_name, sep = "_")]] = df_means
+
+
+        sem_plot_data = bind_rows(df_by_fact, .id = "Factor") %>%
+          mutate(Factor = factor(Factor, levels = params$Factor))
+
+        longer_df = tidyr::pivot_longer(sem_plot_data, -c(Time, Factor), names_to = "Name", values_to = "Values")
+        sem_plot = get_SEM_plot(longer_df, "Time", "Values", xlab, ylab, facetBy = "Factor", scales = "free_x") +
+          theme_classic()
+
+        gp <- ggplotGrob(sem_plot)
+        facet.columns <- gp$layout$l[grepl("panel", gp$layout$name)]
+        x.var <- sapply(df_by_fact,
+                        function(l) nrow(l))
+        gp$widths[facet.columns] <- gp$widths[facet.columns] * x.var
+        sem_plot = ggpubr::as_ggplot(gp)
+
+        sem_plot$file_name = paste0(params$DirName, "_Trace.png" )
+        sem_plot$width = 2
+        plotl[[sem_plot$file_name]] = sem_plot
+        datal[[paste(.self$ana_name, sem_plot$file_name, sep = "_")]] = sem_plot_data
 
         return(list(plots = plotl, data = datal))
       },
