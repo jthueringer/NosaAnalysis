@@ -24,8 +24,7 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_prep$BoxplotWithStatistics = list()
   default_prep$BoxplotWithStatistics$paired = FALSE
   default_prep$BoxplotWithStatistics$method = "Allowed methods are one of t.test, wilcox.test, anova, kruskal.test"
-  default_prep$FigureSettings = list()
-  default_prep$FigureSettings$Theme = "theme_classic"
+  default_prep$FigureTheme = "theme_classic"
 
   default_sheets = list()
   default_sheets$metadata = list()
@@ -33,54 +32,48 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_sheets$Processed = list()
   default_sheets$Baseline = list()
   default_sheets$Smoothing = list()
-  default_sheets$'Spike Detection' = c("Train", "Peak (s)", "Amplitude of Peak", "Spike Frequency (#Spikes / second)")
+  default_sheets[["Spike Detection"]] = c("Train", "Peak (s)", "Amplitude of Peak", "Spike Frequency (#Spikes / second)")
 
   default_output = list()
   default_output$DataAsRObject = FALSE
   default_output$DataAsXlsx = FALSE
   default_output$Trace = list()
-  default_output$Trace$FirstAna = list()
-  default_output$Trace$FirstAna$Sheet = "Processed"
-  default_output$Trace$SecondAna = list()
-  default_output$Trace$SecondAna$Sheet = "Raw"
+  default_output$Trace$Sheet = "Processed"
   default_output$SEM = list()
-  default_output$SEM$FirstAna = list()
-  default_output$SEM$FirstAna$Sheet = "Processed"
-  default_output$SEM$FirstAna$DirName = "TwoStimuli"
-  default_output$SEM$FirstAna$Factor =  c("pre", "post")
-  default_output$SEM$FirstAna$Trace =  TRUE
-  default_output$SEM$FirstAna$CropTrace = 1
-  default_output$SEM$FirstAna$PeakAverage = TRUE
-  default_output$SEM$FirstAna$Stimuli = c(10, 41)
-  default_output$SEM$FirstAna$PeakSearchWindow = 5
-  default_output$SEM$FirstAna$before = 2
-  default_output$SEM$FirstAna$after = 8
-  default_output$SEM$FirstAna$ControlPlots = FALSE
+  default_output$SEM$Sheet = "Processed"
+  default_output$SEM$DirName = "TwoStimuli"
+  default_output$SEM$Factor =  c("pre", "post")
+  default_output$SEM$Trace =  TRUE
+  default_output$SEM$CropTrace = 1
+  default_output$SEM$PeakAverage = TRUE
+  default_output$SEM$Stimuli = c(10, 41)
+  default_output$SEM$PeakSearchWindow = 5
+  default_output$SEM$before = 2
+  default_output$SEM$after = 8
+  default_output$SEM$ControlPlots = FALSE
   default_output$Responses = list()
-  default_output$Responses$FirstAna = list()
-  default_output$Responses$FirstAna$Sheet = "Processed"
-  default_output$Responses$FirstAna$Filename = "TwoStim"
-  default_output$Responses$FirstAna$Factor = c("pre", "post")
-  default_output$Responses$FirstAna$Stimuli = c(10, 40)
-  default_output$Responses$FirstAna$before = 2
-  default_output$Responses$FirstAna$after = 8
-  default_output$Responses$FirstAna$GroupByStimulus = c(FALSE, TRUE)
+  default_output$Responses$Sheet = "Processed"
+  default_output$Responses$Filename = "TwoStim"
+  default_output$Responses$Factor = c("pre", "post")
+  default_output$Responses$Stimuli = c(10, 40)
+  default_output$Responses$before = 2
+  default_output$Responses$after = 8
+  default_output$Responses$GroupByStimulus = c(FALSE, TRUE)
   default_output$Auc = list()
-  default_output$Auc$FirstAna = list()
-  default_output$Auc$FirstAna$Sheet = "Processed"
-  default_output$Auc$FirstAna$DirName = "TwoStim"
-  default_output$Auc$FirstAna$Factor = c("pre", "post")
-  default_output$Auc$FirstAna$Stimuli = c(10, 40)
-  default_output$Auc$FirstAna$PeakSearchWindow = 5
-  default_output$Auc$FirstAna$before = 1.5
-  default_output$Auc$FirstAna$after = 1.5
-  default_output$Auc$FirstAna$GroupByStimulus = c(FALSE, TRUE)
-  default_output$Auc$FirstAna$ControlPlots = FALSE
-  default_output$TimeSlots$FirstAna = list()
-  default_output$TimeSlots$FirstAna$Sheet = "Processed"
-  default_output$TimeSlots$FirstAna$DirName = "Training"
-  default_output$TimeSlots$FirstAna$NormalisationFactor = "pre"
-  default_output$TimeSlots$FirstAna$Factor = c("pre", "post")
+  default_output$Auc$Sheet = "Processed"
+  default_output$Auc$DirName = "TwoStim"
+  default_output$Auc$Factor = c("pre", "post")
+  default_output$Auc$Stimuli = c(10, 40)
+  default_output$Auc$PeakSearchWindow = 5
+  default_output$Auc$before = 1.5
+  default_output$Auc$after = 1.5
+  default_output$Auc$GroupByStimulus = c(FALSE, TRUE)
+  default_output$Auc$ControlPlots = FALSE
+  default_output$TimeSlots = list()
+  default_output$TimeSlots$Sheet = "Processed"
+  default_output$TimeSlots$DirName = "Training"
+  default_output$TimeSlots$NormalisationFactor = "pre"
+  default_output$TimeSlots$Factor = c("pre", "post")
 
   # default_output$Boxplots = list()
   # default_output$Boxplots$PeakCount = list()
@@ -132,6 +125,18 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
       warning(paste0("Invalid parameter removed: ", names(outputs)[i]))
       outputs <- outputs[-i]
     }
+    else
+    {
+      if (is.list(outputs[[i]]))
+      {
+        for(j in c(length(outputs[[i]]):1)){
+          if(!names(outputs[[i]])[j] %in% c(NA, names(default_output[[names(outputs)[i]]]))) {
+            warning(paste0("Invalid parameter removed: ", names(outputs[[i]])[j]))
+            outputs[[i]] <- outputs[[i]][-j]
+          }
+        }
+      }
+    }
   }
 
   prep$InputDirectory = yc$getYaml("Prep$InputDirectory", prep$InputDirectory)
@@ -139,12 +144,7 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   prep$NeedsTimeCorrection = yc$getYaml("Prep$NeedsTimeCorrection", prep$NeedsTimeCorrection)
   prep$BoxplotWithStatistics = yc$getYaml("Prep$BoxplotWithStatistics", default_prep$BoxplotWithStatistics)
 
-  sheets$metadata = yc$getYaml("Sheets$metadata", sheets$metadata)
-  sheets$Raw = yc$getYaml("Sheets$Raw", sheets$Raw)
-  sheets$Processed = yc$getYaml("Sheets$Processed", sheets$Processed)
-  sheets$Baseline = yc$getYaml("Sheets$Baseline", sheets$Baseline)
-  sheets$Smoothing = yc$getYaml("Sheets$Smoothing", sheets$Smoothing)
-  sheets$'Spike Detection'= yc$getYaml("Sheets$'Spike Detection'", sheets$'Spike Detection')
+  sheets = yc$getYaml("Sheets", sheets)
 
   outputs$DataAsRObject = yc$getYaml("Output$DataAsRObject", outputs$DataAsRObject)
   outputs$DataAsXlsx= yc$getYaml("Output$DataAsXlsx", outputs$DataAsXlsx)
