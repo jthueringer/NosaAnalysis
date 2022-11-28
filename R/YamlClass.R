@@ -22,14 +22,6 @@ YamlClass = setRefClass(
       return(.self)
     },
 
-    setYaml = function(param_name, param_val)
-    {
-      "Set a YAML parameter to a specific value. Overwrites the old value or creates a new entry."
-      expr = paste0(".self$yamlObj$", param_name, " = ", quote(value))
-      eval(parse(text=expr))
-      return (param_val)
-    },
-
     getYaml = function(param_name, default)
     {
       "Request a specific parameter and return its value if it exists. If it does not exist it is created with a default value."
