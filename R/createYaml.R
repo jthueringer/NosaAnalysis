@@ -75,14 +75,6 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_output$TimeSlots$NormalisationFactor = "pre"
   default_output$TimeSlots$Factor = c("pre", "post")
 
-  # default_output$Boxplots = list()
-  # default_output$Boxplots$PeakCount = list()
-  # default_output$Boxplots$PeakCount$Filename = "PeakCount"
-  # default_output$Boxplots$PeakCount$Factor = c("training", "odor", "shock")
-  # default_output$Boxplots$PeakCount$Window = c(0, 260)
-
-
-
   ############
   ## add missing parameters from default parameter list
   ############

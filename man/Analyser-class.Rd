@@ -19,7 +19,15 @@ are generated at runtime.
 
 \item{\code{plots}}{List of plots}
 
+\item{\code{plot_data}}{List of data frames for each generated plot.}
+
+\item{\code{params}}{List of user defined parameters (from yaml)}
+
+\item{\code{statistics}}{List of user defined statistic settings (from yaml)}
+
 \item{\code{dir_name}}{Name of the dir in which the plots are stored.}
+
+\item{\code{ana_name}}{String naming the instanced analyser}
 }}
 
 

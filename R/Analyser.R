@@ -8,7 +8,11 @@
 #' @field description Description of the analysis
 #' @field plot_fnc Function that generates plots.
 #' @field plots List of plots
+#' @field plot_data List of data frames for each generated plot.
+#' @field params List of user defined parameters (from yaml)
+#' @field statistics List of user defined statistic settings (from yaml)
 #' @field dir_name Name of the dir in which the plots are stored.
+#' @field ana_name String naming the instanced analyser
 #'
 Analyser = setRefClass(
   "Analyser",
@@ -42,11 +46,6 @@ Analyser = setRefClass(
       return(.self)
     },
 
-    getSheetName = function()
-    {
-      return(.self$params$Sheet)
-    },
-
     setStatistics = function(statistics)
     {
       .self$statistics = statistics
@@ -59,11 +58,6 @@ Analyser = setRefClass(
       return(NULL)
     },
 
-    getParams = function()
-    {
-      return(.self$params)
-    },
-
     setDirName = function(dir_name)
     {
       .self$dir_name = dir_name
@@ -74,8 +68,7 @@ Analyser = setRefClass(
     {
       if (is.null(df))
       {
-        #TODO: explicit call of curerent analysis
-        message(paste0(" No data available to generate data."))
+        warning(paste0("No data available to generate plots."))
         return(NULL)
       }
 
