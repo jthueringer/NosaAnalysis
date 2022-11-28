@@ -81,7 +81,7 @@ SEM_Analyser = setRefClass(
               c_plot$file_name = paste0("control_avg", stim, "_", factor, ".png")
               c_plot$width = 0.5
               plotl[[c_plot$file_name]] = c_plot
-              c_plot_data = get_plot_data(c_plot, "ymax")
+              c_plot_data = extract_plot_data(c_plot, "ymax")
               datal[[paste(path, c_plot$file_name, sep = "_")]] = c_plot_data
             }
             df_average = tidyr::pivot_longer(df_average, -Time, names_to = "Name", values_to = "Values")
@@ -91,7 +91,7 @@ SEM_Analyser = setRefClass(
 
             plotl[[paste(path, a_plot$file_name, sep = "_")]] = a_plot
             #eval(parse(text = paste0("plotl$", basename(.self$dir_name), "Avg_", factor, " = a_plot")))
-            a_plot_data = get_plot_data(a_plot, "ymax")
+            a_plot_data = extract_plot_data(a_plot, "ymax")
             datal[[paste(path, a_plot$file_name, sep = "_")]] = a_plot_data
           }
         }

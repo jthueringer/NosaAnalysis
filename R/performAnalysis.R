@@ -78,12 +78,12 @@ performAnalysis = function(yaml_file = character() )
   ############
   for (i in 1:length(analysis_list))
   {
-    sheet = analysis_list[[i]]$getSheetName()
-    if (is.null(analysis_list[[i]]$getParams()$Factor))  analysis_list[[i]]$setData(nsr$data[[sheet]])
+    sheet = analysis_list[[i]]$params$Sheet
+    if (is.null(analysis_list[[i]]$params$Factor))  analysis_list[[i]]$setData(nsr$data[[sheet]])
     else
     {
       df = nsr$data[[sheet]] %>%
-        select(contains(c("Time", analysis_list[[i]]$getParams()$Factor)))
+        select(contains(c("Time", analysis_list[[i]]$params$Factor)))
       analysis_list[[i]]$setData(df)
     }
   }

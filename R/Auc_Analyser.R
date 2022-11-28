@@ -140,7 +140,7 @@ Auc_Analyser = setRefClass(
           longer_df = tidyr::pivot_longer(tmp, -c(Time,Extended), names_to = "Name", values_to = "Values")
           t_plot = ggpubr::ggline(longer_df, x="Time", y="Values", add="mean",
                                   plot_type = "l", numeric.x.axis=TRUE)
-          pl_data = get_plot_data(t_plot)
+          pl_data = extract_plot_data(t_plot)
           pl_data =  data.frame(rename(pl_data, c(Time = x, Values = y))) %>%
             mutate(Extended = df_stim_reduced[[1]]$Extended)
           t_plot = t_plot +
