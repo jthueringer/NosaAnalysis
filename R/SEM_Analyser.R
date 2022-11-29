@@ -32,13 +32,12 @@ SEM_Analyser = setRefClass(
           # trace plot with sem
           if (isTRUE(params$Trace))
           {
-            if(!"CropTrace" %in% names(params)) params$CropTrace <<- 0
-            longer_df = tidyr::pivot_longer(factor_df %>% filter(Time>=Time[1]+params$CropTrace),
-                                            -Time, names_to = "Name", values_to = "Values")
+            longer_df = tidyr::pivot_longer(factor_df, -Time, names_to = "Name", values_to = "Values")
             t_plot = get_SEM_plot(longer_df, "Time", "Values", xlab, ylab)
             t_plot$file_name = paste0("Trace_", factor, ".png")
             t_plot$width = 2
             plotl[[t_plot$file_name]] = t_plot
+            datal[[t_plot$file_name]] = extract_plot_data(t_plot, additional = c("ymin", "ymax"))
           }
 
           #############

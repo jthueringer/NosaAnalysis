@@ -44,7 +44,6 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_output$SEM$DirName = "TwoStimuli"
   default_output$SEM$Factor =  c("pre", "post")
   default_output$SEM$Trace =  TRUE
-  default_output$SEM$CropTrace = 1
   default_output$SEM$PeakAverage = TRUE
   default_output$SEM$Stimuli = c(10, 41)
   default_output$SEM$PeakSearchWindow = 5
