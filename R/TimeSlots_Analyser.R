@@ -18,48 +18,56 @@ TimeSlots_Analyser = setRefClass(
         data = data %>%
           rename(Time = contains("Time"))
 
-        df_by_fact = list()
-        df_means = setNames(data.frame(matrix(ncol = 3, nrow = 0)), c("Name", "Factor", "Mean"))
+        df_by_key = list()
+        df_means = setNames(data.frame(matrix(ncol = 3, nrow = 0)), c("Name", "Key", "Mean"))
 
         norm_means = list()
 
-        if (!is.null(params$NormalisationFactor))
+        if (params$NormalisationKey %in% params$Key)
         {
           tmp = data %>%
-            select(contains(c(params$NormalisationFactor))) %>%
-            rename_with(~ gsub(params$NormalisationFactor, "", .x, fixed = TRUE), contains(params$NormalisationFactor)) %>% na.omit()
+            select(contains(c(params$NormalisationKey))) %>%
+            rename_with(~ gsub(params$NormalisationKey, "", .x, fixed = TRUE), contains(params$NormalisationKey)) %>% na.omit()
           norm_means = data.frame(t(tmp)) %>%
             mutate(Mean = rowMeans(.), Name = rownames(.)) %>%
             select(Mean)
         }
         else
         {
-          stop(paste0( " The NormalisationFactor of the analysis 'TimeSlots' must be specified, but is missing."))
+          stop(" The NormalisationKey must be one of the sample name keys.")
         }
 
-        for (fact in params$Factor)
+        for (key in params$Key)
         {
-          df_by_fact[[fact]] = data %>%
-            select(contains(c("Time", fact))) %>%
-            rename_with(~ gsub(fact, "", .x, fixed = TRUE), contains(fact)) %>% na.omit()
-          normalised = data.frame(sapply(names(norm_means$Mean),
-                                         function(name){df_by_fact[[fact]][[name]]-unname(norm_means$Mean[name])}))
-          names(normalised) = names(norm_means$Mean)
-          df_by_fact[[fact]] = cbind(Time = df_by_fact[[fact]]$Time, normalised)
+          df_by_key[[key]] = data %>%
+            select(contains(c("Time", key))) %>%
+            rename_with(~ gsub(key, "", .x, fixed = TRUE), contains(key)) %>% na.omit()
+          if (ncol(df_by_key[[key]])<2)
+          {
+            stop(paste0(" The Key ", key, " does not exist in the data names."))
+          }
+          normalised = tryCatch(data.frame(sapply(names(norm_means$Mean),
+                                                  function(name){df_by_key[[key]][[name]]-unname(norm_means$Mean[name])})),
+                   error=function(cond) {
+                     stop("Some of the TimeSlot samples can not be paired, and therefore can not be normalised.")})
 
-          means_tmp = data.frame(t(df_by_fact[[fact]] %>% select(-c(Time)))) %>%
-            mutate(Mean = rowMeans(.), Factor = fact, Name = rownames(.)) %>%
-            select(Name, Factor, Mean)
-          df_means = rbind(df_means, means_tmp)
+          names(normalised) = names(norm_means$Mean)
+          df_by_key[[key]] = cbind(Time = df_by_key[[key]]$Time, normalised)
+
+          means_tmp = data.frame(t(df_by_key[[key]] %>% select(-c(Time)))) %>%
+            mutate(Mean = rowMeans(.), Key = key, Name = rownames(.)) %>%
+            mutate(Name = gsub(key,"",Name)) %>%
+            select(Name, Key, Mean)
+          df_means = rbind(df_means, means_tmp%>% mutate(Mean = unname(Mean)), make.row.names = FALSE)
         }
 
         if(statistics$paired)
         {
-          b_plot = ggpubr::ggpaired (df_means, x="Factor", y="Mean", line.color = "gray")
+          b_plot = ggpubr::ggpaired (df_means, x="Key", y="Mean", line.color = "gray")
         }
         else
         {
-          b_plot = ggpubr::ggboxplot(df_means, x="Factor", y="Mean", add = "jitter")
+          b_plot = ggpubr::ggboxplot(df_means, x="Key", y="Mean", add = "jitter")
         }
         b_plot = b_plot +
           ggpubr::stat_compare_means(method = statistics$method, paired=statistics$paired) +
@@ -71,14 +79,15 @@ TimeSlots_Analyser = setRefClass(
         datal[[paste(.self$ana_name, b_plot$file_name, sep = "_")]] = df_means
 
 
-        sem_plot_data = bind_rows(df_by_fact, .id = "Factor") %>%
-          mutate(Factor = factor(Factor, levels = params$Factor))
+        sem_plot_data = bind_rows(df_by_key, .id = "Key") %>%
+          mutate(Key = factor(Key, levels = params$Key))
 
-        longer_df = tidyr::pivot_longer(sem_plot_data, -c(Time, Factor), names_to = "Name", values_to = "Values")
-        sem_plot = get_SEM_plot(longer_df, "Time", "Values", xlab, ylab, facetBy = "Factor", scales = "free_x") +
+        longer_df = tidyr::pivot_longer(sem_plot_data, -c(Time, Key), names_to = "Name", values_to = "Values")
+        sem_plot = get_SEM_plot(longer_df, "Time", "Values", xlab, ylab, facetBy = "Key", scales = "free_x") +
           theme_classic()
+        sem_plot_data = extract_plot_data(sem_plot, additional = c("ymin", "ymax"))
 
-        sem_plot = adjust_facet_width_of_plot(sem_plot, df_by_fact)
+        sem_plot = adjust_facet_width_of_plot(sem_plot, df_by_key)
 
         sem_plot$file_name = paste0(params$DirName, "_Trace.png" )
         sem_plot$width = 2

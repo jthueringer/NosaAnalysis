@@ -71,8 +71,8 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_output$TimeSlots = list()
   default_output$TimeSlots$Sheet = "Processed"
   default_output$TimeSlots$DirName = "Training"
-  default_output$TimeSlots$NormalisationFactor = "pre"
-  default_output$TimeSlots$Factor = c("pre", "post")
+  default_output$TimeSlots$NormalisationKey = "pre"
+  default_output$TimeSlots$Key = c("pre", "post")
 
   ############
   ## add missing parameters from default parameter list
