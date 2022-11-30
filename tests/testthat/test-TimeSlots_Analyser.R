@@ -1,4 +1,5 @@
 test_that("TimeSlots_Analyser with korrekt data", {
+  pdf(NULL) # to prevent generating an empty RPlots.pdf
   yaml_class = YamlClass$new()
   yaml = createYaml(yc=yaml_class)
   refGen = get("TimeSlots_Analyser")
@@ -31,6 +32,7 @@ test_that("TimeSlots_Analyser with korrekt data", {
 })
 
 test_that("TimeSlots_Analyser paired Boxplot", {
+  pdf(NULL) # to prevent generating an empty RPlots.pdf
   yaml_class = YamlClass$new()
   yaml = createYaml(yc=yaml_class)
   refGen = get("TimeSlots_Analyser")

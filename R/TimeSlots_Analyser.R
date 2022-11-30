@@ -46,10 +46,12 @@ TimeSlots_Analyser = setRefClass(
           {
             stop(paste0(" The Key ", key, " does not exist in the data names."))
           }
-          normalised = tryCatch(data.frame(sapply(names(norm_means$Mean),
-                                                  function(name){df_by_key[[key]][[name]]-unname(norm_means$Mean[name])})),
-                   error=function(cond) {
-                     stop("Some of the TimeSlot samples can not be paired, and therefore can not be normalised.")})
+          if (!identical(names(norm_means$Mean), names(df_by_key[[key]][names(df_by_key[[key]]) != "Time"])))
+          {
+            stop("Some of the TimeSlot samples can not be paired, and therefore can not be normalised.")
+          }
+          normalised = data.frame(sapply(names(norm_means$Mean),
+                                         function(name){df_by_key[[key]][[name]]-unname(norm_means$Mean[name])}))
 
           names(normalised) = names(norm_means$Mean)
           df_by_key[[key]] = cbind(Time = df_by_key[[key]]$Time, normalised)
@@ -77,7 +79,6 @@ TimeSlots_Analyser = setRefClass(
         b_plot$width = 1
         plotl[[b_plot$file_name]] = b_plot
         datal[[paste(.self$ana_name, b_plot$file_name, sep = "_")]] = df_means
-
 
         sem_plot_data = bind_rows(df_by_key, .id = "Key") %>%
           mutate(Key = factor(Key, levels = params$Key))
