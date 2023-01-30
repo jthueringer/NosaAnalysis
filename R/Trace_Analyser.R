@@ -10,7 +10,7 @@ Trace_Analyser = setRefClass(
       {
         plotl = list()
         datal = list()
-        datal[[paste0(.self$ana_name, basename(.self$dir_name))]] = data
+        datal[[.self$ana_name]] = data
         xlab = grep("Time", names(data), value = TRUE)
         ylab = "\u0394 F/F"
         data = data %>%
@@ -19,7 +19,7 @@ Trace_Analyser = setRefClass(
         {
           df = data.frame(Time = data$Time, Value = data[[col]]) %>% na.omit()
           plot = get_traceplot(df, "Time", "Value", xlab, ylab)
-          plot$file_name = paste0(basename(.self$dir_name), col, ".png")
+          plot$file_name = paste(.self$ana_name, col, sep = "_")
           plot$width = 2
 
           plotl[[plot$file_name]] = plot

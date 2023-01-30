@@ -14,7 +14,7 @@ Auc_Analyser = setRefClass(
         ###########################
         # AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa
         # irgendwo werden pre und post vertauscht!!!!!!!!!!!!!!1
-        df_auc = get_columns_by_factor(data, params$Factor, TRUE)
+        df_auc = get_columns_by_key(data, params$Key, TRUE)
         names(df_auc)[grep("Time", names(df_auc))] = "Time"
 
         df_stim_reduced = list()
@@ -49,33 +49,33 @@ Auc_Analyser = setRefClass(
               eval(parse(text = paste0("plotl$control", time_of_max[[elem]], "_auc", elem, " = c_plot")))
             }
           }
-          df_stim_reduced[[stim_col_name]] = separate_data_by_factor(df_stim_reduced[[stim_col_name]], params$Factor)
+          df_stim_reduced[[stim_col_name]] = separate_data_by_key(df_stim_reduced[[stim_col_name]], params$Key)
         }
 
         sample_names = grep("Time", names(df_auc), value=TRUE, invert=TRUE)
         auc = data.frame(Name = sample_names,
-                         Factor = extract_factor(sample_names, params$Factor)) %>%
-          mutate(Factor = factor(.data$Factor, levels = params$Factor))
+                         Key = extract_key(sample_names, params$Key)) %>%
+          mutate(Key = factor(.data$Key, levels = params$Key))
         for (stim in names(df_stim_reduced))
         {
           # calculate auc
           auc2 = NULL
-          for (factor in params$Factor)
+          for (key in params$Key)
           {
-            for (set in names(df_stim_reduced[[stim]][[factor]]))
+            for (set in names(df_stim_reduced[[stim]][[key]]))
             {
               #calculate auc
               timeline = df_stim_reduced[[stim]]$Time[df_stim_reduced[[stim]]$Extended]
-              f1 = approxfun(timeline, df_stim_reduced[[stim]][[factor]][[set]][df_stim_reduced[[stim]]$Extended])
+              f1 = approxfun(timeline, df_stim_reduced[[stim]][[key]][[set]][df_stim_reduced[[stim]]$Extended])
               f1_integral = integrate(f1, timeline[1], timeline[length(timeline)], subdivisions = 500)
-              auc2 = rbind(auc2, data.frame(Name = set, Factor = factor, stim = f1_integral$value))
+              auc2 = rbind(auc2, data.frame(Name = set, Key = key, stim = f1_integral$value))
             }
           }
           names(auc2) = sub("stim", stim, names(auc2))
-          auc = merge(auc, auc2, by=c("Name", "Factor"))
+          auc = merge(auc, auc2, by=c("Name", "Key"))
         }
         auc = auc %>% rowwise() %>%
-          mutate(Name = gsub(Factor,"",Name)) %>%
+          mutate(Name = gsub(Key,"",Name)) %>%
           ungroup()
 
         for (group in params$GroupByStimulus)
@@ -88,11 +88,11 @@ Auc_Analyser = setRefClass(
 
             if (statistics$paired)
             {
-              b_plot = ggpubr::ggpaired (h, x="Factor", y="AUC", id="Name", line.color = "gray", facet.by="Stimuli", short.panel.labs=FALSE)
+              b_plot = ggpubr::ggpaired (h, x="Key", y="AUC", id="Name", line.color = "gray", facet.by="Stimuli", short.panel.labs=FALSE)
             }
             else
             {
-              b_plot = ggpubr::ggboxplot(h, x="Factor", y="AUC", add = "jitter", facet.by="Stimuli", short.panel.labs=FALSE)
+              b_plot = ggpubr::ggboxplot(h, x="Key", y="AUC", add = "jitter", facet.by="Stimuli", short.panel.labs=FALSE)
             }
 
             b_plot = b_plot +
@@ -107,16 +107,16 @@ Auc_Analyser = setRefClass(
             h$Mean = rowMeans(h[3:length(h)])
             if(statistics$paired)
             {
-              b_plot = ggpubr::ggpaired (h, x="Factor", y="Mean", id="Name", line.color = "gray")
+              b_plot = ggpubr::ggpaired (h, x="Key", y="Mean", id="Name", line.color = "gray")
             }
             else
             {
-              b_plot = ggpubr::ggboxplot(h, x="Factor", y="Mean", add = "jitter")
+              b_plot = ggpubr::ggboxplot(h, x="Key", y="Mean", add = "jitter")
             }
             b_plot = b_plot +
               ggpubr::stat_compare_means(method = statistics$method, paired=statistics$paired) +
               ggpubr::stat_compare_means(label =  "p.signif", label.y = max(h$Mean)*0.93)
-            b_plot$file_name = paste0(params$DirName,"_byFactor.png")
+            b_plot$file_name = paste0(params$DirName,"_byKey.png")
           }
           else
           {
@@ -128,14 +128,14 @@ Auc_Analyser = setRefClass(
         }
         ####
 
-        #prints averaged auc for each factor
-        for (factor in params$Factor )
+        #prints averaged auc for each key
+        for (key in params$Key )
         {
           tmp = df_stim_reduced[[1]] %>% select(c(Time, Extended))
 
           for (stim in params$Stimuli)
           {
-            tmp = cbind(tmp, df_stim_reduced[[stim_col_name]][[factor]]) #[df_stim_reduced[[1]]$Extended,])
+            tmp = cbind(tmp, df_stim_reduced[[stim_col_name]][[key]]) #[df_stim_reduced[[1]]$Extended,])
           }
           longer_df = tidyr::pivot_longer(tmp, -c(Time,Extended), names_to = "Name", values_to = "Values")
           t_plot = ggpubr::ggline(longer_df, x="Time", y="Values", add="mean",
@@ -145,7 +145,7 @@ Auc_Analyser = setRefClass(
             mutate(Extended = df_stim_reduced[[1]]$Extended)
           t_plot = t_plot +
             ggpubr::geom_exec(geom_area, data=pl_data[pl_data$Extended,], mapping=aes(y = ifelse(.data$Extended == TRUE, .data$Values, 0)), fill = "grey")
-          t_plot$file_name = paste0(params$DirName, "Avg_", factor, ".png" )
+          t_plot$file_name = paste0(params$DirName, "Avg_", key, ".png" )
           t_plot$width = 0.5
           plotl[[t_plot$file_name]] = t_plot
         }

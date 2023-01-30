@@ -21,11 +21,12 @@
 #'
 #' @export
 #'
-performAnalysis = function(yaml_file = character() )
+performAnalysis = function(yaml_file = NULL )
 {
   ############
   # prepare the Yaml
   ############
+  yaml_obj = list()
   if (!is.null(yaml_file))
   {
     if (file.exists(yaml_file))
@@ -48,9 +49,10 @@ performAnalysis = function(yaml_file = character() )
   yaml_list = createYaml(yc=yaml_class, sheets = yaml_class$yamlObj$Sheets, prep = yaml_class$yamlObj$Prep, outputs = yaml_class$yamlObj$Output)
 
   yaml_prep = yaml_list$prep
-  yaml_sheets = yaml_list$sheets
-  directory = yaml_prep$InputDirectory
   output_dir = paste0(yaml_prep$ResultsDirectory, "/")
+  check_directories(yaml_prep$InputDirectory, output_dir)
+
+  yaml_sheets = yaml_list$sheets
   yaml_outs = yaml_list$outputs
 
   analysis_list = get_analyser_objects(yaml_outs, yaml_prep$BoxplotWithStatistics)
@@ -59,31 +61,32 @@ performAnalysis = function(yaml_file = character() )
   # loading content of nosa results into data.frames that are stored within nested list
   ############
   nsr <- NosaResultLoader$new()
-  if (dir.exists(output_dir))
-  {
-    stop(paste0("The directory '", output_dir, "' already exists.\n"));
-  }
-  if (dir.exists(directory))
-  {
-    nsr$loadNosaResults(directory, yaml_sheets, yaml_prep)
-  }
-  else
-  {
-    stop(paste0("The directory '", directory, "' does not exist.\n"));
-  }
+  nsr$loadNosaResults(yaml_prep$InputDirectory, yaml_sheets, yaml_prep)
 
 
   ############
   # create output
   ############
+
+  cat("\n\t ...Generating output...\n\n")
   for (i in 1:length(analysis_list))
   {
     sheet = analysis_list[[i]]$params$Sheet
-    if (is.null(analysis_list[[i]]$params$Factor))  analysis_list[[i]]$setData(nsr$data[[sheet]])
+    if (is.null(analysis_list[[i]]$params$Key))
+    {
+      analysis_list[[i]]$setData(nsr$data[[sheet]])
+    }
     else
     {
+      for (key in analysis_list[[i]]$params$Key)
+      {
+        if (sum(grepl(key, names(nsr$data[[sheet]]))) == 0 )
+        {
+          stop(paste0("Can not find the keyword ", key, " specified in '", analysis_list[[i]]$ana_name, " analysis'.\n"));
+        }
+      }
       df = nsr$data[[sheet]] %>%
-        select(contains(c("Time", analysis_list[[i]]$params$Factor)))
+        select(contains(c("Time", analysis_list[[i]]$params$Key))) %>% na.omit()
       analysis_list[[i]]$setData(df)
     }
   }
@@ -103,10 +106,11 @@ performAnalysis = function(yaml_file = character() )
 
   for(analysis in analysis_list)
   {
-    dir.create(paste0(output_dir, analysis$dir_name), recursive = TRUE)
+    dir.create(paste0(output_dir, analysis$ana_name), recursive = TRUE)
+    cat(paste0("\t...Writing ", analysis$ana_name, " output...\n"))
     for (plot in analysis$plots)
     {
-      ggexport(plot, filename=paste0(output_dir, analysis$dir_name, plot$file_name), width = 800*plot$width, height = 800, res = 150)
+      ggexport(plot, filename=paste0(output_dir, analysis$ana_name, "/", plot$file_name, ".png"), width = 800*plot$width, height = 800, res = 150, verbose = FALSE)
     }
   }
 
@@ -125,13 +129,8 @@ performAnalysis = function(yaml_file = character() )
     {
       for (dataname in names(analysis$plot_data))
       {
-        sheetname = gsub("/", "_", dataname)
-        if(nchar(sheetname) > 31)
-        {
-          sheetname = substr(sheetname, 1, 31)
-        }
-        openxlsx::addWorksheet(wb, sheetname)
-        openxlsx::writeData(wb, sheet = sheetname, analysis$plot_data[[dataname]])
+        openxlsx::addWorksheet(wb, dataname)
+        openxlsx::writeData(wb, sheet = dataname, analysis$plot_data[[dataname]])
       }
     }
     saveWorkbook(wb, paste0(output_dir, "/data.xlsx"))

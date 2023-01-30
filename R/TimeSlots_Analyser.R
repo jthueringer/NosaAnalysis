@@ -75,7 +75,7 @@ TimeSlots_Analyser = setRefClass(
           ggpubr::stat_compare_means(method = statistics$method, paired=statistics$paired) +
           ggpubr::stat_compare_means(label =  "p.signif", label.y = max(df_means$Mean)*0.93)
         b_plot =  ggpubr::ggpar(b_plot, xlab = "", ylab = ylab)
-        b_plot$file_name = paste0(params$DirName, "_Boxplot.png" )
+        b_plot$file_name = paste0(.self$ana_name, "_Boxplot" )
         b_plot$width = 1
         plotl[[b_plot$file_name]] = b_plot
         datal[[paste(.self$ana_name, b_plot$file_name, sep = "_")]] = df_means
@@ -90,7 +90,7 @@ TimeSlots_Analyser = setRefClass(
 
         sem_plot = adjust_facet_width_of_plot(sem_plot, df_by_key)
 
-        sem_plot$file_name = paste0(params$DirName, "_Trace.png" )
+        sem_plot$file_name = paste0(.self$ana_name, "_Trace" )
         sem_plot$width = 2
         plotl[[sem_plot$file_name]] = sem_plot
         datal[[paste(.self$ana_name, sem_plot$file_name, sep = "_")]] = sem_plot_data

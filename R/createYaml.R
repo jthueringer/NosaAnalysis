@@ -61,7 +61,7 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_output$Auc = list()
   default_output$Auc$Sheet = "Processed"
   default_output$Auc$DirName = "TwoStim"
-  default_output$Auc$Factor = c("pre", "post")
+  default_output$Auc$Key = c("pre", "post")
   default_output$Auc$Stimuli = c(10, 40)
   default_output$Auc$PeakSearchWindow = 5
   default_output$Auc$before = 1.5

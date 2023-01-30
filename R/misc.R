@@ -11,6 +11,32 @@ rowSem <- function(x) {
 }
 
 #'
+#' Tests whether user-defined input and output directories and their paths exist.
+#' The output directory should not yet exist, but the input directory should.
+#'
+#' @param input_dir Path of an existing directory.
+#' @param output_dir A path whose base name exists but the destination directory does not.
+#'
+#' @return True, if it doesn't throw an error.
+#'
+check_directories = function(input_dir, output_dir)
+{
+  if (dir.exists(output_dir))
+  {
+    stop(paste0("The output directory '", output_dir, "' already exists.\n"));
+  }
+  if (!dir.exists(dirname(output_dir)))
+  {
+    stop(paste0("The path to the output directory '", output_dir, "' does not exist.\n"));
+  }
+  if (!dir.exists(input_dir))
+  {
+    stop(paste0("The input directory '", input_dir, "' does not exist.\n"));
+  }
+  return(TRUE)
+}
+
+#'
 #' Extract all columns that contain a given string and return new data.frame.
 #' If no list of strings is provided, all data are returned.
 #'
@@ -22,7 +48,7 @@ rowSem <- function(x) {
 #'
 #' @importFrom stats na.omit
 #'
-get_columns_by_factor = function(data, substr_colnames, include_col = NULL)
+get_columns_by_key = function(data, substr_colnames, include_col = NULL)
 {
   if (is.null(substr_colnames))
   {
@@ -39,22 +65,22 @@ get_columns_by_factor = function(data, substr_colnames, include_col = NULL)
 }
 
 #'
-#' Extract factors from given name list.
+#' Extract keys from given name list.
 #'
-#' @param names List with names to search for factors.
-#' @param factors List with factors.
+#' @param names List with names to search for keys.
+#' @param keys List with keys.
 #'
-#' @return List of found factors. If not found, entry is 'NA'.
+#' @return List of found keys. If not found, entry is 'NA'.
 #'
-extract_factor = function(names, factors)
+extract_key = function(names, keys)
 {
-  tmp_factor = rep(NA, length(names))
-  for (factor in factors)
+  tmp_key = rep(NA, length(names))
+  for (key in keys)
   {
-    bool_factor = grepl(factor, names)
-    tmp_factor[bool_factor] = factor
+    bool_key = grepl(key, names)
+    tmp_key[bool_key] = key
   }
-  return(tmp_factor)
+  return(tmp_key)
 }
 
 #'
@@ -71,18 +97,12 @@ get_analyser_objects = function(params, statistics)
   {
     if (!ana_name %in% c("DataAsRObject", "DataAsXlsx"))
     {
-      dir_name = ana_name
-      if ("DirName" %in% names(params[[ana_name]]))
-      {
-        dir_name = params[[ana_name]]$DirName
-      }
       ana = get(paste0(ana_name, "_Analyser"))
       if (inherits(ana, "refObjectGenerator"))
       {
-        analysers[[dir_name]] = ana$new()
-        analysers[[dir_name]]$setParams(params[[ana_name]])
-        analysers[[dir_name]]$setDirName(paste0(dir_name, "/"))
-        analysers[[dir_name]]$setStatistics(statistics)
+        analysers[[ana_name]] = ana$new()
+        analysers[[ana_name]]$setParams(params[[ana_name]])
+        analysers[[ana_name]]$setStatistics(statistics)
       }
     }
   }
@@ -192,12 +212,12 @@ reduce_data_by_window = function(df, windowlength, timepoints, larger_window = 0
 #'
 #' @return List of data.frames.
 #'
-separate_data_by_factor = function(df, factors)
+separate_data_by_key = function(df, keys)
 {
   dfs = df %>% select(c(Time = contains("Time"), Extended = contains("Extended")))
-  for (factor in factors)
+  for (key in keys)
   {
-  dfs[[factor]] = df %>% select(contains(factor))
+  dfs[[key]] = df %>% select(contains(key))
   }
   return(dfs)
 }
