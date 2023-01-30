@@ -4,7 +4,7 @@
 \alias{performAnalysis}
 \title{Perform the analysis of NOSA software results.}
 \usage{
-performAnalysis(yaml_file = character())
+performAnalysis(yaml_file = NULL)
 }
 \arguments{
 \item{yaml_file}{A character string that provides the path and name of a yaml_file containing

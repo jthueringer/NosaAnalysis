@@ -14,23 +14,4 @@ The 'data' field is initialized after $loadNosaResults was called.
 \item{\code{data}}{NosaResults data as list. Valid list entries are: "metadata", "Raw", "Processed", "Baseline", "Spike Detection" and "Smoothing".}
 }}
 
-\section{Methods}{
-
-\describe{
-\item{\code{getAmplitudeOfPeak()}}{From Spike Detection sheet the Amplitude of Peak data ...}
-
-\item{\code{getBaseline()}}{The Baseline sheet data ...}
-
-\item{\code{getMetadata()}}{The metadata sheet data ...}
-
-\item{\code{getProcessed()}}{The Processed sheet data ...}
-
-\item{\code{getRaw()}}{The Raw sheet data ...}
-
-\item{\code{getSpikeFrequency()}}{From Spike Detection sheet the Spike Frequency (#Spikes / second) data ...}
-
-\item{\code{getTimeOfPeak()}}{From Spike Detection sheet the Time of Peak (s) data ...}
-
-\item{\code{getTrain()}}{From Spike Detection sheet the train data ...}
-}}
 
