@@ -1,4 +1,12 @@
-test_that("Trace_Analyser", {
+test_that("get analyser object", {
+  refGen = get("Trace_Analyser")
+  ana = refGen$new()
+
+  expect_equal(ana$ana_name, "Trace")
+  expect_equal(length(ana$plots), 0)
+})
+
+test_that("generates all plots and plot data", {
   yaml_class = YamlClass$new()
   yaml = createYaml(yc=yaml_class)
   refGen = get("Trace_Analyser")
@@ -6,13 +14,10 @@ test_that("Trace_Analyser", {
   ana$setParams(yaml$outputs$Trace)
   ana$setStatistics(yaml$prep$BoxplotWithStatistics)
 
-  expect_equal(ana$ana_name, "Trace")
+  df = data.frame(matrix(1:50, nrow = 10, ncol = 5))
+  names(df) = c("Time", letters[1:4])
 
-  df = data.frame(matrix(1:100, nrow = 10, ncol = 10))
-  names(df) = c("Time", as.character(1:9))
-
-  expect_equal(length(ana$plots), 0)
   ana$setData(df)
-  expect_equal(length(ana$plots), 9)
+  expect_equal(length(ana$plots), 4)
   expect_equal(ana$plot_data[[1]], df)
 })

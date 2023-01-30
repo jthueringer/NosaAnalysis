@@ -1,0 +1,24 @@
+Prep:
+  InputDirectory: files
+  ResultsDirectory: files/result
+  NeedsTimeCorrection: yes
+  BoxplotWithStatistics:
+    paired: yes
+    method: t.test
+Sheets:
+  metadata: []
+  Processed: []
+  Spike Detection:
+  - Train
+  - Peak (s)
+Output:
+  DataAsRObject: yes
+  DataAsXlsx: yes
+  Trace:
+    Sheet: Processed
+  TimeSlots:
+    Sheet: Processed
+    NormalisationKey: slota
+    Key:
+    - slota
+    - slotb

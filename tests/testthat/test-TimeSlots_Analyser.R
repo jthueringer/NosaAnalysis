@@ -1,4 +1,4 @@
-test_that("TimeSlots_Analyser with korrekt data", {
+test_that("correct calculation", {
   pdf(NULL) # to prevent generating an empty RPlots.pdf
   yaml_class = YamlClass$new()
   yaml = createYaml(yc=yaml_class)
@@ -31,7 +31,7 @@ test_that("TimeSlots_Analyser with korrekt data", {
   expect_equal(ana$plot_data[[2]], trace_result, tolerance = 0.1)
 })
 
-test_that("TimeSlots_Analyser paired Boxplot", {
+test_that("paired Boxplot", {
   pdf(NULL) # to prevent generating an empty RPlots.pdf
   yaml_class = YamlClass$new()
   yaml = createYaml(yc=yaml_class)
@@ -52,7 +52,7 @@ test_that("TimeSlots_Analyser paired Boxplot", {
   expect_equal(ana$plot_data[[1]], boxplot_result, tolerance = 0.5)
 })
 
-test_that("TimeSlots_Analyser wrong NormalisationKey", {
+test_that("wrong NormalisationKey", {
   yaml_class = YamlClass$new()
   yaml = createYaml(yc=yaml_class)
   refGen = get("TimeSlots_Analyser")
@@ -67,7 +67,7 @@ test_that("TimeSlots_Analyser wrong NormalisationKey", {
   expect_error(ana$setData(df), "The NormalisationKey must be one of the sample name keys.")
 })
 
-test_that("TimeSlots_Analyser key not in names", {
+test_that("key not in names", {
   yaml_class = YamlClass$new()
   yaml = createYaml(yc=yaml_class)
   refGen = get("TimeSlots_Analyser")
@@ -81,7 +81,7 @@ test_that("TimeSlots_Analyser key not in names", {
   expect_error(ana$setData(df), "does not exist in the data names")
 })
 
-test_that("TimeSlots_Analyser data can not be normalised/ paired", {
+test_that("data can not be normalised/ paired", {
   yaml_class = YamlClass$new()
   yaml = createYaml(yc=yaml_class)
   refGen = get("TimeSlots_Analyser")

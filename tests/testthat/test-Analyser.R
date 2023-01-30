@@ -1,25 +1,15 @@
-test_that("Analyser", {
-
-  analyser = Analyser$new(description = "this is a test",
-                          plot_fnc = function(.self, data)
-                          {
-                            # will not produce plots as the analyser, but generate some values
-                            plotl = lapply(data, function(df)
-                            {
-                              ggline(df, x="x", y="y", plot_type = "l", color = "green")
-                            })
-                            return(list(plots = plotl, data = data))
-                          },
-                          ana_name = "test")
+test_that("no data available", {
+  analyser = test_analyser()
   no_df = NULL
   expect_warning(analyser$setData(no_df), "No data available to generate plots.")
+})
+
+test_that("data available", {
+  analyser = test_analyser()
   expect_equal(length(analyser$plots), 0)
   expect_equal(length(analyser$plot_data), 0)
 
-
-  dfs = list()
-  dfs[["one"]] = data.frame(x=1:10, y=6:15)
-  dfs[["two"]] = data.frame(x=11:20, y=6:15)
+  dfs = list(one = data.frame(x=1:10, y=6:15), two = data.frame(x=11:20, y=6:15))
 
   analyser$setParams(list(example1 = "param1", example2 = "param2"))
   analyser$setDirName("test_dir")
