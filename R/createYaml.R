@@ -35,8 +35,8 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_sheets[["Spike Detection"]] = c("Train", "Peak (s)", "Amplitude of Peak", "Spike Frequency (#Spikes / second)")
 
   default_output = list()
-  default_output$DataAsRObject = FALSE
-  default_output$DataAsXlsx = FALSE
+  default_output$DataAsRObject = TRUE
+  default_output$DataAsXlsx = TRUE
   default_output$Trace = list()
   default_output$Trace$Sheet = "Processed"
   default_output$SEM = list()
@@ -49,7 +49,7 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_output$SEM$PeakSearchWindow = 5
   default_output$SEM$before = 2
   default_output$SEM$after = 8
-  default_output$SEM$ControlPlots = FALSE
+  default_output$SEM$ControlPlots = TRUE
   default_output$Responses = list()
   default_output$Responses$Sheet = "Processed"
   default_output$Responses$Filename = "TwoStim"
