@@ -23,37 +23,23 @@
 #'
 performAnalysis = function(yaml_file = NULL )
 {
+
   ############
   # prepare the Yaml
   ############
   yaml_obj = list()
-  if (!is.null(yaml_file))
-  {
-    if (file.exists(yaml_file))
-    {
-      yaml_obj = yaml::read_yaml(yaml_file)
-    }
-    else
-    {
-      stop(paste0("The yaml_file '", yaml_file, "' does not exist.\n"));
-    }
-  }
-  else
-  {
-    stop(paste0("\nYou must provide a yaml_file.\n
-                You can create a yaml file filled with default values using
-                'writeDefaultYaml(filename)'.\n"));
-  }
+  if (check_yaml_file(yaml_file))
+    yaml_obj = yaml::read_yaml(yaml_file)
 
   yaml_class = YamlClass$new(yaml_obj)
   yaml_list = createYaml(yc=yaml_class, sheets = yaml_class$yamlObj$Sheets, prep = yaml_class$yamlObj$Prep, outputs = yaml_class$yamlObj$Output)
 
-  yaml_prep = yaml_list$prep
-  output_dir = paste0(yaml_prep$ResultsDirectory, "/")
-  check_directories(yaml_prep$InputDirectory, output_dir)
-
   yaml_sheets = yaml_list$sheets
   yaml_outs = yaml_list$outputs
+  yaml_prep = yaml_list$prep
+
+  output_dir = paste0(yaml_prep$ResultsDirectory, "/")
+  check_directories(yaml_prep$InputDirectory, output_dir)
 
   analysis_list = get_analyser_objects(yaml_outs, yaml_prep$BoxplotWithStatistics)
 

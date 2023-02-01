@@ -1,11 +1,28 @@
-
-prepare_testyaml = function(tmpdir, resultdir = "/result", wronginput = FALSE, nokeys = FALSE)
+get_testyaml_object = function(tmpdir, analyser, changes = NULL)
 {
-  yo = yaml::yaml.load_file(paste0("files/test.yaml"))
-  yo$Prep$ResultsDirectory = paste0(tmpdir, resultdir)
+  yaml_class = YamlClass$new()
+  yaml = createYaml(yc=yaml_class)$yc$yamlObj
+  yaml$Prep$InputDirectory = "files"
+  yaml$Prep$ResultsDirectory = paste0(tmpdir, "/result")
+  yaml$Prep$BoxplotWithStatistics$method = "t.test"
 
-  if (nokeys) yo$Outputs$Trace$Sheets = NULL
-  if (wronginput) yo$Prep$InputDirectory = "/nonsense"
+  yaml$Sheets = yaml$Sheets[names(yaml$Sheets) %in% c("metadata","Processed") == TRUE]
+  yaml$Output = yaml$Output[names(yaml$Output) %in% c("DataAsRObject", "DataAsXlsx", analyser) == TRUE]
+
+  if (!is.null(changes))
+  {
+    for (change in changes)
+    {
+      eval(parse(text=paste0("yaml$", change)))
+    }
+  }
+  return(yaml)
+}
+
+prepare_testyamlfile = function(tmpdir, analyser, changes = NULL)
+{
+  yo = get_testyaml_object(tmpdir, analyser, changes)
+
   yaml::write_yaml(yo, paste0(tmpdir, "/test.yaml"))
 }
 

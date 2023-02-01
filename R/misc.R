@@ -37,6 +37,36 @@ check_directories = function(input_dir, output_dir)
 }
 
 #'
+#' Tests whether user-given yaml file exists.
+#' If it does not exist, then it is pointed out how it can be generated
+#' with default values.
+#'
+#' @param yaml_file Path of yaml file.
+#'
+#' @return True if no error occurs
+#'
+check_yaml_file = function(yaml_file = NULL)
+{
+  if (!is.null(yaml_file))
+  {
+    if (file.exists(yaml_file))
+    {
+      return(TRUE)
+    }
+    else
+    {
+      stop(paste0("The yaml_file '", yaml_file, "' does not exist.\n"));
+    }
+  }
+  else
+  {
+    stop(paste0("\nYou must provide a yaml_file.\n
+                You can create a yaml file filled with default values using
+                'writeDefaultYaml(filename)'.\n"));
+  }
+}
+
+#'
 #' Extract all columns that contain a given string and return new data.frame.
 #' If no list of strings is provided, all data are returned.
 #'
