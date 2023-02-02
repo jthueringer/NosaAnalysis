@@ -78,7 +78,7 @@ TimeSlots_Analyser = setRefClass(
         b_plot$file_name = paste0(.self$ana_name, "_Boxplot" )
         b_plot$width = 1
         plotl[[b_plot$file_name]] = b_plot
-        datal[[paste(.self$ana_name, b_plot$file_name, sep = "_")]] = df_means
+        datal[[b_plot$file_name]] = df_means
 
         sem_plot_data = bind_rows(df_by_key, .id = "Key") %>%
           mutate(Key = factor(Key, levels = params$Key))
@@ -93,7 +93,7 @@ TimeSlots_Analyser = setRefClass(
         sem_plot$file_name = paste0(.self$ana_name, "_Trace" )
         sem_plot$width = 2
         plotl[[sem_plot$file_name]] = sem_plot
-        datal[[paste(.self$ana_name, sem_plot$file_name, sep = "_")]] = sem_plot_data
+        datal[[sem_plot$file_name]] = sem_plot_data
 
         return(list(plots = plotl, data = datal))
       },

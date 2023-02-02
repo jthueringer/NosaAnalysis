@@ -67,31 +67,28 @@ check_yaml_file = function(yaml_file = NULL)
 }
 
 #'
-#' Extract all columns that contain a given string and return new data.frame.
-#' If no list of strings is provided, all data are returned.
+#' Takes a data frame with two or more columns, one named as 'Time'.
+#' Extracts the values for all columns, that are between
+#' (and include) 'from' and 'to' of the 'Time' column.
+#' Throws an error if 'from' or 'to' is not present.
 #'
-#' @param data Data frame.
-#' @param substr_colnames List with strings that are searched for in the column names of a given data.frame.
-#' @param include_col String for an additional colum. Optional.
+#' @param df Data frame of two columns. One named as 'Time'
+#' @param from First timepoint of extracted values
+#' @param to Last timepoint of extracted values
+#' @param analyser String for error output. optional
 #'
-#' @return Data.frame that consists only of the columns that contain the substr_colnames you are looking for in their names.
+#' @return named columns with extracted values
 #'
-#' @importFrom stats na.omit
-#'
-get_columns_by_key = function(data, substr_colnames, include_col = NULL)
+extract_values_between_two_given_times = function(df, from, to, analyser="")
 {
-  if (is.null(substr_colnames))
+  if (sum(df$Time == from) + sum(df$Time == to) < 2)
   {
-    ifelse(include_col, return(data), return(data[!grepl('Time', names(data))]))
+    stop(paste0("\n", analyser, " analysis is not possible, because the chosen time window is too large. Please reduce time window. \n"))
   }
-  if (include_col)
-  {
-    return(data %>% select(contains(c("Time", substr_colnames))) %>% na.omit())
-  }
-  else
-  {
-    return(data %>% select(contains(substr_colnames)) %>% na.omit())
-  }
+  tmp = df %>%
+    filter(.data$Time >= from & .data$Time <= to)
+
+  return(tmp %>% select(-"Time"))
 }
 
 #'
@@ -111,6 +108,38 @@ extract_key = function(names, keys)
     tmp_key[bool_key] = key
   }
   return(tmp_key)
+}
+
+#'
+#' Extract all columns that contain a given string and return new data.frame.
+#' If no list of strings is provided, all data are returned.
+#'
+#' @param data Data frame.
+#' @param substr_colnames List with strings that are searched for in the column names of a given data.frame.
+#' @param include_col String for an additional colum. Optional.
+#'
+#' @return Data.frame that consists only of the columns that contain the substr_colnames you are looking for in their names.
+#'
+#' @importFrom stats na.omit
+#'
+get_columns_by_key = function(data, substr_colnames, include_col = NA_character_)
+{
+  if (is.null(substr_colnames))
+  {
+    #ifelse(include_col, return(data), return(data[!grepl('Time', names(data))]))
+    if (!is.na(include_col))
+    {
+      return(data %>% select(include_col))
+    }
+  }
+  if (!is.na(include_col))
+  {
+    return(data %>% select(contains(c(include_col, substr_colnames))) %>% na.omit())
+  }
+  else
+  {
+    return(data %>% select(contains(substr_colnames)) %>% na.omit())
+  }
 }
 
 #'
@@ -140,30 +169,30 @@ get_analyser_objects = function(params, statistics)
 }
 
 #'
-#' Takes a list of columnnames as well as a list of strings to search for in columnnames.
+#' Takes a list of columnnames as well as a list of strings (keys) to search for in columnnames.
 #' Returns a list that holds for each search string a named list containg booleans for
 #' the present of the string.
 #' If no search strings are available the returning list contains of TRUEs except for
 #' the excluded_column.
 #'
 #' @param columnnames List of strings.
-#' @param factors List of search strings.
+#' @param keys List of search strings.
 #' @param excluded_column String
 #'
 #' @return List that holds for each search string a named list containg booleans for
 #' the present of the string.
 #'
-get_bool_for_columns_by_factor <- function(columnnames, factors=NULL, excluded_column = FALSE) {
+get_bool_for_columns_by_key <- function(columnnames, keys=NULL, excluded_column = FALSE) {
   data_columns = list()
-  if (!length(factors))
+  if (!length(keys))
   {
     data_columns[['all']] = !grepl(excluded_column, columnnames)
   }
   else
   {
-    for (fact in factors)
+    for (key in keys)
     {
-      data_columns[[ fact ]] = grepl(fact, columnnames)
+      data_columns[[ key ]] = grepl(key, columnnames)
     }
   }
   return(data_columns)
@@ -247,7 +276,7 @@ separate_data_by_key = function(df, keys)
   dfs = df %>% select(c(Time = contains("Time"), Extended = contains("Extended")))
   for (key in keys)
   {
-  dfs[[key]] = df %>% select(contains(key))
+    dfs[[key]] = df %>% select(contains(key))
   }
   return(dfs)
 }

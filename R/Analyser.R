@@ -41,7 +41,6 @@ Analyser = setRefClass(
       .self$plot_data = list();
       .self$params = params;
       .self$statistics = statistics;
-      .self$dir_name = dir_name;
       .self$ana_name = ana_name;
       return(.self)
     },

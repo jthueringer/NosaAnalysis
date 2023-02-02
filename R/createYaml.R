@@ -41,9 +41,9 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_output$Trace$Sheet = "Processed"
   default_output$SEM = list()
   default_output$SEM$Sheet = "Processed"
-  default_output$SEM$DirName = "TwoStimuli"
-  default_output$SEM$Factor =  c("pre", "post")
+  default_output$SEM$Key =  c("pre", "post")
   default_output$SEM$Trace =  TRUE
+  default_output$SEM$CropTrace = 0
   default_output$SEM$PeakAverage = TRUE
   default_output$SEM$Stimuli = c(10, 41)
   default_output$SEM$PeakSearchWindow = 5
@@ -60,7 +60,6 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_output$Responses$GroupByStimulus = c(FALSE, TRUE)
   default_output$Auc = list()
   default_output$Auc$Sheet = "Processed"
-  default_output$Auc$DirName = "TwoStim"
   default_output$Auc$Key = c("pre", "post")
   default_output$Auc$Stimuli = c(10, 40)
   default_output$Auc$PeakSearchWindow = 5
@@ -70,7 +69,6 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_output$Auc$ControlPlots = FALSE
   default_output$TimeSlots = list()
   default_output$TimeSlots$Sheet = "Processed"
-  default_output$TimeSlots$DirName = "Training"
   default_output$TimeSlots$NormalisationKey = "pre"
   default_output$TimeSlots$Key = c("pre", "post")
 
