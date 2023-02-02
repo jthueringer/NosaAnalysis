@@ -10,9 +10,7 @@ test_that("generates plots and plot_data", {
                              changes = c("Output$SEM$Stimuli = c(0.5, 1)",
                                          "Output$SEM$PeakSearchWindow = 0",
                                          "Output$SEM$before = 0.5", "Output$SEM$after = 0.5"))
-  ana = get("SEM_Analyser")$new()
-  ana$setParams(yaml$Output$SEM)
-  ana$setStatistics(yaml$Prep$BoxplotWithStatistics)
+  ana = get_testanalyser_object("SEM", yaml)
 
   df = data.frame(seq(0, 1.5, by = 1.0/6.0),
                   matrix(1:100, nrow = 10, ncol = 10, byrow = TRUE))
@@ -33,9 +31,8 @@ test_that("crops data", {
                                          "Output$SEM$PeakSearchWindow = 0",
                                          "Output$SEM$before = 0", "Output$SEM$after = 0.5",
                                          "Output$SEM$CropTrace = 0.1333"))
-  ana = get("SEM_Analyser")$new()
-  ana$setParams(yaml$Output$SEM)
-  ana$setStatistics(yaml$Prep$BoxplotWithStatistics)
+
+  ana = get_testanalyser_object("SEM", yaml)
 
   df = data.frame(seq(0, 1.5, by = 1.0/6.0),
                   matrix(1:100, nrow = 10, ncol = 10, byrow = TRUE))

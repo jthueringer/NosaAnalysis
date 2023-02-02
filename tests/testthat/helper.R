@@ -1,3 +1,12 @@
+
+get_testanalyser_object = function(analyser, yaml)
+{
+  ana = get(paste0(analyser, "_Analyser"))$new()
+  ana$setParams(yaml$Output[[analyser]])
+  ana$setStatistics(yaml$Prep$BoxplotWithStatistics)
+  return(ana)
+}
+
 get_testyaml_object = function(tmpdir, analyser, changes = NULL)
 {
   yaml_class = YamlClass$new()

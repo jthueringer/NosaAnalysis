@@ -7,12 +7,8 @@ test_that("get analyser object", {
 })
 
 test_that("generates all plots and plot data", {
-  yaml_class = YamlClass$new()
-  yaml = createYaml(yc=yaml_class)
-  refGen = get("Trace_Analyser")
-  ana = refGen$new()
-  ana$setParams(yaml$outputs$Trace)
-  ana$setStatistics(yaml$prep$BoxplotWithStatistics)
+  yaml = get_testyaml_object("dir", analyser = "Trace", changes = NULL)
+  ana = get_testanalyser_object("Trace", yaml)
 
   df = data.frame(matrix(1:50, nrow = 10, ncol = 5))
   names(df) = c("Time", letters[1:4])
