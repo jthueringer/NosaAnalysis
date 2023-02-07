@@ -67,31 +67,6 @@ check_yaml_file = function(yaml_file = NULL)
 }
 
 #'
-#' Takes a data frame with two or more columns, one named as 'Time'.
-#' Extracts the values for all columns, that are between
-#' (and include) 'from' and 'to' of the 'Time' column.
-#' Throws an error if 'from' or 'to' is not present.
-#'
-#' @param df Data frame of two columns. One named as 'Time'
-#' @param from First timepoint of extracted values
-#' @param to Last timepoint of extracted values
-#' @param analyser String for error output. optional
-#'
-#' @return named columns with extracted values
-#'
-extract_values_between_two_given_times = function(df, from, to, analyser="")
-{
-  if (sum(df$Time == from) + sum(df$Time == to) < 2)
-  {
-    stop(paste0("\n", analyser, " analysis is not possible, because the chosen time window is too large. Please reduce time window. \n"))
-  }
-  tmp = df %>%
-    filter(.data$Time >= from & .data$Time <= to)
-
-  return(tmp %>% select(-"Time"))
-}
-
-#'
 #' Extract keys from given name list.
 #'
 #' @param names List with names to search for keys.
@@ -111,35 +86,30 @@ extract_key = function(names, keys)
 }
 
 #'
-#' Extract all columns that contain a given string and return new data.frame.
-#' If no list of strings is provided, all data are returned.
+#' Takes a data frame with two or more columns, one named as 'Time'.
+#' Extracts the values for all columns, that are between
+#' (and include) 'from' and 'to' of the 'Time' column.
+#' Throws an error if 'from' or 'to' is not present.
 #'
-#' @param data Data frame.
-#' @param substr_colnames List with strings that are searched for in the column names of a given data.frame.
-#' @param include_col String for an additional colum. Optional.
+#' @param df Data frame of two columns. One named as 'Time'
+#' @param from First timepoint of extracted values
+#' @param to Last timepoint of extracted values
+#' @param analyser String for error output. optional
 #'
-#' @return Data.frame that consists only of the columns that contain the substr_colnames you are looking for in their names.
+#' @return named columns with extracted values
 #'
-#' @importFrom stats na.omit
-#'
-get_columns_by_key = function(data, substr_colnames, include_col = NA_character_)
+extract_values_between_two_given_times = function(df, from, to, analyser="")
 {
-  if (is.null(substr_colnames))
+  success = TRUE
+  if (sum(df$Time == from) + sum(df$Time == to) < 2)
   {
-    #ifelse(include_col, return(data), return(data[!grepl('Time', names(data))]))
-    if (!is.na(include_col))
-    {
-      return(data %>% select(include_col))
-    }
+    success = FALSE
+    message(paste0("\t", analyser, " analysis: not possible, because the chosen time window is too large. Please reduce time window."))
   }
-  if (!is.na(include_col))
-  {
-    return(data %>% select(contains(c(include_col, substr_colnames))) %>% na.omit())
-  }
-  else
-  {
-    return(data %>% select(contains(substr_colnames)) %>% na.omit())
-  }
+  tmp = df %>%
+    filter(.data$Time >= from & .data$Time <= to)
+
+  return(c(success=success, data.frame(tmp %>% select(-"Time"))))
 }
 
 #'
@@ -196,6 +166,38 @@ get_bool_for_columns_by_key <- function(columnnames, keys=NULL, excluded_column 
     }
   }
   return(data_columns)
+}
+
+#'
+#' Extract all columns that contain a given string and return new data.frame.
+#' If no list of strings is provided, all data are returned.
+#'
+#' @param data Data frame.
+#' @param substr_colnames List with strings that are searched for in the column names of a given data.frame.
+#' @param include_col String for an additional colum. Optional.
+#'
+#' @return Data.frame that consists only of the columns that contain the substr_colnames you are looking for in their names.
+#'
+#' @importFrom stats na.omit
+#'
+get_columns_by_key = function(data, substr_colnames, include_col = NA_character_)
+{
+  if (is.null(substr_colnames))
+  {
+    #ifelse(include_col, return(data), return(data[!grepl('Time', names(data))]))
+    if (!is.na(include_col))
+    {
+      return(data %>% select(include_col))
+    }
+  }
+  if (!is.na(include_col))
+  {
+    return(data %>% select(contains(c(include_col, substr_colnames))) %>% na.omit())
+  }
+  else
+  {
+    return(data %>% select(contains(substr_colnames)) %>% na.omit())
+  }
 }
 
 
@@ -264,16 +266,25 @@ reduce_data_by_window = function(df, windowlength, timepoints, larger_window = 0
 }
 
 #'
-#' At any given time, with a defined time period, the data is extracted and written separately into individual tables.
+#' A data frame is separated into named lists (keywords).
+#' The data is extracted according to the key in the column name
+#' and stored into individual data frames. With additional 'global_cols'
+#' the result consists of the global columns and the key seperated
+#' data frames.
 #'
 #' @param df Data.frame
-#' @param factors List of Strings.
+#' @param keys List of Strings
+#' @param global_cols List of column names to be part of the result
 #'
 #' @return List of data.frames.
 #'
-separate_data_by_key = function(df, keys)
+separate_data_by_key = function(df, keys, global_cols = NULL)
 {
-  dfs = df %>% select(c(Time = contains("Time"), Extended = contains("Extended")))
+  dfs = data.frame()
+  if (length(global_cols))
+  {
+    dfs = df %>% select(all_of(global_cols))
+  }
   for (key in keys)
   {
     dfs[[key]] = df %>% select(contains(key))

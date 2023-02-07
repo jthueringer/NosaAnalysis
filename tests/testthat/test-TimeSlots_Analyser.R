@@ -37,7 +37,8 @@ test_that("paired Boxplot", {
                   matrix(c(runif(50, min = 0, max = 0.5),rep(NA, 50)), nrow = 20, ncol = 5, byrow = TRUE),
                   matrix(runif(100, min = 5, max = 6), nrow = 20, ncol = 5, byrow = TRUE))
   names(df) = c("Time", paste("pre_", letters[1:5], sep=""), paste("post_", letters[1:5], sep=""))
-  ana$setData(df)
+
+  expect_true(ana$setData(df))
   boxplot_result = data.frame(Name = c(paste("_", letters[1:5], sep=""),paste("_", letters[1:5], sep="")),
                               Key = rep(c("pre", "post"), each = 5),
                               Mean = c(rep(c(0, 5.5), each = 5)))
@@ -51,7 +52,8 @@ test_that("wrong NormalisationKey", {
   df = data.frame(matrix(1:110, nrow = 10, ncol = 11))
   names(df) = c("Time", paste("pre_", letters[1:5], sep=""), paste("post_", letters[1:5], sep=""))
 
-  expect_error(ana$setData(df), "The NormalisationKey must be one of the sample name keys.")
+  expect_message(success <- ana$setData(df), "TimeSlots analysis: The NormalisationKey must be one of the sample name keys.")
+  expect_false(success)
 })
 
 test_that("key not in names", {
@@ -61,7 +63,8 @@ test_that("key not in names", {
   df = data.frame(matrix(1:110, nrow = 10, ncol = 11))
   names(df) = c("Time", paste("pre_", letters[1:5], sep=""), paste("nonsense_", letters[1:5], sep=""))
 
-  expect_error(ana$setData(df), "does not exist in the data names")
+  expect_message(success <-ana$setData(df), "TimeSlots analysis: The Key post does not")
+  expect_false(success)
 })
 
 test_that("data can not be normalised/ paired", {
@@ -71,5 +74,6 @@ test_that("data can not be normalised/ paired", {
   df = data.frame(matrix(1:110, nrow = 10, ncol = 11))
   names(df) = c("Time", paste("pre_", letters[1:5], sep=""), paste("post_", letters[2:6], sep=""))
 
-  expect_error(ana$setData(df), "Some of the TimeSlot samples can not be paired.")
+  expect_message(success <-ana$setData(df), "TimeSlots analysis: Some of the TimeSlot samples can not be paired.")
+  expect_false(success)
 })

@@ -74,7 +74,7 @@ Analyser = setRefClass(
       result = plot_fnc(.self, df, ...)
       .self$plots = result$plots
       .self$plot_data = result$data
-      return(NULL)
+      return(result$success)
     }
   )
 )

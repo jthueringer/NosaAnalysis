@@ -39,11 +39,12 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_output$DataAsXlsx = TRUE
   default_output$Trace = list()
   default_output$Trace$Sheet = "Processed"
+  default_output$Trace$StartAt = 0
   default_output$SEM = list()
   default_output$SEM$Sheet = "Processed"
   default_output$SEM$Key =  c("pre", "post")
   default_output$SEM$Trace =  TRUE
-  default_output$SEM$CropTrace = 0
+  default_output$SEM$StartAt = 0
   default_output$SEM$PeakAverage = TRUE
   default_output$SEM$Stimuli = c(10, 41)
   default_output$SEM$PeakSearchWindow = 5

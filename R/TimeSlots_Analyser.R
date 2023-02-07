@@ -34,7 +34,8 @@ TimeSlots_Analyser = setRefClass(
         }
         else
         {
-          stop(" The NormalisationKey must be one of the sample name keys.")
+          message(paste0("\tTimeSlots analysis: The NormalisationKey must be one of the sample name keys."))
+          return(list(plots = plotl, data = datal, success=FALSE))
         }
 
         for (key in params$Key)
@@ -44,11 +45,13 @@ TimeSlots_Analyser = setRefClass(
             rename_with(~ gsub(key, "", .x, fixed = TRUE), contains(key)) %>% na.omit()
           if (ncol(df_by_key[[key]])<2)
           {
-            stop(paste0(" The Key ", key, " does not exist in the data names."))
+            message(paste0("\tTimeSlots analysis: The Key ", key, " does not exist in the data names."))
+            return(list(plots = plotl, data = datal, success=FALSE))
           }
           if (!identical(names(norm_means$Mean), names(df_by_key[[key]][names(df_by_key[[key]]) != "Time"])))
           {
-            stop("Some of the TimeSlot samples can not be paired, and therefore can not be normalised.")
+            message(paste0("\tTimeSlots analysis: Some of the TimeSlot samples can not be paired and therefore can not be normalised."))
+            return(list(plots = plotl, data = datal, success=FALSE))
           }
           normalised = data.frame(sapply(names(norm_means$Mean),
                                          function(name){df_by_key[[key]][[name]]-unname(norm_means$Mean[name])}))
@@ -95,7 +98,7 @@ TimeSlots_Analyser = setRefClass(
         plotl[[sem_plot$file_name]] = sem_plot
         datal[[sem_plot$file_name]] = sem_plot_data
 
-        return(list(plots = plotl, data = datal))
+        return(list(plots = plotl, data = datal, success = TRUE))
       },
       ana_name = "TimeSlots"
     )

@@ -32,8 +32,8 @@ test_that("keyword not in data", {
 
   prepare_testyamlfile(path, analyser = "TimeSlots",changes = c("Output$TimeSlots$Key = c('pre', 'nonsense')"))
 
-  expect_error(nsr <- expect_output(performAnalysis(paste0(path, "/test.yaml"))),
-                                "Can not find the keyword nonsense")
+  expect_message(nsr <- expect_output(performAnalysis(paste0(path, "/test.yaml"))),
+                                "TimeSlots analysis: Can not find the keyword nonsense")
   unlink(paste0(path, "/result"), recursive = TRUE)
   unlink(paste0(path, "/test.yaml"))
 })
