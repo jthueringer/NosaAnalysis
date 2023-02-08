@@ -4,9 +4,9 @@ test_that("successful analysis (data reduced by keywords)", {
   path <- tempdir()
   on.exit(unlink(path))
 
-  prepare_testyamlfile(path, analyser = "TimeSlots")
+  write_testyamlfile(path, analyser = "TimeSlots")
 
-  suppressMessages(expect_output(nsr <- performAnalysis(paste0(path, "/test.yaml"))))
+  expect_output(nsr <-suppressMessages(performAnalysis(paste0(path, "/test.yaml"))))
   expect_equal(names(nsr), "TimeSlots")
   unlink(paste0(path, "/result"), recursive = TRUE)
   unlink(paste0(path, "/test.yaml"))
@@ -17,7 +17,7 @@ test_that("successful analysis (data reduced by keywords)", {
 #   path <- tempdir()
 #   on.exit(unlink(path))
 #
-#   prepare_testyamlfile(path, analyser = "SEM",changes = c("Output$SEM$Key = NULL"))
+#   write_testyamlfile(path, analyser = "SEM",changes = c("Output$SEM$Key = NULL"))
 #
 #   suppressMessages(expect_output(nsr <- performAnalysis(paste0(path, "/test.yaml"))))
 #   expect_equal(names(nsr), "SEM")
@@ -30,7 +30,7 @@ test_that("keyword not in data", {
   path <- tempdir()
   on.exit(unlink(path))
 
-  prepare_testyamlfile(path, analyser = "TimeSlots",changes = c("Output$TimeSlots$Key = c('pre', 'nonsense')"))
+  write_testyamlfile(path, analyser = "TimeSlots",changes = c("Output$TimeSlots$Key = c('pre', 'nonsense')"))
 
   expect_message(nsr <- expect_output(performAnalysis(paste0(path, "/test.yaml"))),
                                 "TimeSlots analysis: Can not find the keyword nonsense")

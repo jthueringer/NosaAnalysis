@@ -2,18 +2,28 @@
 % Please edit documentation in R/misc.R
 \name{separate_data_by_key}
 \alias{separate_data_by_key}
-\title{At any given time, with a defined time period, the data is extracted and written separately into individual tables.}
+\title{A data frame is separated into named lists (keywords).
+The data is extracted according to the key in the column name
+and stored into individual data frames. With additional 'global_cols'
+the result consists of the global columns and the key seperated
+data frames.}
 \usage{
-separate_data_by_key(df, keys)
+separate_data_by_key(df, keys, global_cols = NULL)
 }
 \arguments{
 \item{df}{Data.frame}
 
-\item{factors}{List of Strings.}
+\item{keys}{List of Strings}
+
+\item{global_cols}{List of column names to be part of the result}
 }
 \value{
 List of data.frames.
 }
 \description{
-At any given time, with a defined time period, the data is extracted and written separately into individual tables.
+A data frame is separated into named lists (keywords).
+The data is extracted according to the key in the column name
+and stored into individual data frames. With additional 'global_cols'
+the result consists of the global columns and the key seperated
+data frames.
 }

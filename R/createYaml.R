@@ -24,7 +24,6 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_prep$BoxplotWithStatistics = list()
   default_prep$BoxplotWithStatistics$paired = FALSE
   default_prep$BoxplotWithStatistics$method = "Allowed methods are one of t.test, wilcox.test, anova, kruskal.test"
-  default_prep$FigureTheme = "theme_classic"
 
   default_sheets = list()
   default_sheets$metadata = list()
@@ -39,12 +38,10 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_output$DataAsXlsx = TRUE
   default_output$Trace = list()
   default_output$Trace$Sheet = "Processed"
-  default_output$Trace$StartAt = 0
   default_output$SEM = list()
   default_output$SEM$Sheet = "Processed"
   default_output$SEM$Key =  c("pre", "post")
   default_output$SEM$Trace =  TRUE
-  default_output$SEM$StartAt = 0
   default_output$SEM$PeakAverage = TRUE
   default_output$SEM$Stimuli = c(10, 41)
   default_output$SEM$PeakSearchWindow = 5
@@ -100,19 +97,19 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   ############
   for(i in c(length(sheets):1)){
     if(!names(sheets)[i] %in% c(NA, names(default_sheets))) {
-      warning(paste0("Invalid parameter removed: ", names(sheets)[i]))
+      message(paste0("\tInvalid 'Sheets' parameter removed: ", names(sheets)[i]))
       sheets <- sheets[-i]
     }
   }
   for(i in c(length(prep):1)){
     if(!names(prep)[i] %in% c(NA, names(default_prep))) {
-      warning(paste0("Invalid parameter removed: ", names(prep)[i]))
+      message(paste0("\tInvalid 'Prep' parameter removed: ", names(prep)[i]))
       prep <- prep[-i]
     }
   }
   for(i in c(length(outputs):1)){
     if(!names(outputs)[i] %in% c(NA, names(default_output))) {
-      warning(paste0("Invalid parameter removed: ", names(outputs)[i]))
+      message(paste0("\tInvalid 'Output' parameter removed: ", names(outputs)[i]))
       outputs <- outputs[-i]
     }
     else
@@ -121,7 +118,7 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
       {
         for(j in c(length(outputs[[i]]):1)){
           if(!names(outputs[[i]])[j] %in% c(NA, names(default_output[[names(outputs)[i]]]))) {
-            warning(paste0("Invalid parameter removed: ", names(outputs[[i]])[j]))
+            message(paste0("\tInvalid 'Output' parameter removed: ", names(outputs[[i]])[j]))
             outputs[[i]] <- outputs[[i]][-j]
           }
         }
@@ -129,20 +126,9 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
     }
   }
 
-  prep$InputDirectory = yc$getYaml("Prep$InputDirectory", prep$InputDirectory)
-  prep$ResultsDirectory = yc$getYaml("Prep$ResultsDirectory", prep$ResultsDirectory)
-  prep$NeedsTimeCorrection = yc$getYaml("Prep$NeedsTimeCorrection", prep$NeedsTimeCorrection)
-  prep$BoxplotWithStatistics = yc$getYaml("Prep$BoxplotWithStatistics", default_prep$BoxplotWithStatistics)
-
-  sheets = yc$getYaml("Sheets", sheets)
-
-  outputs$DataAsRObject = yc$getYaml("Output$DataAsRObject", outputs$DataAsRObject)
-  outputs$DataAsXlsx= yc$getYaml("Output$DataAsXlsx", outputs$DataAsXlsx)
-  outputs$Trace = yc$getYaml("Output$Trace", outputs$Trace)
-  outputs$SEM = yc$getYaml("Output$SEM", outputs$SEM)
-  outputs$Responses = yc$getYaml("Output$Responses", outputs$Responses)
-  outputs$Auc = yc$getYaml("Output$Auc", outputs$Auc)
-  outputs$TimeSlots = yc$getYaml("Output$TimeSlots", outputs$TimeSlots)
+  yc$setYaml("Prep", prep)
+  yc$setYaml("Sheets", sheets)
+  yc$setYaml("Output", outputs)
 
 
   return(list("yc" = yc, "sheets" = sheets, "prep" = prep, "outputs" = outputs))

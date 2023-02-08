@@ -5,7 +5,7 @@
 \title{Extract all columns that contain a given string and return new data.frame.
 If no list of strings is provided, all data are returned.}
 \usage{
-get_columns_by_key(data, substr_colnames, include_col = NULL)
+get_columns_by_key(data, substr_colnames, include_col = NA_character_)
 }
 \arguments{
 \item{data}{Data frame.}

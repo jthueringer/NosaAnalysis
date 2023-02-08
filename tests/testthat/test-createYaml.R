@@ -4,7 +4,7 @@ test_that("valid and invalid yaml parameter input", {
   yaml = list()
   yaml$Prep = list()
   yaml$Prep$NeedsTimeCorrection = FALSE
-  yaml$Prep$nonsense = FALSE
+  yaml$Prep$nonsense = "hallo"
   yaml$Output = list()
   yaml$Output$SEM$nonsense = c(1,2)
   yaml$Output$SEM$before = 3.0
@@ -14,16 +14,16 @@ test_that("valid and invalid yaml parameter input", {
 
   yc = YamlClass$new(yaml)
 
-  expect_warning(preps <- createYaml(yc, prep = yaml$Prep)$prep, "Invalid parameter removed")
+  expect_message(preps <- createYaml(yc, prep = yaml$Prep)$prep, "Invalid 'Prep' parameter removed")
   expect_equal(preps$NeedsTimeCorrection, FALSE)
   expect_null(preps$nonsense)
 
-  expect_warning(outs <- createYaml(yc, outputs = yaml$Output)$outputs, "Invalid parameter removed")
+  expect_message(outs <- createYaml(yc, outputs = yaml$Output)$outputs, "Invalid 'Output' parameter removed")
   expect_null(outs$SEM$nonsense1)
   expect_equal(outs$SEM$before, 3.0)
-  expect_equal(length(outs), 7)
+  expect_equal(length(outs), 1)
 
-  expect_warning(sheets <- createYaml(yc, sheets = yaml$Sheets)$sheets, "Invalid parameter removed")
+  expect_message(sheets <- createYaml(yc, sheets = yaml$Sheets)$sheets, "Invalid 'Sheets' parameter removed")
   expect_null(sheets$Nonsense)
   expect_equal(sheets$metadata, list())
 })
@@ -33,7 +33,7 @@ test_that("invalid analyser name", {
   yaml$Output = list()
   yaml$Output$Nonsense = list()
   yc = YamlClass$new(yaml)
-  expect_warning(createYaml(yc, outputs = yaml$Output)$outputs, "Invalid parameter removed")
+  expect_message(createYaml(yc, outputs = yaml$Output)$outputs, "Invalid 'Output' parameter removed")
 })
 
 test_that("get default values, if empty yaml given", {
@@ -41,7 +41,7 @@ test_that("get default values, if empty yaml given", {
   yc = YamlClass$new(list())
   yml = createYaml(yc)
   expect_equal(length(yml$sheets), 6)
-  expect_equal(length(yml$prep), 6)
+  expect_equal(length(yml$prep), 5)
   expect_equal(length(yml$outputs), 7)
   expect_equal(yml$sheets$metadata, list())
   expect_equal(yml$prep$NeedsTimeCorrection, TRUE)

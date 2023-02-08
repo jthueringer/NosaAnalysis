@@ -30,8 +30,7 @@ SEM_Analyser = setRefClass(
         for (key in names(data_columns))
         {
           key_df = data[data_columns[[key]]] %>%
-            mutate(Time = data[[grep('Time', names(data))]])  %>%
-            filter(.data$Time >= params$StartAt) %>% na.omit()
+            mutate(Time = data[[grep('Time', names(data))]])  %>% na.omit()
 
           #############
           # trace plot with sem

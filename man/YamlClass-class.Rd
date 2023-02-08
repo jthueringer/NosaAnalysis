@@ -12,13 +12,13 @@ If the param is unknown, create it with the given default value and return the d
 \section{Fields}{
 
 \describe{
-\item{\code{yamlObj}}{A Yaml object}
+\item{\code{yaml_obj}}{A Yaml object}
 }}
 
 \section{Methods}{
 
 \describe{
-\item{\code{getYaml(param_name, default)}}{Request a specific parameter and return its value if it exists. If it does not exist it is created with a default value.}
+\item{\code{setYaml(param_name, param_list)}}{Sets a parameter list to a given parameter name.}
 
 \item{\code{writeYaml(filename)}}{Write the YAML config to a YAML file. Returns TRUE on success (always), unless writing the file generates an error.}
 }}

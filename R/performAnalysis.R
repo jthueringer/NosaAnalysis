@@ -27,12 +27,13 @@ performAnalysis = function(yaml_file = NULL )
   ############
   # prepare the Yaml
   ############
+  cat("\n\t ...Checking yaml input...\n\n")
   yaml_obj = list()
   if (check_yaml_file(yaml_file))
     yaml_obj = yaml::read_yaml(yaml_file)
 
   yaml_class = YamlClass$new(yaml_obj)
-  yaml_list = createYaml(yc=yaml_class, sheets = yaml_class$yamlObj$Sheets, prep = yaml_class$yamlObj$Prep, outputs = yaml_class$yamlObj$Output)
+  yaml_list = createYaml(yc=yaml_class, sheets = yaml_class$yaml_obj$Sheets, prep = yaml_class$yaml_obj$Prep, outputs = yaml_class$yaml_obj$Output)
 
   yaml_sheets = yaml_list$sheets
   yaml_outs = yaml_list$outputs
@@ -77,8 +78,10 @@ performAnalysis = function(yaml_file = NULL )
           break;
         }
       }
+      timename = grep("Time", names(nsr$data[[sheet]]), value=TRUE)
       df = nsr$data[[sheet]] %>%
-        select(contains(c("Time", analysis_list[[i]]$params$Key))) %>% na.omit()
+        select(contains(c("Time", analysis_list[[i]]$params$Key))) %>%
+        filter(.data[[timename]]>=yaml_prep$DataCrop$start & .data[[timename]]<=yaml_prep$DataCrop$end)
     }
 
     if(!need_break)

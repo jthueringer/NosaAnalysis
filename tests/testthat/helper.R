@@ -10,7 +10,7 @@ get_testanalyser_object = function(analyser, yaml)
 get_testyaml_object = function(tmpdir, analyser, changes = NULL)
 {
   yaml_class = YamlClass$new()
-  yaml = createYaml(yc=yaml_class)$yc$yamlObj
+  yaml = createYaml(yc=yaml_class)$yc$yaml_obj
   yaml$Prep$InputDirectory = "files"
   yaml$Prep$ResultsDirectory = paste0(tmpdir, "/result")
   yaml$Prep$BoxplotWithStatistics$method = "t.test"
@@ -28,7 +28,7 @@ get_testyaml_object = function(tmpdir, analyser, changes = NULL)
   return(yaml)
 }
 
-prepare_testyamlfile = function(tmpdir, analyser, changes = NULL)
+write_testyamlfile = function(tmpdir, analyser, changes = NULL)
 {
   yo = get_testyaml_object(tmpdir, analyser, changes)
 

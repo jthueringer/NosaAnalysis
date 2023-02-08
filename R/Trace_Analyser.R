@@ -21,8 +21,8 @@ Trace_Analyser = setRefClass(
         ylab = "\u0394 F/F"
 
         data = data %>%
-          rename(Time = contains("Time")) %>%
-          filter(Time >= params$StartAt)
+          rename(Time = contains("Time"))
+
         for (col in names(data %>% select(-Time)))
         {
           df = data.frame(Time = data$Time, Value = data[[col]]) %>% na.omit()

@@ -4,7 +4,7 @@
 #' If the object has the param, then return it.
 #' If the param is unknown, create it with the given default value and return the default.
 #'
-#' @field yamlObj A Yaml object
+#' @field yaml_obj A Yaml object
 #'
 #' @import yaml
 #' @importFrom methods new
@@ -13,31 +13,19 @@
 YamlClass = setRefClass(
   "YamlClass",
 
-  fields = list(yamlObj = "list"
+  fields = list(yaml_obj = "list"
   ),
 
   methods = list(
-    initialize = function(yamlObj = list()) {
-      .self$yamlObj = yamlObj;
+    initialize = function(yaml_obj = list()) {
+      .self$yaml_obj = yaml_obj;
       return(.self)
     },
 
-    getYaml = function(param_name, default)
+    setYaml = function(param_name, param_list)
     {
-      "Request a specific parameter and return its value if it exists. If it does not exist it is created with a default value."
-      #cat(paste0("YAML: ", param_name, " def: ", paste(default, sep="", collapse=",")))
-      param_val = eval(parse(text=paste0(".self$yamlObj$", param_name)))
-      if (is.null(param_val))
-      {
-        ## param not known --> add
-        expr = paste0(".self$yamlObj$", param_name, " = ", quote(default))
-        eval(parse(text=expr))
-        return (default)
-      }
-      else {
-        # TODO: check is.numeric or string?
-        return (param_val)
-      }
+      "Sets a parameter list to a given parameter name."
+      .self$yaml_obj[[param_name]] = param_list
     },
 
 
@@ -51,7 +39,7 @@ YamlClass = setRefClass(
 # This file has a structure, that should be kept when editing.
 #
 "
-      cat(paste0(yaml_description, yaml::as.yaml(.self$yamlObj)), file=filename)
+      cat(paste0(yaml_description, yaml::as.yaml(.self$yaml_obj)), file=filename)
 
       return (TRUE);
     }
