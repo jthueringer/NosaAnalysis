@@ -24,14 +24,14 @@ NosaResultLoader = setRefClass(
       "Read all existing nosa results of specified directory into a list of 4 data.frames (one df per nosa results sheet).
   Data.frames in the resulting list are named as the sheets:
   'Metadata', 'Raw', 'Processed', 'Baseline'.
-  The last sheet 'Spike Detection' is provided as list that contains 4 data.frames
+  The last sheet 'Spike Detection' is provided as list that contains up to 4 data.frames
   "
 
-      cat("\nsearching nosa results ", data_directory, " ...\n", sep = "")
+      cat("\n\tSearching nosa results in ", data_directory, " ...\n", sep = "")
 
       list_files = list.files(data_directory, pattern = "xlsx")
 
-      cat("found ", length(list_files), " files: ", list_files, "\n\n")
+      cat("\tFound ", length(list_files), " files.\n\n")
 
       # use user given sheet names, the metadata-sheet must be included
       sheets <- names(sheet_p)
@@ -43,11 +43,10 @@ NosaResultLoader = setRefClass(
       }
 
       tmp_df = list()
-      timelane_to_zero = FALSE
 
       for (file in list_files)
       {
-        cat("loading data of file: ", file, "\n")
+        cat("\tLoading data of file: ", file, "\n")
         complete_data <-
           mapply(function(x) {
             if (grepl("etadata", x)) y = 2
@@ -108,30 +107,6 @@ NosaResultLoader = setRefClass(
           }
         }
 
-        # check, that timelanes start with zero
-        # if needs time correction, then every timepoint starts at 0, but values don't change
-        if (prep_p$NeedsTimeCorrection)
-        {
-          for (sheet in sheets)
-          {
-            if (!identical(sheet, "metadata"))
-            {
-              time_indices = grep("^Time", colnames(complete_df[[sheet]]))
-              if (!is.null(time_indices))
-              {
-                complete_df[[sheet]][time_indices] = data.frame(sapply(time_indices, function(i) {
-                  round(complete_df[[sheet]][[time_indices]] - complete_df[[sheet]][[time_indices]][1], digits = 3)
-                }))
-              }
-            }
-          }
-          # correct the metatdata
-          complete_df[['metadata']][['source end frame']] = complete_df[['metadata']][['source end frame']] - complete_df[['metadata']][['source start frame']]
-          complete_df[['metadata']][['source start frame']][complete_df[['metadata']][['source start frame']] > 0] = 0
-          timelane_to_zero = TRUE
-        }
-
-
         # prepare data of spike detection sheet
         if ("Spike Detection" %in% sheets)
         {
@@ -168,18 +143,7 @@ NosaResultLoader = setRefClass(
         {
           for (sheet in sheets)
           {
-            if (identical(sheet, 'metadata'))
-            {
-              # TODO: check same start frame between tmp_df and complete_df
-              tmp_df[[sheet]] = do.call("rbind", list(tmp_df[[sheet]], complete_df[[sheet]]))
-              if (sum(!duplicated(tmp_df[[sheet]][['source start frame']])) != 1 )
-              {
-                stop(
-                  paste0( "\nThe timeline  of ", file, " differs from the previously loaded file(s), which therefore cannot be processed. Manually merge the different tables into one.")
-                )
-              }
-            }
-            else if (identical(sheet, 'Spike Detection'))
+            if (identical(sheet, 'Spike Detection'))
             {
               for (table in sheet_p[['Spike Detection']])
               {
@@ -208,76 +172,8 @@ NosaResultLoader = setRefClass(
         }
       }
 
-      # if (timelane_to_zero) warning("The timelanes of file ", file, " have been set to the initial value of zero because 'NeedsTimeCorrection' is selected.\n")
-      # else  warning(paste0( "The timelanes of file ", file, " does not start with frame or second '0'\n"))
       .self$data <- tmp_df
       return(NULL)
-    },
-
-    getMetadata = function()
-    {
-      "The metadata sheet data ..."
-
-      return(.self$data$metadata)
-    },
-
-    getRaw = function()
-    {
-      "The Raw sheet data ..."
-
-      result = .self$data$Raw
-
-      return(result)
-    },
-
-    getProcessed = function()
-    {
-      "The Processed sheet data ..."
-
-      result = .self$data$Processed
-
-      return(result)
-    },
-
-    getBaseline = function()
-    {
-      "The Baseline sheet data ..."
-
-      result = .self$data$Baseline
-
-      return(result)
-    },
-
-    getTrain = function()
-    {
-      "From Spike Detection sheet the train data ..."
-      result = .self$data$`Spike Detection`$Train
-
-      return(result)
-    },
-
-    getTimeOfPeak = function()
-    {
-      "From Spike Detection sheet the Time of Peak (s) data ..."
-      result = .self$data[['Spike Detection']][['Peak (s)']]
-
-      return(result)
-    },
-
-    getAmplitudeOfPeak = function()
-    {
-      "From Spike Detection sheet the Amplitude of Peak data ..."
-      result = .self$data$`Spike Detection`$`Amplitude of Peak`
-
-      return(result)
-    },
-
-    getSpikeFrequency = function()
-    {
-      "From Spike Detection sheet the Spike Frequency (#Spikes / second) data ..."
-      result = .self$data$`Spike Detection`$`Spike Frequency (#Spikes / second)`
-
-      return(result)
     }
   ) # methods
 ) # class
