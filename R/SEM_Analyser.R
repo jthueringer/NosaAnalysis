@@ -54,7 +54,7 @@ SEM_Analyser = setRefClass(
 
             for (stim in params$Stimuli)
             {
-              time_of_max = get_times_of_max_in_window(key_df, stim, params$PeakSearchWindow, "Time")
+              time_of_max = get_times_of_max_in_window(key_df, stim, stim+params$PeakSearchWindow, "Time")
 
               # empty data.frame with correct row numbers
               df_stims = data.frame(row.names = seq_along(df_average$Time))
@@ -74,8 +74,8 @@ SEM_Analyser = setRefClass(
 
                 if (params$ControlPlots)
                 {
-                  c_plot = ggpubr::ggline(tmp, x="Time", y=elem, plot_type = "l", color = "blue", numeric.x.axis=TRUE)
-                  c_plot$file_name = paste0(.self$ana_name, "control_", time_of_max[[elem]], "_", elem)
+                  c_plot = ggpubr::ggline(tmp, x="Time", y=elem, plot_type = "l", color = "green", numeric.x.axis=TRUE)
+                  c_plot$file_name = paste0(.self$ana_name, "_control_", time_of_max[[elem]], "_", elem)
                   c_plot$width = 0.5
                   plotl[[c_plot$file_name]] = c_plot
                 }

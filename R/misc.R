@@ -203,23 +203,23 @@ get_columns_by_key = function(data, substr_colnames, include_col = NA_character_
 
 #'
 #' From a given list of column names extract substrings and return a new data.frame containing the column Name with substring reduced names
-#' and the second column Factor containing the extracted substrings
+#' and the second column Key containing the extracted substrings
 #'
 #' @param names List of Strings
-#' @param factors List of (sub-)Strings
+#' @param keys List of (sub-)Strings
 #'
 #' @return Data.frame: first column holds substring reduced names, second column holds extracted substrings
 #'
 #' @importFrom rlang .data
 #'
-get_factor_df = function(names, factors)
+get_key_df = function(names, keys)
 {
-  Name = Factor = NULL
-  df = data.frame(Name = names, Factor = extract_factor(names, factors)) %>%
-    mutate(Factor = factor(.data$Factor, levels = factors)) %>%
+  Name = Key = NULL
+  df = data.frame(Name = names, Key = extract_key(names, keys)) %>%
+    mutate(Key = factor(.data$Key, levels = keys)) %>%
     mutate(Name = unname(mapply(function(name, fact) gsub(fact, "", name),
                          name=.data$Name,
-                         fact=.data$Factor)))
+                         fact=.data$Key)))
   return(df)
 }
 
@@ -227,18 +227,18 @@ get_factor_df = function(names, factors)
 #' For each column find the max value and return the timepoint.
 #'
 #' @param df Data frame containing the column "Time" as well as other columns in which the maximum value is to be found.
-#' @param stim Double representing the start time.
-#' @param window Double that defines the end time (stim+window)
-#' @param time String containing the column name of time.
+#' @param start Double that defines the start time
+#' @param end Double that defines the end time
+#' @param time_col_name String containing the column name of time.
 #'
 #' @return Named list. Names were column names from input data frame; values is the timepoint, where the max value was found
 #'
 #' @importFrom rlang .data
 #'
-get_times_of_max_in_window <- function(df, stim, window, time) {
+get_times_of_max_in_window <- function(df, start, end, time_col_name) {
   subs = df %>%
-    filter(.data[[time]] >= stim & .data[[time]] <= stim+window)
-  times_of_max = lapply(subs[grep(time, names(subs),invert=TRUE)], function(col) { subs[which.max(col), time] })
+    filter(.data[[time_col_name]] >= start & .data[[time_col_name]] <= end)
+  times_of_max = lapply(subs[grep(time_col_name, names(subs),invert=TRUE)], function(col) { subs[which.max(col), time_col_name] })
   return(times_of_max)
 }
 

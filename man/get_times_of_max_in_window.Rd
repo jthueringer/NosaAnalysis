@@ -4,16 +4,16 @@
 \alias{get_times_of_max_in_window}
 \title{For each column find the max value and return the timepoint.}
 \usage{
-get_times_of_max_in_window(df, stim, window, time)
+get_times_of_max_in_window(df, start, end, time_col_name)
 }
 \arguments{
 \item{df}{Data frame containing the column "Time" as well as other columns in which the maximum value is to be found.}
 
-\item{stim}{Double representing the start time.}
+\item{start}{Double that defines the start time}
 
-\item{window}{Double that defines the end time (stim+window)}
+\item{end}{Double that defines the end time}
 
-\item{time}{String containing the column name of time.}
+\item{time_col_name}{String containing the column name of time.}
 }
 \value{
 Named list. Names were column names from input data frame; values is the timepoint, where the max value was found

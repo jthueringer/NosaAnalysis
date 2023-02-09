@@ -57,12 +57,6 @@ Analyser = setRefClass(
       return(NULL)
     },
 
-    setDirName = function(dir_name)
-    {
-      .self$dir_name = dir_name
-      return(NULL)
-    },
-
     setData = function(df, ...)
     {
       if (is.null(df))
