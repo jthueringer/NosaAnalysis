@@ -30,7 +30,7 @@ test_that("correct calculation", {
 test_that("paired Boxplot", {
   pdf(NULL) # to prevent generating an empty RPlots.pdf
 
-  yaml = get_testyaml_object("dir", analyser = "TimeSlots", changes = "Output$Prep$BoxplotWithStatistics$paired = TRUE")
+  yaml = get_testyaml_object("dir", analyser = "TimeSlots", changes = "Prep$BoxplotWithStatistics$paired = TRUE")
   ana = get_testanalyser_object("TimeSlots", yaml)
 
   df = data.frame(seq(0, 3.2, by = 1.0/6.0),
