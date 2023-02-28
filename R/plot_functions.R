@@ -41,7 +41,7 @@ extract_plot_data = function(plot, additional = NULL)
       }
       else
       {
-        message(paste0("There is no data named", add, " in the plot. Skipping"))
+        message(paste0("There is no data named '", add, "' in the plot. Skipping"))
       }
     }
   }

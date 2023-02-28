@@ -192,11 +192,11 @@ get_columns_by_key = function(data, substr_colnames, include_col = NA_character_
   }
   if (!is.na(include_col))
   {
-    return(data %>% select(contains(c(include_col, substr_colnames))) %>% na.omit())
+    return(data %>% select(contains(c(include_col, substr_colnames))))
   }
   else
   {
-    return(data %>% select(contains(substr_colnames)) %>% na.omit())
+    return(data %>% select(contains(substr_colnames)))
   }
 }
 
@@ -288,6 +288,7 @@ separate_data_by_key = function(df, keys, global_cols = NULL)
   for (key in keys)
   {
     dfs[[key]] = df %>% select(contains(key))
+    names(dfs[[key]]) = gsub(names(dfs[[key]]), pattern = key, replacement="")
   }
   return(dfs)
 }

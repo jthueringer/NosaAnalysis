@@ -61,8 +61,8 @@ Analyser = setRefClass(
     {
       if (is.null(df))
       {
-        warning(paste0("No data available to generate plots."))
-        return(NULL)
+        warning(paste0("No data available to generate plots.\n"))
+        return(FALSE)
       }
 
       result = plot_fnc(.self, df, ...)
