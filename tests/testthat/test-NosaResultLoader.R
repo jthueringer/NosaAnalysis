@@ -3,7 +3,7 @@ test_that("no metadata sheet", {
   expect_error(expect_output(nsr$loadNosaResults("files", sheet_p = list(), prep_p)), "The metadata sheet must be included")
 })
 
-test_that("sheet not available", {
+test_that("reads 'Spike Detection' sheet with different tables", {
   nsr <- NosaResultLoader$new()
-  expect_output(nsr$loadNosaResults("files", sheet_p =list(metadata=FALSE, 'Spike Detection'="Train"), prep_p), "Searching nosa results")
+  expect_output(nsr$loadNosaResults("files", sheet_p =list(metadata=FALSE, 'Spike Detection'=c("Train", "Time of Peak (s)")), prep_p), "Searching nosa results")
 })

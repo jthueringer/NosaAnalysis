@@ -8,7 +8,7 @@ test_that("get analyser object", {
 
 test_that("generates all plots and plot data", {
   yaml = get_testyaml_object("dir", analyser = "Trace", changes = NULL)
-  ana = get_testanalyser_object("Trace", yaml)
+  ana = get_analyser_object("Trace", yaml)
 
   df = data.frame(matrix(1:50, nrow = 10, ncol = 5))
   names(df) = c("Time", letters[1:4])
@@ -20,7 +20,7 @@ test_that("generates all plots and plot data", {
 
 test_that("No column with substring 'Time' available", {
   yaml = get_testyaml_object("dir", analyser = "Trace", changes = NULL)
-  ana = get_testanalyser_object("Trace", yaml)
+  ana = get_analyser_object("Trace", yaml)
 
   df = data.frame(matrix(1:50, nrow = 10, ncol = 5))
   names(df) = c("Time", letters[1:4])
@@ -30,7 +30,7 @@ test_that("No column with substring 'Time' available", {
 
 test_that("too many time columns", {
   yaml = get_testyaml_object("dir", analyser = "Trace", changes = NULL)
-  ana = get_testanalyser_object("Trace", yaml)
+  ana = get_analyser_object("Trace", yaml)
 
   df = data.frame(matrix(1:50, nrow = 10, ncol = 5))
   names(df) = c("Time", letters[1:4])

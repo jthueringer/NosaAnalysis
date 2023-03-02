@@ -59,7 +59,7 @@ performAnalysis = function(yaml_file = NULL )
   skips = list()
   for (i in 1:length(analysis_list))
   {
-    need_break = FALSE
+    skipping = FALSE
     sheet = analysis_list[[i]]$params$Sheet
     df = data.frame()
     if (is.null(analysis_list[[i]]$params$Key))
@@ -74,7 +74,7 @@ performAnalysis = function(yaml_file = NULL )
         {
           message(paste0("\tIn ", analysis_list[[i]]$ana_name, " analysis: Can not find the keyword ", key, "\n\t..Skipping..\n"));
           skips = c(skips, names(analysis_list)[i])
-          need_break = TRUE
+          skipping = TRUE
           break;
         }
       }
@@ -84,7 +84,7 @@ performAnalysis = function(yaml_file = NULL )
         filter(.data[[timename]]>=yaml_prep$DataCrop$start & .data[[timename]]<=yaml_prep$DataCrop$end)
     }
 
-    if(!need_break)
+    if(!skipping)
     {
       if(!analysis_list[[i]]$setData(df))
       {

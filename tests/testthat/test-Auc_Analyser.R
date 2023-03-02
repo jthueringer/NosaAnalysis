@@ -6,7 +6,7 @@ test_that("get analyser object", {
 
 test_that("two keywords, two stimuli, paired data", {
   yaml = get_testyaml_object("dir", analyser = "Auc", changes = "Prep$BoxplotWithStatistics$paired = TRUE")
-  ana = get_testanalyser_object("Auc", yaml)
+  ana = get_analyser_object("Auc", yaml)
 
   input_data = data.frame(Time = seq(from=0.5, to=50, by=0.5),
                           pre_a = c(rep(2,15), 4, rep(3,67), 6, rep(2,16)),
@@ -29,7 +29,7 @@ test_that("two keywords, two stimuli, paired data", {
 
 test_that("two keywords, two stimuli, no paired data", {
   yaml = get_testyaml_object("dir", analyser = "Auc", changes = "Prep$BoxplotWithStatistics$paired = FALSE")
-  ana = get_testanalyser_object("Auc", yaml)
+  ana = get_analyser_object("Auc", yaml)
 
   input_data = data.frame(Time = seq(from=0.5, to=50, by=0.5),
                           pre_a = c(rep(2,15), 4, rep(3,67), 6, rep(2,16)),
@@ -52,7 +52,7 @@ test_that("two keywords, two stimuli, no paired data", {
 
 test_that("not enough datapoints", {
   yaml = get_testyaml_object("dir", analyser = "Auc", changes = "Prep$BoxplotWithStatistics$paired = TRUE")
-  ana = get_testanalyser_object("Auc", yaml)
+  ana = get_analyser_object("Auc", yaml)
 
   df = data.frame(Time = seq(from=0, to=41, by=0.5),
                   pre_a = rep(1,83),
@@ -79,7 +79,7 @@ test_that("too many timelanes that contain 'Time'", {
 
 test_that("no pairable data", {
   yaml = get_testyaml_object("dir", analyser = "Auc", changes = "Prep$BoxplotWithStatistics$paired = TRUE")
-  ana = get_testanalyser_object("Auc", yaml)
+  ana = get_analyser_object("Auc", yaml)
 
   df = data.frame(Time = seq(from=0.5, to=50, by=0.5),
                   pre_a = c(rep(2,15), 4, rep(3,67), 6, rep(3,16)),

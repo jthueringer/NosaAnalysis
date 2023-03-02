@@ -17,90 +17,80 @@ SEM_Analyser = setRefClass(
         datal = list()
         xlab = grep("Time", names(data), value = TRUE)
         ylab = expression(Delta ~ "F/F")
+        ycol_name = "Values"
 
         if (sum(grepl("Time", names(data))) !=1)
         {
           message(paste0("\tSEM analysis: There is no or more than one column that contains the keyword 'Time'."))
           return(list(plots = plotl, data = datal, success=FALSE))
         }
+        data = data %>% rename(Time = xlab)
 
-        # create list containing logical vectors for column selection from data
-        data_columns = get_bool_for_columns_by_key(names(data), keys=params$Key, excluded_column="Time")
-
-        for (key in names(data_columns))
+        if (isTRUE(params$Trace))
         {
-          key_df = data[data_columns[[key]]] %>%
-            mutate(Time = data[[grep('Time', names(data))]])  %>% na.omit()
+          longer_df = tidyr::pivot_longer(data, -Time, names_to = "Name", values_to = "Values", values_drop_na=TRUE) %>%
+            mutate(Name = get_key_df(Name, params$Key)$Key)
+          t_plot = ggpubr::ggline(longer_df, "Time", "Values", add="mean_se", add.params = list(color="grey"), error.plot="linerange",
+                                  plot_type = "l", color = "green", numeric.x.axis=TRUE,
+                                  xlab = xlab, ylab = ylab, facet.by = c("Name"))
+          t_plot = ggpubr::facet(t_plot, facet.by = "Name", ncol = 1)
+          t_plot$width = 1
+          t_plot$file_name = paste0(.self$ana_name, "_Trace")
+          plotl[[t_plot$file_name]] = t_plot
+          plotdata = extract_plot_data(t_plot, additional = c("ymin", "ymax"), facet_levels=params$Key)
+          datal[[t_plot$file_name]] =  plotdata  %>% rename(!!xlab:="x", !!ycol_name:="y")
+        }
 
-          #############
-          # trace plot with sem
-          if (isTRUE(params$Trace))
+        time_frequency = sum(data$Time < data$Time[1]+1)
+        timeline = seq(0-params$before,0+params$after, 1.0/time_frequency)
+        df_average = setNames(data.frame(matrix(ncol = 5, nrow = 0)), c("Time", "Name", "Values", "Key", "Stimulus"))
+
+        for (stim in params$Stimuli)
+        {
+          time_of_max = get_times_of_max_in_window(data, stim, stim+params$PeakSearchWindow, "Time")
+
+          for(elem in names(time_of_max))
           {
-            longer_df = tidyr::pivot_longer(key_df, -Time, names_to = "Name", values_to = "Values")
-            t_plot = get_SEM_plot(longer_df, "Time", "Values", xlab, ylab)
-            t_plot$file_name = paste0(.self$ana_name, "_Trace_", key)
-            t_plot$width = 2
-            plotl[[t_plot$file_name]] = t_plot
-            datal[[t_plot$file_name]] = extract_plot_data(t_plot, additional = c("ymin", "ymax"))
-          }
-
-          #############
-          # average plot with sem
-          if (params$PeakAverage)
-          {
-            # determine the time frequency in which values are available and create a sequence for the output
-            time_frequency = sum(key_df$Time < key_df$Time[1]+1)
-            df_average = data.frame(Time = seq(0-params$before,0+params$after, 1.0/time_frequency))
-
-            for (stim in params$Stimuli)
+            tmp = data %>% select(c(Time,eval(elem)))
+            tmp_values = extract_values_between_two_given_times(tmp,
+                                                                from = time_of_max[[elem]]-params$before,
+                                                                to = time_of_max[[elem]]+params$after,
+                                                                analyser = "SEM_Average")
+            if(!tmp_values$success)
             {
-              time_of_max = get_times_of_max_in_window(key_df, stim, stim+params$PeakSearchWindow, "Time")
-
-              # empty data.frame with correct row numbers
-              df_stims = data.frame(row.names = seq_along(df_average$Time))
-
-              for(elem in names(time_of_max))
-              {
-                tmp = key_df %>% select(c(Time,eval(elem)))
-                tmp_values = extract_values_between_two_given_times(tmp,
-                                                       from = time_of_max[[elem]]-params$before,
-                                                       to = time_of_max[[elem]]+params$after,
-                                                       analyser = "SEM_Average")
-                if(!tmp_values$success)
-                {
-                  return(list(plots = plotl, data = datal, success=FALSE))
-                }
-                df_stims = cbind(df_stims, tmp_values[2])
-
-                if (params$ControlPlots)
-                {
-                  c_plot = ggpubr::ggline(tmp, x="Time", y=elem, plot_type = "l", color = "green", numeric.x.axis=TRUE)
-                  c_plot$file_name = paste0(.self$ana_name, "_control_", time_of_max[[elem]], "_", elem)
-                  c_plot$width = 0.5
-                  plotl[[c_plot$file_name]] = c_plot
-                }
-              }
-              names(df_stims) = paste0(names(df_stims), "_", stim)
-              df_average = cbind(df_average, df_stims)
-              df_stims = df_stims %>% mutate(Time = df_average$Time)
-
-              longer_df = tidyr::pivot_longer(df_stims, -Time, names_to = "Name", values_to = "Values")
-              c_plot = get_SEM_plot(longer_df, "Time", "Values", xlab, ylab)
-              c_plot$file_name = paste0(.self$ana_name, "_control_avg", stim, "_", key)
-              c_plot$width = 0.5
-              plotl[[c_plot$file_name]] = c_plot
-              c_plot_data = extract_plot_data(c_plot, additional = c("ymin", "ymax"))
-              datal[[c_plot$file_name]] = c_plot_data
+              return(list(plots = plotl, data = datal, success=FALSE))
             }
-            df_average = tidyr::pivot_longer(df_average, -Time, names_to = "Name", values_to = "Values")
-            a_plot = get_SEM_plot(df_average, "Time", "Values", xlab, ylab)
-            a_plot$file_name = paste0(.self$ana_name, "_PeakAvg_", key)
-            a_plot$width = 0.5
-
-            plotl[[a_plot$file_name]] = a_plot
-            a_plot_data = extract_plot_data(a_plot, additional = c("ymin", "ymax"))
-            datal[[a_plot$file_name]] = a_plot_data
+            df_average = rbind(df_average, data.frame(Time=timeline,
+                                                      Name=elem,
+                                                      Values=tmp_values[[2]],
+                                                      Key=extract_key(elem, params$Key),
+                                                      Stimulus=paste0("x",stim)))
           }
+        }
+        df_average = df_average %>% mutate(Key = factor(Key, levels=params$Key),
+                                           Stimulus = factor(Stimulus))
+
+        c_plot = ggpubr::ggline(df_average, "Time", "Values", add="mean_se", add.params = list(color="grey"), error.plot="linerange",
+                                plot_type = "l", color = "green", numeric.x.axis=TRUE,
+                                xlab = xlab, ylab = ylab, facet.by = c("Key", "Stimulus"))
+        c_plot$file_name = paste0(.self$ana_name, "_byStimulus")
+        c_plot$width = 1
+        plotl[[c_plot$file_name]] = c_plot
+        c_plot_data = extract_plot_data(c_plot, additional = c("ymin", "ymax"),
+                                        facet_levels=paste(rep(levels(df_average$Key), each=nlevels(df_average$Stimulus)),
+                                                           levels(df_average$Stimulus), sep="_"))
+        datal[[c_plot$file_name]] = c_plot_data  %>% rename(!!xlab:="x", !!ycol_name:="y")
+
+        if (params$PeakAverage)
+        {
+          a_plot = ggpubr::ggline(df_average, "Time", "Values", add="mean_se", add.params = list(color="grey"), error.plot="linerange",
+                                  plot_type = "l", color = "green", numeric.x.axis=TRUE,
+                                  xlab = xlab, ylab = ylab, facet.by = "Key")
+          a_plot$file_name = paste0(.self$ana_name, "_PeakAvg")
+          a_plot$width = 1
+          plotl[[a_plot$file_name]] = a_plot
+          a_plot_data = extract_plot_data(a_plot, additional = c("ymin", "ymax"), facet_levels=params$Key)
+          datal[[a_plot$file_name]] = a_plot_data  %>% rename(!!xlab:="x", !!ycol_name:="y")
         }
         return(list(plots = plotl, data = datal, success = TRUE))
       },

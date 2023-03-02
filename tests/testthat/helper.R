@@ -1,5 +1,5 @@
 
-get_testanalyser_object = function(analyser, yaml)
+get_analyser_object = function(analyser, yaml)
 {
   ana = get(paste0(analyser, "_Analyser"))$new()
   ana$setParams(yaml$Output[[analyser]])

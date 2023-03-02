@@ -1,7 +1,7 @@
 test_that("correct calculation", {
   pdf(NULL) # to prevent generating an empty RPlots.pdf
   yaml = get_testyaml_object("dir", analyser = "TimeSlots")
-  ana = get_testanalyser_object("TimeSlots", yaml)
+  ana = get_analyser_object("TimeSlots", yaml)
 
   expect_equal(ana$ana_name, "TimeSlots")
 
@@ -31,7 +31,7 @@ test_that("paired Boxplot", {
   pdf(NULL) # to prevent generating an empty RPlots.pdf
 
   yaml = get_testyaml_object("dir", analyser = "TimeSlots", changes = "Prep$BoxplotWithStatistics$paired = TRUE")
-  ana = get_testanalyser_object("TimeSlots", yaml)
+  ana = get_analyser_object("TimeSlots", yaml)
 
   df = data.frame(seq(0, 3.2, by = 1.0/6.0),
                   matrix(c(runif(50, min = 0, max = 0.5),rep(NA, 50)), nrow = 20, ncol = 5, byrow = TRUE),
@@ -47,7 +47,7 @@ test_that("paired Boxplot", {
 
 test_that("wrong NormalisationKey", {
   yaml = get_testyaml_object("dir", analyser = "TimeSlots", changes = "Output$TimeSlots$NormalisationKey = 'nonsense'")
-  ana = get_testanalyser_object("TimeSlots", yaml)
+  ana = get_analyser_object("TimeSlots", yaml)
 
   df = data.frame(matrix(1:110, nrow = 10, ncol = 11))
   names(df) = c("Time", paste("pre_", letters[1:5], sep=""), paste("post_", letters[1:5], sep=""))
@@ -58,7 +58,7 @@ test_that("wrong NormalisationKey", {
 
 test_that("key not in names", {
   yaml = get_testyaml_object("dir", analyser = "TimeSlots", changes = NULL)
-  ana = get_testanalyser_object("TimeSlots", yaml)
+  ana = get_analyser_object("TimeSlots", yaml)
 
   df = data.frame(matrix(1:110, nrow = 10, ncol = 11))
   names(df) = c("Time", paste("pre_", letters[1:5], sep=""), paste("nonsense_", letters[1:5], sep=""))
@@ -69,7 +69,7 @@ test_that("key not in names", {
 
 test_that("data can not be normalised/ paired", {
   yaml = get_testyaml_object("dir", analyser = "TimeSlots", changes = NULL)
-  ana = get_testanalyser_object("TimeSlots", yaml)
+  ana = get_analyser_object("TimeSlots", yaml)
 
   df = data.frame(matrix(1:110, nrow = 10, ncol = 11))
   names(df) = c("Time", paste("pre_", letters[1:5], sep=""), paste("post_", letters[2:6], sep=""))

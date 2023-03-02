@@ -27,7 +27,7 @@ adjust_facet_width_of_plot = function(ggplot, data)
 #'
 #' @return Data frame with columns x and y, optional: requested additional values
 #'
-extract_plot_data = function(plot, additional = NULL)
+extract_plot_data = function(plot, additional = NULL, facet_levels = NULL)
 {
   plotdata = ggplot2::ggplot_build(plot)$data[[1]]
   df = data.frame(x = plotdata$x, y = plotdata$y)
@@ -43,6 +43,13 @@ extract_plot_data = function(plot, additional = NULL)
       {
         message(paste0("There is no data named '", add, "' in the plot. Skipping"))
       }
+    }
+  }
+  if (!is.null(facet_levels))
+  {
+    if (nlevels(plotdata$PANEL) == length(facet_levels))
+    {
+      df$facet = facet_levels[plotdata$PANEL]
     }
   }
   return(df)
