@@ -125,7 +125,7 @@ Auc_Analyser = setRefClass(
 
               pl_data =  data.frame(rename(pl_data, c(Time = x, Values = y)))[df_stim_reduced[[1]]$Extended,]
               t_plot = t_plot +
-                ggpubr::geom_exec(geom_area, data=pl_data, fill = "green")
+                ggpubr::geom_exec(geom_area, data=pl_data, fill = "green", alpha=0.5, position="identity")
               t_plot$file_name = paste(.self$ana_name, "trace_byStim", sep="_" )
               t_plot$width = 1
               plotl[[t_plot$file_name]] = t_plot
@@ -162,7 +162,7 @@ Auc_Analyser = setRefClass(
 
               pl_data =  data.frame(rename(pl_data, c(Time = x, Values = y)))[df_stim_reduced[[1]]$Extended,]
               t_plot = t_plot +
-                ggpubr::geom_exec(geom_area, data=pl_data, fill="green")
+                ggpubr::geom_exec(geom_area, data=pl_data, fill="green", alpha=0.5, position="identity")
               t_plot$file_name = paste(.self$ana_name, "trace_byKey", sep="_" )
               t_plot$width = 1
               plotl[[t_plot$file_name]] = t_plot

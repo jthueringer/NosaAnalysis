@@ -86,11 +86,22 @@ SEM_Analyser = setRefClass(
           a_plot = ggpubr::ggline(df_average, "Time", "Values", add="mean_se", add.params = list(color="grey"), error.plot="linerange",
                                   plot_type = "l", color = "green", numeric.x.axis=TRUE,
                                   xlab = xlab, ylab = ylab, facet.by = "Key")
-          a_plot$file_name = paste0(.self$ana_name, "_PeakAvg")
+          a_plot$file_name = paste0(.self$ana_name, "_PeakAvg_facet")
           a_plot$width = 1
           plotl[[a_plot$file_name]] = a_plot
           a_plot_data = extract_plot_data(a_plot, additional = c("ymin", "ymax"), facet_levels=params$Key)
           datal[[a_plot$file_name]] = a_plot_data  %>% rename(!!xlab:="x", !!ycol_name:="y")
+
+          a_plot = ggpubr::ggline(df_average, "Time", "Values", add=c("mean_se"),
+                                  palette=c("blue", "green"), error.plot="linerange",
+                                  plot_type = "l", numeric.x.axis=TRUE,
+                                  xlab = xlab, ylab = ylab, color = "Key")
+          # a_plot_data = extract_plot_data(a_plot, additional = c("group"), facet_levels=params$Key)
+          # a_plot = a_plot +
+          #   ggpubr::geom_exec(geom_line, data=a_plot_data, x="x", y="y", group="group", position="identity")
+          a_plot$file_name = paste0(.self$ana_name, "_PeakAvg")
+          a_plot$width = 1
+          plotl[[a_plot$file_name]] = a_plot
         }
         return(list(plots = plotl, data = datal, success = TRUE))
       },

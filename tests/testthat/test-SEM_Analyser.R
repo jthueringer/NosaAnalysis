@@ -20,13 +20,13 @@ test_that("generates plots and plot_data", {
   result_trace = data.frame(Time=c(df$Time,df$Time), Values= rep(c(2,4,6,8), each=25)) %>%
     mutate(ymin = Values, ymax = Values, facet = rep(c("pre", "post"), each=50))
   expect_true(ana$setData(df))
-  expect_equal(length(ana$plots), 3)
+  expect_equal(length(ana$plots), 4)
   expect_equal(ana$plot_data[["SEM_Trace"]], result_trace)
 
   stderror=0.333
   result_PeakAvg = data.frame(Time=seq(-2,5), Values= rep(c(3,7), each=8)) %>%
     mutate(ymin = Values-stderror, ymax = Values+stderror, facet = rep(c("pre", "post"), each=8))
-  expect_equal(ana$plot_data[["SEM_PeakAvg"]], result_PeakAvg, tolerance = 1e-4)
+  expect_equal(ana$plot_data[["SEM_PeakAvg_facet"]], result_PeakAvg, tolerance = 1e-4)
 
 })
 
