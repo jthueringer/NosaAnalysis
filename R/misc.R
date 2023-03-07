@@ -101,7 +101,7 @@ extract_key = function(names, keys)
 extract_values_between_two_given_times = function(df, from, to, analyser="")
 {
   success = TRUE
-  if (sum(df$Time == from) + sum(df$Time == to) < 2)
+  if (sum(df$Time < from)==0 | sum(df$Time > to)==0)
   {
     success = FALSE
     message(paste0("\t", analyser, " analysis: not possible, because the chosen time window is too large. Please reduce time window."))

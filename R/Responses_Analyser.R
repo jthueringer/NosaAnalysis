@@ -17,19 +17,16 @@ Responses_Analyser = setRefClass(
         path = paste(.self$ana_name, basename(.self$dir_name), sep = "_")
 
         sample_names = grep("Time", names(data), value=TRUE, invert=TRUE)
-        peak_values = data.frame(Name = sample_names, Key = extract_key(sample_names, params$Key)) %>%
-          mutate(Key = factor(.data$Key, levels = params$Key)) %>%
-          rowwise() %>%
-          mutate(Name = gsub(Key,"",Name)) %>%
-          ungroup()
+        peak_values = get_key_df(sample_names, params$Key)
+        peak_values = peak_values  %>%
+          arrange(Key, Name)
+
         for (stim in params$Stimuli)
         {
           peak_values = cbind(peak_values, unname(apply(data[data[[xlab]]>=stim-params$PeakSearchWindow$beforeStim & data[[xlab]]<=stim+params$PeakSearchWindow$afterStim,][-1],
                                             2, function(col) { col=max(col)})))
           names(peak_values)[length(peak_values)] = paste0("x", stim)
         }
-        peak_values = peak_values  %>%
-          arrange(Key, Name)
 
         for (group in params$GroupByStimulus)
         {
