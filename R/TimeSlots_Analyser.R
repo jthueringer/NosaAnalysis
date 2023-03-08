@@ -74,9 +74,13 @@ TimeSlots_Analyser = setRefClass(
         {
           b_plot = ggpubr::ggboxplot(df_means, x="Key", y="Mean", add = "jitter")
         }
-        b_plot = b_plot +
-          ggpubr::stat_compare_means(method = statistics$method, paired=statistics$paired) +
-          ggpubr::stat_compare_means(label =  "p.signif", label.y = max(df_means$Mean)*0.93)
+
+        if (length(params$Key) > 1)
+        {
+          b_plot = b_plot +
+            ggpubr::stat_compare_means(method = statistics$method, paired=statistics$paired) +
+            ggpubr::stat_compare_means(label =  "p.signif", label.y = max(df_means$Mean)*0.93)
+        }
         b_plot =  ggpubr::ggpar(b_plot, xlab = "", ylab = ylab)
         b_plot$file_name = paste0(.self$ana_name, "_Boxplot" )
         b_plot$width = 1
@@ -89,7 +93,8 @@ TimeSlots_Analyser = setRefClass(
         longer_df = tidyr::pivot_longer(sem_plot_data, -c(Time, Key), names_to = "Name", values_to = "Values")
         sem_plot = get_SEM_plot(longer_df, "Time", "Values", xlab, ylab, facetBy = "Key", scales = "free_x") +
           theme_classic()
-        sem_plot_data = extract_plot_data(sem_plot, additional = c("ymin", "ymax"))
+        sem_plot_data = extract_plot_data(sem_plot, additional = c("ymin", "ymax")) %>%
+          rename("Time" = x)
 
         sem_plot = adjust_facet_width_of_plot(sem_plot, df_by_key)
 

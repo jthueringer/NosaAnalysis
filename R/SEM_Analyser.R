@@ -51,7 +51,7 @@ SEM_Analyser = setRefClass(
 
           for(elem in names(time_of_max))
           {
-            tmp = data %>% select(c(Time,eval(elem)))
+            tmp = data %>% select(c(Time,eval(elem))) %>% na.omit()
             tmp_values = extract_values_between_two_given_times(tmp,
                                                                 from = time_of_max[[elem]]-params$before,
                                                                 to = time_of_max[[elem]]+params$after,
@@ -93,12 +93,9 @@ SEM_Analyser = setRefClass(
           datal[[a_plot$file_name]] = a_plot_data  %>% rename(!!xlab:="x", !!ycol_name:="y")
 
           a_plot = ggpubr::ggline(df_average, "Time", "Values", add=c("mean_se"),
-                                  palette=c("blue", "green"), error.plot="linerange",
+                                  palette=c("green", "blue"), error.plot="linerange",
                                   plot_type = "l", numeric.x.axis=TRUE,
                                   xlab = xlab, ylab = ylab, color = "Key")
-          # a_plot_data = extract_plot_data(a_plot, additional = c("group"), facet_levels=params$Key)
-          # a_plot = a_plot +
-          #   ggpubr::geom_exec(geom_line, data=a_plot_data, x="x", y="y", group="group", position="identity")
           a_plot$file_name = paste0(.self$ana_name, "_PeakAvg")
           a_plot$width = 1
           plotl[[a_plot$file_name]] = a_plot

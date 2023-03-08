@@ -104,12 +104,16 @@ Auc_Analyser = setRefClass(
             }
             else
             {
-              b_plot = ggpubr::ggboxplot(h, x="Key", y="AUC", facet.by="Stimuli", short.panel.labs=FALSE)
+              b_plot = ggpubr::ggboxplot(h, x="Key", y="AUC", facet.by="Stimuli", short.panel.labs=FALSE, add = "jitter")
             }
 
-            b_plot = b_plot +
-              ggpubr::stat_compare_means(method = statistics$method, paired=statistics$paired) +
-              ggpubr::stat_compare_means(label =  "p.signif", label.y = max(h$AUC)*0.93)
+            if (length(params$Key) > 1)
+            {
+              b_plot = b_plot +
+                ggpubr::stat_compare_means(method = statistics$method, paired=statistics$paired) +
+                ggpubr::stat_compare_means(label =  "p.signif", label.y = max(h$AUC)*0.93)
+            }
+            b_plot =  ggpubr::ggpar(b_plot, xlab = "", ylab = "AUC")
             b_plot$file_name = paste0(.self$ana_name,"_byStim")
 
             if (params$ControlPlots)
@@ -142,11 +146,16 @@ Auc_Analyser = setRefClass(
             }
             else
             {
-              b_plot = ggpubr::ggboxplot(h, x="Key", y="AUC")
+              b_plot = ggpubr::ggboxplot(h, x="Key", y="AUC", add = "jitter")
             }
-            b_plot = b_plot +
-              ggpubr::stat_compare_means(method = statistics$method, paired=statistics$paired) +
-              ggpubr::stat_compare_means(label =  "p.signif", label.y = max(h$AUC)*0.93)
+
+            if (length(params$Key) > 1)
+            {
+              b_plot = b_plot +
+                ggpubr::stat_compare_means(method = statistics$method, paired=statistics$paired) +
+                ggpubr::stat_compare_means(label =  "p.signif", label.y = max(h$AUC)*0.93)
+            }
+            b_plot =  ggpubr::ggpar(b_plot, xlab = "", ylab = "AUC")
             b_plot$file_name = paste0(.self$ana_name,"_byKey")
 
 

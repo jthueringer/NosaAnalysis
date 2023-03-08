@@ -45,9 +45,13 @@ Responses_Analyser = setRefClass(
               b_plot = ggpubr::ggboxplot(h, x="Key", y="MaxPeak", add = "jitter", facet.by="Stimuli", short.panel.labs=FALSE)
             }
 
-            b_plot = b_plot +
-              ggpubr::stat_compare_means(method = statistics$method, paired=statistics$paired) +
-              ggpubr::stat_compare_means(label =  "p.signif", label.y = max(h$MaxPeak)*0.93)
+            if (length(params$Key) > 1)
+            {
+              b_plot = b_plot +
+                ggpubr::stat_compare_means(method = statistics$method, paired=statistics$paired) +
+                ggpubr::stat_compare_means(label =  "p.signif", label.y = max(h$MaxPeak)*0.93)
+            }
+            b_plot =  ggpubr::ggpar(b_plot, xlab = "", ylab = ylab)
             b_plot$file_name = paste0(.self$ana_name, "_groupByStim")
             datal[[b_plot$file_name]] = peak_values
           }
@@ -63,9 +67,13 @@ Responses_Analyser = setRefClass(
             {
               b_plot = ggpubr::ggboxplot(h, x="Key", y="Mean", add = "jitter")
             }
-            b_plot = b_plot +
-              ggpubr::stat_compare_means(method = statistics$method, paired=statistics$paired) +
-              ggpubr::stat_compare_means(label =  "p.signif", label.y = max(h$Mean)*0.93)
+
+            if (length(params$Key) > 1)
+            {
+              b_plot = b_plot +
+                ggpubr::stat_compare_means(method = statistics$method, paired=statistics$paired) +
+                ggpubr::stat_compare_means(label =  "p.signif", label.y = max(h$Mean)*0.93)
+            }
             b_plot =  ggpubr::ggpar(b_plot, xlab = "", ylab = ylab)
             b_plot$file_name = .self$ana_name
             datal[[b_plot$file_name]] = h
