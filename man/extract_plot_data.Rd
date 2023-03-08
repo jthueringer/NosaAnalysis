@@ -4,12 +4,14 @@
 \alias{extract_plot_data}
 \title{Extract data computed by ggpubr functions (e.g. mean_se)}
 \usage{
-extract_plot_data(plot, additional = NULL)
+extract_plot_data(plot, additional = NULL, facet_levels = NULL)
 }
 \arguments{
 \item{plot}{Plot generated with ggpubr}
 
 \item{additional}{List containing names of other values to be extracted (e.g. 'y-max', 'y-min')}
+
+\item{facet_levels}{List of group combination in the order of the resulting facetted plot}
 }
 \value{
 Data frame with columns x and y, optional: requested additional values

@@ -50,46 +50,67 @@ performAnalysis = function(yaml_file = NULL )
   nsr <- NosaResultLoader$new()
   nsr$loadNosaResults(yaml_prep$InputDirectory, yaml_sheets, yaml_prep)
 
-
   ############
   # create output
   ############
 
   cat("\n\t ...Calculating...\n\n")
   skips = list()
-  for (i in 1:length(analysis_list))
+  for (ana_name in names(analysis_list))
   {
     skipping = FALSE
-    sheet = analysis_list[[i]]$params$Sheet
-    df = data.frame()
-    if (is.null(analysis_list[[i]]$params$Key))
+    parameter = analysis_list[[ana_name]]$params
+    data = data.frame()
+    if (ana_name == "PeakCount")
     {
-      df = nsr$data[[sheet]]
+      if ("Spike Detection" %in% names(nsr$data) & parameter$Sheet %in% names(nsr$data[['Spike Detection']]))
+      {
+        data = get_columns_by_key(nsr$data[['Spike Detection']][[parameter$Sheet]], parameter$Key)
+      }
+      else
+      {
+        message(paste0("\tEither the data sheet 'Spike Detection' was not loaded or the table ", parameter$Sheet, " does not exist. Skipping.."))
+        skipping = TRUE
+      }
     }
     else
     {
-      for (key in analysis_list[[i]]$params$Key)
+      if (parameter$Sheet %in% names(nsr$data))
       {
-        if (sum(grepl(key, names(nsr$data[[sheet]]))) == 0 )
+        data = get_columns_by_key(nsr$data[[parameter$Sheet]], parameter$Key, include_col = "Time")
+        timename = grep("Time", names(data), value=TRUE)
+        if (!is.null(parameter$Key))
         {
-          message(paste0("\tIn ", analysis_list[[i]]$ana_name, " analysis: Can not find the keyword ", key, "\n\t..Skipping..\n"));
-          skips = c(skips, names(analysis_list)[i])
-          skipping = TRUE
-          break;
+          data = data %>%
+            select(contains(c("Time", parameter$Key)))
         }
+        data = data %>%
+          filter(.data[[timename]]>=yaml_prep$DataCrop$start & .data[[timename]]<=yaml_prep$DataCrop$end)
       }
-      timename = grep("Time", names(nsr$data[[sheet]]), value=TRUE)
-      df = nsr$data[[sheet]] %>%
-        select(contains(c("Time", analysis_list[[i]]$params$Key))) %>%
-        filter(.data[[timename]]>=yaml_prep$DataCrop$start & .data[[timename]]<=yaml_prep$DataCrop$end)
+      else
+      {
+        message(paste0("\tThe data sheet ", parameter$Sheet, " does not exist. Skipping.."))
+        skipping = TRUE
+      }
+    }
+
+    for (key in parameter$Key)
+    {
+      if (sum(grepl(key, names(data))) == 0 )
+      {
+        message(paste0("\tIn ", analysis_list[[ana_name]]$ana_name, " analysis: Can not find the keyword ", key, "\n\t..Skipping..\n"));
+        skips = c(skips, ana_name)
+        skipping = TRUE
+        break;
+      }
     }
 
     if(!skipping)
     {
-      if(!analysis_list[[i]]$setData(df))
+      if(!analysis_list[[ana_name]]$setData(data))
       {
         message("\t..Skipping..\n")
-        skips = c(skips, names(analysis_list)[i])
+        skips = c(skips, ana_name)
       }
     }
   }

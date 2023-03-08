@@ -2,7 +2,6 @@
 
 export(performAnalysis)
 export(writeDefaultYaml)
-import(dplyr)
 import(ggplot2)
 import(ggpubr)
 import(openxlsx)

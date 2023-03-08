@@ -42,7 +42,7 @@ test_that("get default values, if empty yaml given", {
   yml = createYaml(yc)
   expect_equal(length(yml$sheets), 6)
   expect_equal(length(yml$prep), 5)
-  expect_equal(length(yml$outputs), 7)
+  expect_equal(length(yml$outputs), 8)
   expect_equal(yml$sheets$metadata, list())
   expect_equal(yml$prep$NeedsTimeCorrection, TRUE)
   expect_equal(yml$outputs$TimeSlots$Sheet, "Processed")

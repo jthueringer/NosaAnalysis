@@ -101,7 +101,7 @@ extract_key = function(names, keys)
 extract_values_between_two_given_times = function(df, from, to, analyser="")
 {
   success = TRUE
-  if (sum(df$Time < from)==0 | sum(df$Time > to)==0)
+  if (sum(df$Time <= from)==0 | sum(df$Time >= to)==0)
   {
     success = FALSE
     message(paste0("\t", analyser, " analysis: not possible, because the chosen time window is too large. Please reduce time window."))
@@ -184,11 +184,7 @@ get_columns_by_key = function(data, substr_colnames, include_col = NA_character_
 {
   if (is.null(substr_colnames))
   {
-    #ifelse(include_col, return(data), return(data[!grepl('Time', names(data))]))
-    if (!is.na(include_col))
-    {
-      return(data %>% select(include_col))
-    }
+    return(data)
   }
   if (!is.na(include_col))
   {

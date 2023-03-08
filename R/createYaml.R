@@ -56,6 +56,13 @@ createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
   default_output$Responses$PeakSearchWindow$beforeStim = 2
   default_output$Responses$PeakSearchWindow$afterStim = 5
   default_output$Responses$GroupByStimulus = c(FALSE, TRUE)
+  default_output$PeakCount = list()
+  default_output$PeakCount$Sheet = "Peak (s)"
+  default_output$PeakCount$threshhold = 0.5
+  default_output$PeakCount$Key = c("training")
+  default_output$PeakCount$PeakSearchWindow = list()
+  default_output$PeakCount$PeakSearchWindow$before = 2
+  default_output$PeakCount$PeakSearchWindow$after = 5
   default_output$Auc = list()
   default_output$Auc$Sheet = "Processed"
   default_output$Auc$Key = c("pre", "post")

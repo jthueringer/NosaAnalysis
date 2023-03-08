@@ -24,6 +24,7 @@ adjust_facet_width_of_plot = function(ggplot, data)
 #'
 #' @param plot Plot generated with ggpubr
 #' @param additional List containing names of other values to be extracted (e.g. 'y-max', 'y-min')
+#' @param facet_levels List of group combination in the order of the resulting facetted plot
 #'
 #' @return Data frame with columns x and y, optional: requested additional values
 #'
