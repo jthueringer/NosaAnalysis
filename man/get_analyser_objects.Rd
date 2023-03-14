@@ -4,12 +4,12 @@
 \alias{get_analyser_objects}
 \title{Get all requested analyser from outputs parameter list}
 \usage{
-get_analyser_objects(params, statistics)
+get_analyser_objects(params, manipulations)
 }
 \arguments{
 \item{params}{List of analyser to be requested as well as their user defined parameters}
 
-\item{statistics}{Named list: paired is of type boolean (TRUE samples are paired samples), method is String that names the method to use (t.test, wilcox.test).}
+\item{manipulations}{Named List}
 }
 \value{
 List of analyser objects

@@ -8,15 +8,16 @@ Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 Imports:
     methods,
-    yaml (>= 2.3.5),
-    gdata (>= 2.18.0),
     dplyr (>= 1.0.7),
+    gdata (>= 2.18.0),
     ggplot2 (>= 3.3.5),
-    tidyr (>= 1.2.0),
-    rlang (>= 0.4.11),
+    latex2exp (>= 0.9.6),
+    openxlsx,
     plotrix (>= 3.8-2),
     readxl,
-    openxlsx
+    rlang (>= 0.4.11),
+    tidyr (>= 1.2.0),
+    yaml (>= 2.3.5),
 Depends:
     ggpubr (>= 0.4.0)
 License: GPL (>= 3)

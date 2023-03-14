@@ -57,52 +57,6 @@ extract_plot_data = function(plot, additional = NULL, facet_levels = NULL)
 }
 
 #'
-#' Function to create a boxplot
-#'
-#' @param df Data frame.
-#' @param factor Column name of x axis values.
-#' @param var Column name of y axis values.
-#' @param connect Column name of factors that are connected with a line. Optional
-#' @param group Column name of factors that are connected with a line. Optional
-#'
-#' @return List of ggplot2 data
-#'
-#' @import ggplot2
-#'
-get_boxplot = function(df, factor, var, connect = NULL, group = NULL)
-{
-  plot = ggplot(df, aes(x=.data[[factor]], y=.data[[var]])) +
-    geom_boxplot() +
-    geom_point(size = 2)
-  if(!is.null(connect)) plot = plot +
-      geom_line(aes(group = .data[[connect]]))
-
-  return(plot)
-}
-
-#'
-#' Creates trace plot with standard error of mean.
-#'
-#' @param df Data frame
-#' @param x_values Name of x value column.
-#' @param y_values Name of y valu column.
-#' @param xlab String title of x axis.
-#' @param ylab String title of y axis.
-#' @param facetBy String specifying grouping variables for faceting the plot into multiple panels. Should be in the data.
-#' @param scales 	should axis scales of panels be fixed ("fixed", the default), free ("free"), or free in one dimension ("free_x", "free_y").
-#'
-#' @return List of ggpubr data
-#'
-get_SEM_plot = function(df, x_values, y_values, xlab, ylab, facetBy = NULL, scales = NULL)
-{
-  plot = ggpubr::ggline(df, x=x_values, y=y_values, add="mean_se", add.params = list(color="grey"), error.plot="linerange",
-                        plot_type = "l", color = "green", numeric.x.axis=TRUE,
-                        xlab = xlab, ylab = ylab, facet.by = facetBy, scales = scales)
-
-  return(plot)
-}
-
-#'
 #' Function to create a trace plot. Plotting the standard error of mean is optional.
 #'
 #' @param df Data frame.

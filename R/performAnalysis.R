@@ -14,10 +14,12 @@
 #' @return List with sections data and plots.
 #'
 #' @import openxlsx
+#' @import dplyr
 #' @import ggpubr
+#' @importFrom latex2exp TeX
+#' @importFrom rlang .data
 #' @importFrom stats approxfun integrate
 #' @importFrom stats na.omit
-#' @importFrom rlang .data
 #'
 #' @export
 #'
@@ -30,25 +32,32 @@ performAnalysis = function(yaml_file = NULL )
   cat("\n\t ...Checking yaml input...\n\n")
   yaml_obj = list()
   if (check_yaml_file(yaml_file))
-    yaml_obj = yaml::read_yaml(yaml_file)
+    yaml_obj = yaml::read_yaml(yaml_file, fileEncoding = "UTF-8")
 
   yaml_class = YamlClass$new(yaml_obj)
-  yaml_list = createYaml(yc=yaml_class, sheets = yaml_class$yaml_obj$Sheets, prep = yaml_class$yaml_obj$Prep, outputs = yaml_class$yaml_obj$Output)
+  yaml = createYaml(yc=yaml_class, dirs = yaml_class$yaml_obj$Directories,
+                         manipulate = yaml_class$yaml_obj$DataManipulation,
+                         plot_settings = yaml_class$yaml_obj$PlotSettings,
+                         outputs = yaml_class$yaml_obj$Output)
 
-  yaml_sheets = yaml_list$sheets
-  yaml_outs = yaml_list$outputs
-  yaml_prep = yaml_list$prep
+  dirs = yaml$dirs
+  manipulations = yaml$manipulate
+  plot_settings = yaml$plot_settings
+  plot_settings$ylabTeX = latex2exp::TeX(ifelse(manipulations$Normalization$Execute,
+                                     paste0(manipulations$Normalization$Type, " norm. ", plot_settings$ylabTeX),
+                                     plot_settings$ylabTeX))
+  outputs = yaml$outputs
 
-  output_dir = paste0(yaml_prep$ResultsDirectory, "/")
-  check_directories(yaml_prep$InputDirectory, output_dir)
+  output_dir = paste0(dirs$ResultsDirectory, "/")
+  check_directories(dirs$InputDirectory, output_dir)
 
-  analysis_list = get_analyser_objects(yaml_outs, yaml_prep$BoxplotWithStatistics)
+  analysis_list = get_analyser_objects(outputs, manipulations)
 
   ############
   # loading content of nosa results into data.frames that are stored within nested list
   ############
   nsr <- NosaResultLoader$new()
-  nsr$loadNosaResults(yaml_prep$InputDirectory, yaml_sheets, yaml_prep)
+  nsr$loadNosaResults(dirs$InputDirectory, dirs$Sheets)
 
   ############
   # create output
@@ -56,36 +65,32 @@ performAnalysis = function(yaml_file = NULL )
 
   cat("\n\t ...Calculating...\n\n")
   skips = list()
+  manipulated_data = list()
   for (ana_name in names(analysis_list))
   {
     skipping = FALSE
     parameter = analysis_list[[ana_name]]$params
     data = data.frame()
-    if (ana_name == "PeakCount")
+
+    if (parameter$Sheet %in% names(manipulated_data))
     {
-      if ("Spike Detection" %in% names(nsr$data) & parameter$Sheet %in% names(nsr$data[['Spike Detection']]))
-      {
-        data = get_columns_by_key(nsr$data[['Spike Detection']][[parameter$Sheet]], parameter$Key)
-      }
-      else
-      {
-        message(paste0("\tEither the data sheet 'Spike Detection' was not loaded or the table ", parameter$Sheet, " does not exist. Skipping.."))
-        skipping = TRUE
-      }
+      data = manipulated_data[[parameter$Sheet]]
     }
     else
     {
       if (parameter$Sheet %in% names(nsr$data))
       {
-        data = get_columns_by_key(nsr$data[[parameter$Sheet]], parameter$Key, include_col = "Time")
-        timename = grep("Time", names(data), value=TRUE)
-        if (!is.null(parameter$Key))
+        result = manipulate_data(nsr$data[[parameter$Sheet]], parameter, plot_settings, ana_name, skips)
+        if( isTRUE(result$skipping))
         {
-          data = data %>%
-            select(contains(c("Time", parameter$Key)))
+          skipping = result$skipping
+          skips=result$skips
         }
-        data = data %>%
-          filter(.data[[timename]]>=yaml_prep$DataCrop$start & .data[[timename]]<=yaml_prep$DataCrop$end)
+        else
+        {
+          data = result$data
+          manipulated_data[[parameter$Sheet]] = data
+        }
       }
       else
       {
@@ -94,19 +99,9 @@ performAnalysis = function(yaml_file = NULL )
       }
     }
 
-    for (key in parameter$Key)
-    {
-      if (sum(grepl(key, names(data))) == 0 )
-      {
-        message(paste0("\tIn ", analysis_list[[ana_name]]$ana_name, " analysis: Can not find the keyword ", key, "\n\t..Skipping..\n"));
-        skips = c(skips, ana_name)
-        skipping = TRUE
-        break;
-      }
-    }
-
     if(!skipping)
     {
+      analysis_list[[ana_name]]$setPlotSettings(plot_settings)
       if(!analysis_list[[ana_name]]$setData(data))
       {
         message("\t..Skipping..\n")
@@ -124,11 +119,11 @@ performAnalysis = function(yaml_file = NULL )
   # write output
   ############
   cat("\n\t ...Writing...\n\n")
-  if (length(yaml_outs)>0)
+  if (length(outputs)>0)
     dir.create(output_dir)
-  yaml_list$yc$writeYaml(paste0(output_dir, "configs.yaml"))
+  yaml$yc$writeYaml(paste0(output_dir, "configs.yaml"))
 
-  if ("DataAsRObject" %in% names(yaml_outs) && yaml_outs$DataAsRObject)
+  if ("DataAsRObject" %in% names(outputs) && outputs$DataAsRObject)
   {
     saveRDS(nsr, file = paste0(output_dir, "/dataframes.rds"))
   }
@@ -143,16 +138,22 @@ performAnalysis = function(yaml_file = NULL )
     }
   }
 
-  if (yaml_outs$DataAsXlsx)
+  if (outputs$DataAsXlsx)
   {
     wb = openxlsx::createWorkbook()
-    for (sheetname in names(yaml_sheets))
+
+    for (sheetname in names(dirs$Sheets))
     {
       if (!identical(sheetname, "Spike Detection"))
       {
         openxlsx::addWorksheet(wb, sheetName = sheetname)
         openxlsx::writeData(wb, sheet = sheetname, x=nsr$data[[sheetname]])
       }
+    }
+    for (sheetname in names(manipulated_data))
+    {
+      openxlsx::addWorksheet(wb, sheetName = paste0(sheetname, "_manip"))
+      openxlsx::writeData(wb, sheet = paste0(sheetname, "_manip"), x=manipulated_data[[sheetname]])
     }
     for(analysis in analysis_list)
     {
@@ -165,6 +166,6 @@ performAnalysis = function(yaml_file = NULL )
     saveWorkbook(wb, paste0(output_dir, "/data.xlsx"))
   }
 
-  return(analysis_list)
+  return(list(data=nsr$data, manipulated_data=manipulated_data, results=analysis_list))
   # return(nsr)
 }

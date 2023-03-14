@@ -18,7 +18,6 @@ Trace_Analyser = setRefClass(
           return(list(plots = plotl, data = datal, success=FALSE))
         }
         xlab = grep("Time", names(data), value = TRUE)
-        ylab = "\u0394 F/F"
 
         data = data %>%
           rename(Time = contains("Time"))
@@ -26,7 +25,12 @@ Trace_Analyser = setRefClass(
         for (col in names(data %>% select(-Time)))
         {
           df = data.frame(Time = data$Time, Value = data[[col]]) %>% na.omit()
-          plot = get_traceplot(df, "Time", "Value", xlab, ylab)
+          plot = get_traceplot(df, "Time", "Value", xlab, plot_settings$ylabTeX)
+          if (plot_settings$Threshold)
+          {
+            plot = plot +
+              geom_hline(yintercept = plot_settings$Threshold, linetype="dotted", colour="darkgreen")
+          }
           plot$file_name = paste(.self$ana_name, col, sep = "_")
           plot$width = 2
 

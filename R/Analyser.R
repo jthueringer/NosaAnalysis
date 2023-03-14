@@ -10,8 +10,7 @@
 #' @field plots List of plots
 #' @field plot_data List of data frames for each generated plot.
 #' @field params List of user defined parameters (from yaml)
-#' @field statistics List of user defined statistic settings (from yaml)
-#' @field dir_name Name of the dir in which the plots are stored.
+#' @field plot_settings List of user defined plot settings (from yaml)
 #' @field ana_name String naming the instanced analyser
 #'
 Analyser = setRefClass(
@@ -21,8 +20,7 @@ Analyser = setRefClass(
                 plots = "list",
                 plot_data = "list",
                 params = "list",
-                statistics = "list",
-                dir_name = "character",
+                plot_settings = "list",
                 ana_name = "character"
                 ),
   methods = list(
@@ -31,8 +29,7 @@ Analyser = setRefClass(
                           plots = list(),
                           plot_data = list(),
                           params = list(),
-                          statistics = list(),
-                          dir_name = NA_character_,
+                          plot_settings = list(),
                           ana_name = NA_character_)
     {
       .self$description = description;
@@ -40,14 +37,14 @@ Analyser = setRefClass(
       .self$plots = list();
       .self$plot_data = list();
       .self$params = params;
-      .self$statistics = statistics;
+      .self$plot_settings = plot_settings;
       .self$ana_name = ana_name;
       return(.self)
     },
 
-    setStatistics = function(statistics)
+    setPlotSettings = function(plot_settings)
     {
-      .self$statistics = statistics
+      .self$plot_settings = plot_settings
       return(NULL)
     },
 

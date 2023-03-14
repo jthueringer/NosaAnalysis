@@ -15,7 +15,7 @@ test_that("correct calculation", {
 
 
   boxplot_result = data.frame(Name = c(paste("_", letters[1:5], sep=""),paste("_", letters[1:5], sep="")),
-                              Key = rep(c("pre", "post"), each = 5),
+                              Key = factor(rep(c("pre", "post"), each = 5), levels=c("pre", "post")),
                               Mean = c(rep(c(0, 5.5), each = 5)))
   expect_equal(ana$plot_data[[1]], boxplot_result, tolerance = 0.5)
 
@@ -30,7 +30,7 @@ test_that("correct calculation", {
 test_that("paired Boxplot", {
   pdf(NULL) # to prevent generating an empty RPlots.pdf
 
-  yaml = get_testyaml_object("dir", analyser = "TimeSlots", changes = "Prep$BoxplotWithStatistics$paired = TRUE")
+  yaml = get_testyaml_object("dir", analyser = "TimeSlots", changes = "PlotSettings$Paired = TRUE")
   ana = get_analyser_object("TimeSlots", yaml)
 
   df = data.frame(seq(0, 3.2, by = 1.0/6.0),
@@ -40,40 +40,7 @@ test_that("paired Boxplot", {
 
   expect_true(ana$setData(df))
   boxplot_result = data.frame(Name = c(paste("_", letters[1:5], sep=""),paste("_", letters[1:5], sep="")),
-                              Key = rep(c("pre", "post"), each = 5),
+                              Key = factor(rep(c("pre", "post"), each = 5), levels=c("pre","post")),
                               Mean = c(rep(c(0, 5.5), each = 5)))
   expect_equal(ana$plot_data[[1]], boxplot_result, tolerance = 0.5)
-})
-
-test_that("wrong NormalisationKey", {
-  yaml = get_testyaml_object("dir", analyser = "TimeSlots", changes = "Output$TimeSlots$NormalisationKey = 'nonsense'")
-  ana = get_analyser_object("TimeSlots", yaml)
-
-  df = data.frame(matrix(1:110, nrow = 10, ncol = 11))
-  names(df) = c("Time", paste("pre_", letters[1:5], sep=""), paste("post_", letters[1:5], sep=""))
-
-  expect_message(success <- ana$setData(df), "TimeSlots analysis: The NormalisationKey must be one of the sample name keys.")
-  expect_false(success)
-})
-
-test_that("key not in names", {
-  yaml = get_testyaml_object("dir", analyser = "TimeSlots", changes = NULL)
-  ana = get_analyser_object("TimeSlots", yaml)
-
-  df = data.frame(matrix(1:110, nrow = 10, ncol = 11))
-  names(df) = c("Time", paste("pre_", letters[1:5], sep=""), paste("nonsense_", letters[1:5], sep=""))
-
-  expect_message(success <-ana$setData(df), "TimeSlots analysis: The Key post does not")
-  expect_false(success)
-})
-
-test_that("data can not be normalised/ paired", {
-  yaml = get_testyaml_object("dir", analyser = "TimeSlots", changes = NULL)
-  ana = get_analyser_object("TimeSlots", yaml)
-
-  df = data.frame(matrix(1:110, nrow = 10, ncol = 11))
-  names(df) = c("Time", paste("pre_", letters[1:5], sep=""), paste("post_", letters[2:6], sep=""))
-
-  expect_message(success <-ana$setData(df), "TimeSlots analysis: Some of the TimeSlot samples can not be paired.")
-  expect_false(success)
 })

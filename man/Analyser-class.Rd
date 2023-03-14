@@ -23,9 +23,7 @@ are generated at runtime.
 
 \item{\code{params}}{List of user defined parameters (from yaml)}
 
-\item{\code{statistics}}{List of user defined statistic settings (from yaml)}
-
-\item{\code{dir_name}}{Name of the dir in which the plots are stored.}
+\item{\code{plot_settings}}{List of user defined plot settings (from yaml)}
 
 \item{\code{ana_name}}{String naming the instanced analyser}
 }}

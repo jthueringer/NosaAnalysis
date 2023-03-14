@@ -1,16 +1,5 @@
 
 #'
-#' From row return standard error of mean for arrays.
-#'
-#' @param x An array containing numeric values.
-#'
-#' @return SEM of row.
-#'
-rowSem <- function(x) {
-  return(sqrt(rowSums((x - rowMeans(x))^2)/(dim(x)[2]*(dim(x)[2] - 1))))
-}
-
-#'
 #' Tests whether user-defined input and output directories and their paths exist.
 #' The output directory should not yet exist, but the input directory should.
 #'
@@ -116,10 +105,10 @@ extract_values_between_two_given_times = function(df, from, to, analyser="")
 #' Get all requested analyser from outputs parameter list
 #'
 #' @param params List of analyser to be requested as well as their user defined parameters
-#' @param statistics Named list: paired is of type boolean (TRUE samples are paired samples), method is String that names the method to use (t.test, wilcox.test).
+#' @param manipulations Named List
 #' @return List of analyser objects
 #'
-get_analyser_objects = function(params, statistics)
+get_analyser_objects = function(params, manipulations)
 {
   analysers = list()
   for (ana_name in names(params))
@@ -130,42 +119,11 @@ get_analyser_objects = function(params, statistics)
       if (inherits(ana, "refObjectGenerator"))
       {
         analysers[[ana_name]] = ana$new()
-        analysers[[ana_name]]$setParams(params[[ana_name]])
-        analysers[[ana_name]]$setStatistics(statistics)
+        analysers[[ana_name]]$setParams(c(params[[ana_name]], manipulations))
       }
     }
   }
   return(analysers)
-}
-
-#'
-#' Takes a list of columnnames as well as a list of strings (keys) to search for in columnnames.
-#' Returns a list that holds for each search string a named list containg booleans for
-#' the present of the string.
-#' If no search strings are available the returning list contains of TRUEs except for
-#' the excluded_column.
-#'
-#' @param columnnames List of strings.
-#' @param keys List of search strings.
-#' @param excluded_column String
-#'
-#' @return List that holds for each search string a named list containg booleans for
-#' the present of the string.
-#'
-get_bool_for_columns_by_key <- function(columnnames, keys=NULL, excluded_column = FALSE) {
-  data_columns = list()
-  if (!length(keys))
-  {
-    data_columns[['all']] = !grepl(excluded_column, columnnames)
-  }
-  else
-  {
-    for (key in keys)
-    {
-      data_columns[[ key ]] = grepl(key, columnnames)
-    }
-  }
-  return(data_columns)
 }
 
 #'
@@ -239,26 +197,116 @@ get_times_of_max_in_window <- function(df, start, end, time_col_name) {
 }
 
 #'
-#' At any given time, with a defined time period, the data is extracted and written separately into individual tables.
-#'
-#' @param df Data.frame
-#' @param windowlength Double.
-#' @param timepoints List with one ore more timepoints.
-#' @param larger_window Optional boolean. If TRUE, the amount of data is extended by two seconds in each direction.#'
-#'
-#' @return List of data.frames.
 #'
 #'
-reduce_data_by_window = function(df, windowlength, timepoints, larger_window = 0)
+#'
+#'
+#'
+#'
+#'
+manipulate_data = function(data, params, plot_settings, ana_name, skips)
 {
-  dfs = list()
-  for (tp in timepoints)
+  skipping = FALSE
+  if(!isFALSE(params$GroupingKeyWords))
   {
-    tmp = df[df$Time>tp-larger_window & df$Time<tp+windowlength+larger_window,] %>%
-      mutate(Extended = if_else(.data$Time>tp & .data$Time<tp+windowlength, TRUE, FALSE))
-    dfs[[as.character(tp)]] = tmp
+    for (key in params$GroupingKeyWords)
+    {
+      if (sum(grepl(key, names(data))) == 0 )
+      {
+        message(paste0("\tIn ", ana_name, " analysis: Can not find the keyword ", key, "\n\t..Skipping..\n"));
+        skips = c(skips, ana_name)
+        skipping = TRUE
+        break;
+      }
+    }
   }
-  return(dfs)
+
+
+  if (plot_settings$Paired)
+  {
+    key_df =  get_key_df(grep("Time", names(data), invert=TRUE, value=TRUE), params$GroupingKeyWords)
+    key_df=key_df %>% count(Name)
+    if (nrow(key_df) != nrow(key_df%>%filter(n==length(params$GroupingKeyWords))))
+    {
+      message("\tNOTE: Not all of the samples can be paired.\n\t...Changing the yaml value for 'paired' to 'no'")
+      plot_settings$Paired = FALSE
+    }
+  }
+
+  if (params$Sheet %in% c("Raw", "Processed", "Baseline", "Train") & !skipping)
+  {
+    data = get_columns_by_key(data, params$GroupingKeyWords, include_col = "Time")
+    timename = grep("Time", names(data), value=TRUE)
+
+    if(params$Normalization$Execute)
+    {
+      data = normalize(data, params$Normalization, params$GroupingKeyWords)
+      if (isFALSE(data))
+      {
+        skips = c(skips, ana_name)
+        skipping = TRUE
+      }
+    }
+
+    if(!skipping)
+    {
+      data = data %>%
+        filter(.data[[timename]]>=params$DataCrop$Start & .data[[timename]]<=params$DataCrop$End)
+    }
+  }
+  else if (!skipping)
+  {
+    data = get_columns_by_key(data, params$GroupingKeyWords)
+  }
+  return(list(skipping=skipping, data=data, skips=skips))
+}
+
+#'
+#'
+#'
+#'
+#'
+#'
+#'
+#'
+#'
+normalize = function(data, params, grouping_keys)
+{
+  if (sum(grepl(params$KeyWord, names(data)))>0)
+  {
+    timename = grep("Time", names(data), value=TRUE)
+    tmp = data %>%
+      filter(!!as.symbol(timename) >= params$From & !!as.symbol(timename) <= params$To) %>%
+      select(contains(c(params$KeyWord))) %>%
+      rename_with(~ gsub(params$KeyWord, "", .x, fixed = TRUE), contains(params$KeyWord)) %>% na.omit()
+    norm_means = rowMeans(data.frame(t(tmp)))
+  }
+  else
+  {
+    message(paste0("\tCan`t normalize data: The 'KeyWord' must be one of the sample name keywords."))
+    return(success=FALSE)
+  }
+
+  if (params$Type == "absolute")
+  {
+    for (name in names(norm_means))
+    {
+      data = data %>% mutate(across(grep(name, names(data)), ~ .x -unname(norm_means[names(norm_means) == name])))
+    }
+  }
+  else if (params$Type == "relative")
+  {
+    for (name in names(norm_means))
+    {
+      data = data %>% mutate(across(grep(name, names(data)), ~ .x /unname(norm_means[names(norm_means) == name])))
+    }
+  }
+  else
+  {
+    message(paste0("\tCan`t normalize data: The Type must be either 'relative' or 'absolute."))
+    return(success=FALSE)
+  }
+  return(data)
 }
 
 #'

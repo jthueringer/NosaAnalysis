@@ -7,9 +7,11 @@ test_that("get analyser object", {
 
 test_that("generates plots and plot_data", {
   yaml = get_testyaml_object("dir", analyser = "SEM",
-                             changes = c("Output$SEM$Stimuli = c(10, 30)",
-                                         "Output$SEM$PeakSearchWindow = 5",
-                                         "Output$SEM$before = 2", "Output$SEM$after = 5"))
+                             changes = c("DataManipulation$Stimulus = c(10, 30)",
+                                         "DataManipulation$PeakSearchWindow$BeforeStim = 0",
+                                         "DataManipulation$PeakSearchWindow$AfterStim = 5",
+                                         "DataManipulation$CalculationWindow$BeforePeak = 2",
+                                         "DataManipulation$CalculationWindow$AfterPeak = 5"))
   ana = get_analyser_object("SEM", yaml)
 
   df = data.frame(seq(0, 49),
@@ -30,22 +32,12 @@ test_that("generates plots and plot_data", {
 
 })
 
-test_that("no column with substring 'Time' available", {
-  yaml = get_testyaml_object("dir", analyser = "SEM")
-  ana = get_analyser_object("SEM", yaml)
-  expect_message(success <- ana$setData(data.frame(time=c(1:3), a=c(1:3))), "SEM analysis: There is no or more")
-  expect_false(success)
-})
-
-test_that("too many 'Time' columns", {
-  yaml = get_testyaml_object("dir", analyser = "SEM")
-  ana = get_analyser_object("SEM", yaml)
-  expect_message(success <- ana$setData(data.frame(Time1=c(1:3), Time2=c(1:3), a=c(1:3))), "SEM analysis: There is no or more")
-  expect_false(success)
-})
-
 test_that("time window too large", {
-  yaml = get_testyaml_object("dir", analyser = "SEM")
+  yaml = get_testyaml_object("dir", analyser = "SEM", changes = c("DataManipulation$Stimulus = c(5,40)",
+                             "DataManipulation$PeakSearchWindow$BeforeStim = 0",
+                             "DataManipulation$PeakSearchWindow$AfterStim = 5",
+                             "DataManipulation$CalculationWindow$BeforePeak = 2",
+                             "DataManipulation$CalculationWindow$BeforePeak = 2"))
   ana = get_analyser_object("SEM", yaml)
   df = data.frame(matrix(rep(seq(1, 46),each=5), nrow = 46, ncol = 5, byrow = TRUE))
   names(df) = c("Time", paste("pre", letters[1:2], sep="_"), paste("post", letters[1:2], sep="_"))

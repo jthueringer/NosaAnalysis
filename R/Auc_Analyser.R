@@ -10,49 +10,31 @@ Auc_Analyser = setRefClass(
       {
         plotl = list()
         datal = list()
-        ylab = expression(Delta ~ "F/F")
-
-        if (sum(grepl("Time", names(data))) !=1)
-        {
-          message(paste0("\tAUC analysis: There is no or more than one column that contains the keyword 'Time'."))
-          return(list(plots = plotl, data = datal, success=FALSE))
-        }
         xlab = grep("Time", names(data), value=TRUE)
-        df_auc = get_columns_by_key(data, params$Key, include_col = xlab)
+        df_auc = data
         names(df_auc)[grep("Time", names(df_auc))] = "Time"
-
-        if (statistics$paired)
-        {
-          key_df =  get_key_df(grep("Time", names(df_auc), invert=TRUE, value=TRUE), params$Key)
-          key_df=key_df %>% count(Name)
-          if (nrow(key_df) != nrow(key_df%>%filter(n==length(params$Key))))
-          {
-            message("\tNOTE: Not all of the samples can be paired.\n\t...Changing the yaml value for 'paired' to 'no'")
-            .self$statistics$paired = FALSE
-          }
-        }
 
         df_stim_reduced = list()
         trace_data = data.frame()
 
-        for (stim in params$Stimuli)
+        for (stim in params$Stimulus)
         {
-          time_of_max = get_times_of_max_in_window(df_auc, start=stim-params$PeakSearchWindow$before,
-                                                   end=stim+params$PeakSearchWindow$after, time_col_name = "Time")
+          time_of_max = get_times_of_max_in_window(df_auc, start=stim-params$PeakSearchWindow$BeforeStim,
+                                                   end=stim+params$PeakSearchWindow$AfterStim, time_col_name = "Time")
 
           # empty data.frame with correct row numbers
           stim_col_name = paste0("x", stim)
           time_frequency = sum(df_auc$Time < df_auc$Time[1]+1)
           df_stim_reduced[[stim_col_name]] = data.frame(Extended = c(rep(FALSE, 2*time_frequency),
-                                                                     rep(TRUE, (params$OutputWindow$before+params$OutputWindow$after)*time_frequency+1),
+                                                                     rep(TRUE, (params$CalculationWindow$BeforePeak+params$CalculationWindow$AfterPeak)*time_frequency+1),
                                                                      rep(FALSE, 2*time_frequency)),
-                                                        Time = seq(0-params$OutputWindow$before-2,
-                                                                   0+params$OutputWindow$after+2, 1.0/time_frequency))
+                                                        Time = seq(0-params$CalculationWindow$BeforePeak-2,
+                                                                   0+params$CalculationWindow$AfterPeak+2, 1.0/time_frequency))
 
           for(elem in names(time_of_max))
           {
             tmp = df_auc %>% select(c(Time,eval(elem))) %>%
-              filter(.data$Time >= time_of_max[[elem]]-params$OutputWindow$before-2 & .data$Time <= time_of_max[[elem]]+params$OutputWindow$after+2)
+              filter(.data$Time >= time_of_max[[elem]]-params$CalculationWindow$BeforePeak-2 & .data$Time <= time_of_max[[elem]]+params$CalculationWindow$AfterPeak+2)
             if (length(tmp[[elem]]) < length(df_stim_reduced[[stim_col_name]]$Time))
             {
               message(paste0("\tAUC_Average analysis is not possible, because ", (length(df_stim_reduced[[stim_col_name]]$Time)-length(tmp[[elem]]))/time_frequency,
@@ -63,17 +45,17 @@ Auc_Analyser = setRefClass(
           }
           trace_data = rbind(trace_data, tidyr::pivot_longer(df_stim_reduced[[stim_col_name]], cols=3:length(names(df_stim_reduced[[stim_col_name]])),
                                        names_to = "Name", values_to = "Values") %>%
-            mutate(get_key_df(.data$Name, params$Key), Stimulus = factor(stim_col_name)))
-          df_stim_reduced[[stim_col_name]] = separate_data_by_key(df_stim_reduced[[stim_col_name]], keys=params$Key,
+            mutate(get_key_df(.data$Name, params$GroupingKeyWord), Stimulus = factor(stim_col_name)))
+          df_stim_reduced[[stim_col_name]] = separate_data_by_key(df_stim_reduced[[stim_col_name]], keys=params$GroupingKeyWord,
                                                                   global_cols = c("Time", "Extended"))
         }
 
         sample_names = grep("Time", names(df_auc), value=TRUE, invert=TRUE)
-        auc = get_key_df(names=sample_names, keys=params$Key)
+        auc = get_key_df(names=sample_names, keys=params$GroupingKeyWord)
         for (stim in names(df_stim_reduced))
         {
           stim_auc = NULL
-          for (key in params$Key)
+          for (key in params$GroupingKeyWord)
           {
             for (sample in names(df_stim_reduced[[stim]][[key]]))
             {
@@ -96,9 +78,9 @@ Auc_Analyser = setRefClass(
           if (isTRUE(group))
           {
             h = tidyr::pivot_longer(auc, (names(auc %>% select(-c("Name", "Key")))), names_to = "Stimuli", values_to = "AUC") %>%
-              mutate(Stimuli = factor(.data$Stimuli, levels = paste0("x",params$Stimuli)))
+              mutate(Stimuli = factor(.data$Stimuli, levels = paste0("x",params$Stimulus)))
 
-            if (statistics$paired)
+            if (plot_settings$Paired)
             {
              b_plot = ggpubr::ggpaired (h, x="Key", y="AUC", id="Name", line.color = "gray", facet.by="Stimuli", short.panel.labs=FALSE)
             }
@@ -107,13 +89,13 @@ Auc_Analyser = setRefClass(
               b_plot = ggpubr::ggboxplot(h, x="Key", y="AUC", facet.by="Stimuli", short.panel.labs=FALSE, add = "jitter")
             }
 
-            if (length(params$Key) > 1)
+            if (length(params$GroupingKeyWord) > 1)
             {
               b_plot = b_plot +
-                ggpubr::stat_compare_means(method = statistics$method, paired=statistics$paired) +
+                ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=plot_settings$Paired) +
                 ggpubr::stat_compare_means(label =  "p.signif", label.y = max(h$AUC)*0.93)
             }
-            b_plot =  ggpubr::ggpar(b_plot, xlab = "", ylab = "AUC")
+            b_plot =  b_plot + xlab("") + ylab(plot_settings$ylabTeX)
             b_plot$file_name = paste0(.self$ana_name,"_byStim")
 
             if (params$ControlPlots)
@@ -121,11 +103,12 @@ Auc_Analyser = setRefClass(
               ## trace plot with auc under curve
               t_plot = ggpubr::ggline(trace_data, x="Time", y="Values", add="mean_se", error.plot="linerange",
                                       plot_type = "l", numeric.x.axis=TRUE, color="grey", facet.by = c("Stimulus", "Key"),
-                                      xlab=xlab, ylab=ylab)
+                                      xlab=xlab) +
+                ylab(plot_settings$ylabTeX)
 
               pl_data = extract_plot_data(t_plot, additional = c("ymin", "ymax"))
-              pl_data$Key = factor(rep(rep(params$Key, each=length(df_stim_reduced[[1]]$Time)), times=length(params$Stimuli)))
-              pl_data$Stimulus = factor(rep(paste0("x",params$Stimuli), each=length(params$Key)*length(df_stim_reduced[[1]]$Time)))
+              pl_data$Key = factor(rep(rep(params$GroupingKeyWord, each=length(df_stim_reduced[[1]]$Time)), times=length(params$Stimulus)))
+              pl_data$Stimulus = factor(rep(paste0("x",params$Stimulus), each=length(params$GroupingKeyWord)*length(df_stim_reduced[[1]]$Time)))
 
               pl_data =  data.frame(rename(pl_data, c(Time = x, Values = y)))[df_stim_reduced[[1]]$Extended,]
               t_plot = t_plot +
@@ -140,7 +123,7 @@ Auc_Analyser = setRefClass(
           {
             h = auc %>% select(c("Name", "Key"))
             h$AUC = rowMeans(auc %>% select(-c("Name", "Key")))
-            if(statistics$paired)
+            if(plot_settings$Paired)
             {
               b_plot = ggpubr::ggpaired (h, x="Key", y="AUC", id="Name", line.color = "gray")
             }
@@ -149,13 +132,13 @@ Auc_Analyser = setRefClass(
               b_plot = ggpubr::ggboxplot(h, x="Key", y="AUC", add = "jitter")
             }
 
-            if (length(params$Key) > 1)
+            if (length(params$GroupingKeyWord) > 1)
             {
               b_plot = b_plot +
-                ggpubr::stat_compare_means(method = statistics$method, paired=statistics$paired) +
+                ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=plot_settings$Paired) +
                 ggpubr::stat_compare_means(label =  "p.signif", label.y = max(h$AUC)*0.93)
             }
-            b_plot =  ggpubr::ggpar(b_plot, xlab = "", ylab = "AUC")
+            b_plot =  b_plot + xlab("") + ylab(plot_settings$ylabTeX)
             b_plot$file_name = paste0(.self$ana_name,"_byKey")
 
 
@@ -164,10 +147,11 @@ Auc_Analyser = setRefClass(
               ## trace plot with auc under curve
               t_plot = ggpubr::ggline(trace_data, x="Time", y="Values", add="mean_se", error.plot="linerange",
                                       plot_type = "l", numeric.x.axis=TRUE, color="grey", facet.by = "Key",
-                                      xlab=xlab, ylab=ylab)
+                                      xlab=xlab) +
+                ylab(plot_settings$ylabTeX)
 
               pl_data = extract_plot_data(t_plot, additional = c("ymin", "ymax"))
-              pl_data$Key = factor(rep(params$Key, each=length(df_stim_reduced[[1]]$Time)))
+              pl_data$Key = factor(rep(params$GroupingKeyWord, each=length(df_stim_reduced[[1]]$Time)))
 
               pl_data =  data.frame(rename(pl_data, c(Time = x, Values = y)))[df_stim_reduced[[1]]$Extended,]
               t_plot = t_plot +

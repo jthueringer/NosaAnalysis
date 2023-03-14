@@ -2,8 +2,8 @@
 get_analyser_object = function(analyser, yaml)
 {
   ana = get(paste0(analyser, "_Analyser"))$new()
-  ana$setParams(yaml$Output[[analyser]])
-  ana$setStatistics(yaml$Prep$BoxplotWithStatistics)
+  ana$setParams(c(yaml$DataManipulation, yaml$Output[[analyser]]))
+  ana$setPlotSettings(yaml$PlotSettings)
   return(ana)
 }
 
@@ -11,11 +11,11 @@ get_testyaml_object = function(tmpdir, analyser, changes = NULL)
 {
   yaml_class = YamlClass$new()
   yaml = createYaml(yc=yaml_class)$yc$yaml_obj
-  yaml$Prep$InputDirectory = "files"
-  yaml$Prep$ResultsDirectory = paste0(tmpdir, "/result")
-  yaml$Prep$BoxplotWithStatistics$method = "t.test"
+  yaml$Directories$InputDirectory = "files"
+  yaml$Directories$ResultsDirectory = paste0(tmpdir, "/result")
+  yaml$PlotSettings$TestMethod = "t.test"
 
-  yaml$Sheets = yaml$Sheets[names(yaml$Sheets) %in% c("metadata","Processed") == TRUE]
+  yaml$Directories$Sheets = yaml$Directories$Sheets[names(yaml$Directories$Sheets) %in% c("metadata","Processed") == TRUE]
   yaml$Output = yaml$Output[names(yaml$Output) %in% c("DataAsRObject", "DataAsXlsx", analyser) == TRUE]
 
   if (!is.null(changes))

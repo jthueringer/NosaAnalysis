@@ -14,94 +14,85 @@ TimeSlots_Analyser = setRefClass(
         plotl = list()
         datal = list()
         xlab = grep("Time", names(data), value = TRUE)
-        ylab = "Mean norm. Fluorescence"
         data = data %>%
           rename(Time = contains("Time"))
 
-        df_by_key = list()
         df_means = setNames(data.frame(matrix(ncol = 3, nrow = 0)), c("Name", "Key", "Mean"))
 
-        norm_means = list()
-
-        if (params$NormalisationKey %in% params$Key)
+        for (key in params$GroupingKeyWords)
         {
-          tmp = data %>%
-            select(contains(c(params$NormalisationKey))) %>%
-            rename_with(~ gsub(params$NormalisationKey, "", .x, fixed = TRUE), contains(params$NormalisationKey)) %>% na.omit()
-          norm_means = data.frame(t(tmp)) %>%
-            mutate(Mean = rowMeans(.), Name = rownames(.)) %>%
+          if (key==params$Normalization$KeyWord)
+          {
+            time_slot = data %>%
+              select(contains(c("Time",key))) %>%
+              filter(Time >= params$Normalization$From & Time <= params$Normalization$To) %>% na.omit()
+          }
+          else
+          {
+            time_slot = data %>%
+              select(contains(c("Time",key))) %>%
+              filter(Time >= params$Begin & Time <= params$End) %>% na.omit()
+          }
+          means = data.frame(t(time_slot %>% select(-Time))) %>%
+            mutate(Mean = unname(rowMeans(., na.rm = TRUE))) %>%
             select(Mean)
-        }
-        else
-        {
-          message(paste0("\tTimeSlots analysis: The NormalisationKey must be one of the sample name keys."))
-          return(list(plots = plotl, data = datal, success=FALSE))
+          df_means = rbind(df_means, cbind(get_key_df(names(time_slot %>% select(-Time)), key), Mean = means$Mean))
         }
 
-        for (key in params$Key)
+        if(plot_settings$Paired)
         {
-          df_by_key[[key]] = data %>%
-            select(contains(c("Time", key))) %>%
-            rename_with(~ gsub(key, "", .x, fixed = TRUE), contains(key)) %>% na.omit()
-          if (ncol(df_by_key[[key]])<2)
-          {
-            message(paste0("\tTimeSlots analysis: The Key ", key, " does not exist in the data names."))
-            return(list(plots = plotl, data = datal, success=FALSE))
-          }
-          if (!identical(names(norm_means$Mean), names(df_by_key[[key]][names(df_by_key[[key]]) != "Time"])))
-          {
-            message(paste0("\tTimeSlots analysis: Some of the TimeSlot samples can not be paired and therefore can not be normalised."))
-            return(list(plots = plotl, data = datal, success=FALSE))
-          }
-          normalised = data.frame(sapply(names(norm_means$Mean),
-                                         function(name){df_by_key[[key]][[name]]-unname(norm_means$Mean[name])}))
-
-          names(normalised) = names(norm_means$Mean)
-          df_by_key[[key]] = cbind(Time = df_by_key[[key]]$Time, normalised)
-
-          means_tmp = data.frame(t(df_by_key[[key]] %>% select(-c(Time)))) %>%
-            mutate(Mean = rowMeans(.), Key = key, Name = rownames(.)) %>%
-            mutate(Name = gsub(key,"",Name)) %>%
-            select(Name, Key, Mean)
-          df_means = rbind(df_means, means_tmp%>% mutate(Mean = unname(Mean)), make.row.names = FALSE)
-        }
-
-        if(statistics$paired)
-        {
-          b_plot = ggpubr::ggpaired (df_means, x="Key", y="Mean", line.color = "gray")
+          b_plot = ggpubr::ggpaired (df_means, x="Key", y="Mean", id = "Name", line.color = "gray")
         }
         else
         {
           b_plot = ggpubr::ggboxplot(df_means, x="Key", y="Mean", add = "jitter")
         }
 
-        if (length(params$Key) > 1)
+        if (length(params$GroupingKeyWord) > 1)
         {
           b_plot = b_plot +
-            ggpubr::stat_compare_means(method = statistics$method, paired=statistics$paired) +
+            ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=plot_settings$Paired) +
             ggpubr::stat_compare_means(label =  "p.signif", label.y = max(df_means$Mean)*0.93)
         }
-        b_plot =  ggpubr::ggpar(b_plot, xlab = "", ylab = ylab)
+        b_plot =  b_plot + xlab("") + ylab(plot_settings$ylabTeX)
         b_plot$file_name = paste0(.self$ana_name, "_Boxplot" )
         b_plot$width = 1
         plotl[[b_plot$file_name]] = b_plot
         datal[[b_plot$file_name]] = df_means
 
-        sem_plot_data = bind_rows(df_by_key, .id = "Key") %>%
-          mutate(Key = factor(Key, levels = params$Key))
+        sem_plot_data = data.frame()
+        for (key in params$GroupingKeyWords)
+        {
+          sem_plot_data = bind_rows(sem_plot_data, data %>% select(contains(c("Time", key))) %>%
+                                      rename_with(~gsub(key, "", .x, fixed=TRUE)) %>%
+                                      mutate(Key=factor(key, levels=params$GroupingKeyWords)) %>% na.omit())
+        }
 
         longer_df = tidyr::pivot_longer(sem_plot_data, -c(Time, Key), names_to = "Name", values_to = "Values")
-        sem_plot = get_SEM_plot(longer_df, "Time", "Values", xlab, ylab, facetBy = "Key", scales = "free_x") +
-          theme_classic()
-        sem_plot_data = extract_plot_data(sem_plot, additional = c("ymin", "ymax")) %>%
+        sem_plot = ggpubr::ggline(longer_df, x="Time", y="Values", add="mean_se", add.params = list(color="grey"),
+                                  error.plot="linerange", plot_type = "l", color = "green",
+                                  numeric.x.axis=TRUE, facet.by = "Key", scales = "free_x")
+
+        sem_plot =  sem_plot +
+          ylab(plot_settings$ylabTeX) +
+          sapply(c(params$Normalization$From, params$Normalization$To),
+                 function(xint) geom_vline(data=filter(sem_plot_data, Key==params$Normalization$KeyWord),
+                                           aes(xintercept=xint), linetype="dotted", colour="darkgreen")) +
+          mapply(function(key, x) geom_vline(data=filter(sem_plot_data, Key==key),
+                                             aes(xintercept=x), linetype="dotted", colour="darkgreen"),
+                 params$GroupingKeyWords[!params$GroupingKeyWords %in% params$Normalization$KeyWord],
+                 c(params$Begin, params$End))
+
+        sem_plot_data_extr = extract_plot_data(sem_plot, additional = c("ymin", "ymax")) %>%
           rename("Time" = x)
 
-        sem_plot = adjust_facet_width_of_plot(sem_plot, df_by_key)
+        sem_plot = adjust_facet_width_of_plot(sem_plot,
+                                              lapply(params$GroupingKeyWord, function(key) sem_plot_data %>% filter(Key==key)))
 
         sem_plot$file_name = paste0(.self$ana_name, "_Trace" )
         sem_plot$width = 2
         plotl[[sem_plot$file_name]] = sem_plot
-        datal[[sem_plot$file_name]] = sem_plot_data
+        datal[[sem_plot$file_name]] = sem_plot_data_extr
 
         return(list(plots = plotl, data = datal, success = TRUE))
       },

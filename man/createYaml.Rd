@@ -5,16 +5,22 @@
 \title{Creates a yaml file storing the parameters that are used for the analysis of the NOSA software results
 and returns these parameters as well as a list of available Metrics objects.}
 \usage{
-createYaml(yc, sheets = list(), prep = list(), outputs = list())
+createYaml(
+  yc,
+  dirs = list(),
+  manipulate = list(),
+  plot_settings = list(),
+  outputs = list()
+)
 }
 \arguments{
 \item{yc}{A yaml class object created by YAMLClass$new()}
 
+\item{outputs}{List of metric names that should be plotted; if empty, it is filled with defaults}
+
 \item{sheets}{List sheet names that should be loaded; if empty, it is filled with defaults}
 
 \item{prep}{List of parameters; if empty, it is filled with defaults}
-
-\item{outputs}{List of metric names that should be plotted; if empty, it is filled with defaults}
 }
 \value{
 list of all parameters used for the analysis#'

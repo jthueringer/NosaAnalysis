@@ -12,7 +12,7 @@ test_that("data available", {
   dfs = list(one = data.frame(x=1:10, y=6:15), two = data.frame(x=11:20, y=6:15))
 
   analyser$setParams(list(example1 = "param1", example2 = "param2"))
-  analyser$setStatistics(list(a="huhu", b=3.0))
+  analyser$setPlotSettings(list(a="huhu", b=3.0))
   analyser$setData(dfs)
 
   expect_equal(analyser$ana_name, "test")

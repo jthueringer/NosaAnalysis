@@ -9,139 +9,127 @@
 #' @return list of all parameters used for the analysis#'
 #'
 #'
-createYaml <- function(yc, sheets = list(), prep = list(), outputs = list()){
+createYaml <- function(yc, dirs = list(), manipulate = list(), plot_settings = list(), outputs = list()){
 
   ############
   ## YAML default config
   ############
-  default_prep = list()
-  default_prep$InputDirectory = "/path/to/nosa/results"
-  default_prep$ResultsDirectory = "/path/to/results"
-  default_prep$NeedsTimeCorrection = TRUE
-  default_prep$DataCrop = list()
-  default_prep$DataCrop$start = 0
-  default_prep$DataCrop$end = Inf
-  default_prep$BoxplotWithStatistics = list()
-  default_prep$BoxplotWithStatistics$paired = FALSE
-  default_prep$BoxplotWithStatistics$method = "Allowed methods are one of t.test, wilcox.test, anova, kruskal.test"
+  default_dirs = list()
+  default_dirs$InputDirectory = "/path/to/nosa/results"
+  default_dirs$ResultsDirectory = "/path/to/results"
+  default_dirs$Sheets = list()
+  default_dirs$Sheets$metadata = list()
+  default_dirs$Sheets$Raw = list()
+  default_dirs$Sheets$Processed = list()
+  default_dirs$Sheets$Baseline = list()
+  default_dirs$Sheets$Smoothing = list()
+  default_dirs$Sheets[["Spike Detection"]] = c("Train", "Peak (s)", "Amplitude of Peak", "Spike Frequency (#Spikes / second)")
 
-  default_sheets = list()
-  default_sheets$metadata = list()
-  default_sheets$Raw = list()
-  default_sheets$Processed = list()
-  default_sheets$Baseline = list()
-  default_sheets$Smoothing = list()
-  default_sheets[["Spike Detection"]] = c("Train", "Peak (s)", "Amplitude of Peak", "Spike Frequency (#Spikes / second)")
+  default_manipulate = list()
+  default_manipulate$DataCrop = list()
+  default_manipulate$DataCrop$Start = 0
+  default_manipulate$DataCrop$End = Inf
+  default_manipulate$Normalization = list()
+  default_manipulate$Normalization$Execute = FALSE
+  default_manipulate$Normalization$Type = "relative or absolute"
+  default_manipulate$Normalization$KeyWord = "pre"
+  default_manipulate$Normalization$From = 0
+  default_manipulate$Normalization$To = 1.5
+  default_manipulate$GroupingKeyWords = c("pre", "post")
+  default_manipulate$Stimulus = c(10,41)
+  default_manipulate$PeakSearchWindow = list()
+  default_manipulate$PeakSearchWindow$BeforeStim = 2
+  default_manipulate$PeakSearchWindow$AfterStim = 5
+  default_manipulate$CalculationWindow = list()
+  default_manipulate$CalculationWindow$BeforePeak = 1.5
+  default_manipulate$CalculationWindow$AfterPeak = 1.5
 
-  default_output = list()
-  default_output$DataAsRObject = TRUE
-  default_output$DataAsXlsx = TRUE
-  default_output$Trace = list()
-  default_output$Trace$Sheet = "Processed"
-  default_output$SEM = list()
-  default_output$SEM$Sheet = "Processed"
-  default_output$SEM$Key =  c("pre", "post")
-  default_output$SEM$Trace =  TRUE
-  default_output$SEM$PeakAverage = TRUE
-  default_output$SEM$Stimuli = c(10, 41)
-  default_output$SEM$PeakSearchWindow = 5
-  default_output$SEM$before = 2
-  default_output$SEM$after = 8
-  default_output$SEM$ControlPlots = TRUE
-  default_output$Responses = list()
-  default_output$Responses$Sheet = "Processed"
-  default_output$Responses$Key = c("pre", "post")
-  default_output$Responses$Stimuli = c(10, 40)
-  default_output$Responses$PeakSearchWindow = list()
-  default_output$Responses$PeakSearchWindow$beforeStim = 2
-  default_output$Responses$PeakSearchWindow$afterStim = 5
-  default_output$Responses$GroupByStimulus = c(FALSE, TRUE)
-  default_output$PeakCount = list()
-  default_output$PeakCount$Sheet = "Peak (s)"
-  default_output$PeakCount$threshhold = 0.5
-  default_output$PeakCount$Key = c("training")
-  default_output$PeakCount$PeakSearchWindow = list()
-  default_output$PeakCount$PeakSearchWindow$before = 2
-  default_output$PeakCount$PeakSearchWindow$after = 5
-  default_output$Auc = list()
-  default_output$Auc$Sheet = "Processed"
-  default_output$Auc$Key = c("pre", "post")
-  default_output$Auc$Stimuli = c(10, 40)
-  default_output$Auc$PeakSearchWindow = list()
-  default_output$Auc$PeakSearchWindow$before = 2
-  default_output$Auc$PeakSearchWindow$after = 5
-  default_output$Auc$OutputWindow = list()
-  default_output$Auc$OutputWindow$before = 1.5
-  default_output$Auc$OutputWindow$after = 1.5
-  default_output$Auc$GroupByStimulus = c(FALSE, TRUE)
-  default_output$Auc$ControlPlots = TRUE
-  default_output$TimeSlots = list()
-  default_output$TimeSlots$Sheet = "Processed"
-  default_output$TimeSlots$NormalisationKey = "pre"
-  default_output$TimeSlots$Key = c("pre", "post")
+  default_plot_settings = list()
+  default_plot_settings$Paired = FALSE
+  default_plot_settings$TestMethod = "Allowed methods are one of t.test, wilcox.test, anova, kruskal.test"
+  default_plot_settings$Threshold = 0.5
+  default_plot_settings$ylabTeX = "Delta F/ F"
+
+  default_outputs = list()
+  default_outputs$DataAsRObject = TRUE
+  default_outputs$DataAsXlsx = TRUE
+  default_outputs$Trace = list()
+  default_outputs$Trace$Sheet = "Processed"
+  default_outputs$Trace$Threshold = FALSE
+  default_outputs$SEM = list()
+  default_outputs$SEM$Sheet = "Processed"
+  default_outputs$SEM$Trace =  TRUE
+  default_outputs$SEM$PeakAverage = TRUE
+  default_outputs$SEM$Threshold = FALSE
+  default_outputs$Responses = list()
+  default_outputs$Responses$Sheet = "Processed"
+  default_outputs$Responses$GroupByStimulus = c(FALSE, TRUE)
+  default_outputs$PeakCount = list()
+  default_outputs$PeakCount$Sheet = "Peak (s)"
+  default_outputs$Auc = list()
+  default_outputs$Auc$Sheet = "Processed"
+  default_outputs$Auc$GroupByStimulus = c(FALSE, TRUE)
+  default_outputs$Auc$ControlPlots = TRUE
+  default_outputs$TimeSlots = list()
+  default_outputs$TimeSlots$Sheet = "Processed"
+  default_outputs$TimeSlots$Begin = 0
+  default_outputs$TimeSlots$End = 1.5
 
   ############
   ## add missing parameters from default parameter list
   ############
-  if (!length(sheets))
+  for (elem in c("dirs", "manipulate", "plot_settings"))
   {
-    for(i in c(1:length(default_sheets))){
-      if(!names(default_sheets)[i] %in% names(sheets)) sheets[names(default_sheets)[i]] = default_sheets[i]
-    }
-  }
-  if (!length(prep))
-  {
-    for(i in c(1:length(default_prep))){
-      if(!names(default_prep)[i] %in% names(prep)) prep[names(default_prep)[i]] = default_prep[i]
+    if (length(eval(parse(text = elem))) != length(eval(parse(text = paste0("default_", elem)))))
+    {
+      for(i in c(1:length(eval(parse(text = paste0("default_", elem))))))
+      {
+        if(!names(eval(parse(text = paste0("default_", elem))))[i] %in% names(eval(parse(text = elem))))
+        {
+          eval(parse(text = paste0(elem, "[names(default_", elem, ")[i]] = default_", elem, "[i]")))
+        }
+      }
     }
   }
   if (!length(outputs))
   {
-    for(i in c(1:length(default_output))){
-      if(!names(default_output)[i] %in% names(outputs)) outputs[names(default_output)[i]] = default_output[i]
+    for(i in c(1:length(default_outputs))){
+      if(!names(default_outputs)[i] %in% names(outputs)) outputs[names(default_outputs)[i]] = default_outputs[i]
     }
   }
 
   ############
   ## check for invalid parameters
   ############
-  for(i in c(length(sheets):1)){
-    if(!names(sheets)[i] %in% c(NA, names(default_sheets))) {
-      message(paste0("\tInvalid 'Sheets' parameter removed: ", names(sheets)[i]))
-      sheets <- sheets[-i]
-    }
-  }
-  for(i in c(length(prep):1)){
-    if(!names(prep)[i] %in% c(NA, names(default_prep))) {
-      message(paste0("\tInvalid 'Prep' parameter removed: ", names(prep)[i]))
-      prep <- prep[-i]
-    }
-  }
-  for(i in c(length(outputs):1)){
-    if(!names(outputs)[i] %in% c(NA, names(default_output))) {
-      message(paste0("\tInvalid 'Output' parameter removed: ", names(outputs)[i]))
-      outputs <- outputs[-i]
-    }
-    else
-    {
-      if (is.list(outputs[[i]]))
+  for (elem in c("dirs", "manipulate", "plot_settings", "outputs"))
+  {
+    for(i in c(length(eval(parse(text = elem))):1)){
+      if(!names(eval(parse(text = elem)))[i] %in% c(NA, names(eval(parse(text = paste0("default_", elem)))))) {
+        message(paste0("\tInvalid parameter removed: ", names(eval(parse(text = elem)))[i]))
+        eval(parse(text = paste0(elem, " <- ", elem, "[-i]")))
+      }
+      else
       {
-        for(j in c(length(outputs[[i]]):1)){
-          if(!names(outputs[[i]])[j] %in% c(NA, names(default_output[[names(outputs)[i]]]))) {
-            message(paste0("\tInvalid 'Output' parameter removed: ", names(outputs[[i]])[j]))
-            outputs[[i]] <- outputs[[i]][-j]
+        if (is.list(eval(parse(text = elem))[[i]]))
+        {
+          for(j in c(length(eval(parse(text = elem))[[i]]):1)){
+            if(!names(eval(parse(text = elem))[[i]])[j] %in% c(NA, names(eval(parse(text = paste0("default_", elem)))[[names(eval(parse(text = elem)))[i]]]))) {
+              message(paste("\tInvalid parameter removed", names(eval(parse(text = elem)))[i], names(eval(parse(text = elem))[[i]])[j], sep=" : "))
+              eval(parse(text = paste0(elem, "[[i]] <- ", elem, "[[i]][-j]")))
+            }
           }
         }
       }
     }
   }
 
-  yc$setYaml("Prep", prep)
-  yc$setYaml("Sheets", sheets)
+  yc$setYaml("Directories", dirs)
+  yc$setYaml("DataManipulation", manipulate)
+  yc$setYaml("PlotSettings", plot_settings)
   yc$setYaml("Output", outputs)
 
 
-  return(list("yc" = yc, "sheets" = sheets, "prep" = prep, "outputs" = outputs))
+  return(list("yc" = yc, "dirs" = dirs, "manipulate" = manipulate, "plot_settings" = plot_settings, "outputs" = outputs))
 
 
 }

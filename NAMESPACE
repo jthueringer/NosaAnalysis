@@ -2,11 +2,12 @@
 
 export(performAnalysis)
 export(writeDefaultYaml)
-import(ggplot2)
+import(dplyr)
 import(ggpubr)
 import(openxlsx)
 import(yaml)
 importFrom(gdata,cbindX)
+importFrom(latex2exp,TeX)
 importFrom(methods,new)
 importFrom(readxl,read_xlsx)
 importFrom(rlang,.data)

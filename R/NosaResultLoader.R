@@ -20,7 +20,7 @@ NosaResultLoader = setRefClass(
       return(.self)
     },
 
-    loadNosaResults = function(.self, data_directory, sheet_p, prep_p) {
+    loadNosaResults = function(.self, data_directory, sheet_p) {
       "Read all existing nosa results of specified directory into a list of 4 data.frames (one df per nosa results sheet).
   Data.frames in the resulting list are named as the sheets:
   'Metadata', 'Raw', 'Processed', 'Baseline'.
@@ -73,7 +73,7 @@ NosaResultLoader = setRefClass(
                                                   complete_df$metadata$`source name`)
 
         # check unique source name is true
-        duplicates = duplicated(c(complete_df[['metadata']][['source name']], tmp_df[['metadata']][['source name']]))
+        duplicates = duplicated(c(complete_df[['metadata']][['source name']], na.omit(tmp_df[['metadata']][['source name']])))
         if (sum(duplicates) > 0 )
         {
           stop(
@@ -98,11 +98,17 @@ NosaResultLoader = setRefClass(
         # if the timelanes between sources differ from each other, stop
         for (sheet in sheets)
         {
-          if (!identical(sheet, "metadata"))
+          if (!sheet %in% c("metadata", "Spike Detection"))
           {
-            if (sum(grepl("Time", names(sheet))) > 1)
+            if (sum(grepl("Time", names(complete_df[[sheet]]))) < 1)
             {
-              stop( paste0("\nThe dataset  of ", file, " contains different timelanes, which therefore cannot be processed. Manually merge the different tables into one."))
+              stop(paste0("\t", sheet, " sheet: There is no time column that contains the keyword 'Time'.\n
+                        \tPlease correct input data.\n"))
+            }
+            else if (sum(grepl("Time", names(complete_df[[sheet]]))) > 1)
+            {
+              stop( paste0("\nThe dataset  of ", file, " contains different timelanes, which therefore cannot be processed.
+                           Manually merge the different tables into one."))
             }
           }
         }
@@ -132,37 +138,24 @@ NosaResultLoader = setRefClass(
               name_positions = grep(complete_df[['metadata']][['name']][i], names(tmp_spike[[df_name]]))
               names(tmp_spike[[df_name]])[name_positions] = complete_df[['metadata']][['source name']][i]
             }
+            complete_df[[df_name]] = tmp_spike[[df_name]]
           }
-          complete_df[['Spike Detection']] = tmp_spike
-          names(complete_df[['Spike Detection']]) = spike_detection_names
         }
 
 
         # merging current data with previously loaded data
         if (length(tmp_df) > 0)
         {
-          for (sheet in sheets)
+          for(table in names(tmp_df[names(tmp_df) !='Spike Detection']))
           {
-            if (identical(sheet, 'Spike Detection'))
+            if (table %in% c("Raw", "Processed", "Baseline", "Train"))
             {
-              for (table in sheet_p[['Spike Detection']])
-              {
-                if (identical(table, "Train"))
-                {
-                  tmp_df[['Spike Detection']][['Train']] = merge(tmp_df[['Spike Detection']][['Train']],
-                                                                 complete_df[['Spike Detection']][['Train']],
-                                                                 by = "Time (s)",
-                                                                 all = TRUE)
-                }
-                else
-                {
-                  tmp_df[['Spike Detection']][[table]] = gdata::cbindX( tmp_df[['Spike Detection']][[table]], complete_df[['Spike Detection']][[table]])
-                }
-              }
+              tmp_df[[table]] = merge(tmp_df[[table]], complete_df[[table]],
+                                      by = "Time (s)", all = TRUE)
             }
             else
             {
-              tmp_df[[sheet]] = merge(tmp_df[[sheet]], complete_df[[sheet]], all = TRUE)
+              tmp_df[[table]] = gdata::cbindX( tmp_df[[table]], complete_df[[table]])
             }
           }
         }
