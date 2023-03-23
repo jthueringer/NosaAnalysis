@@ -7,11 +7,14 @@
 #'
 #' @field description Description of the analysis
 #' @field plot_fnc Function that generates plots.
-#' @field plots List of plots
+#' @field plots List of generated plots
 #' @field plot_data List of data frames for each generated plot.
 #' @field params List of user defined parameters (from yaml)
 #' @field plot_settings List of user defined plot settings (from yaml)
 #' @field ana_name String naming the instanced analyser
+#'
+#' @exportClass Analyser
+#' @export Analyser
 #'
 Analyser = setRefClass(
   "Analyser",
@@ -26,8 +29,8 @@ Analyser = setRefClass(
   methods = list(
     initialize = function(description = NA_character_,
                           plot_fnc = function(){},
-                          plots = list(),
-                          plot_data = list(),
+                          plots = list(), # from plot function
+                          plot_data = list(), # from plot function
                           params = list(),
                           plot_settings = list(),
                           ana_name = NA_character_)

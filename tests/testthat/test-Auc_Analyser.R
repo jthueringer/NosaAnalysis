@@ -51,7 +51,10 @@ test_that("two keywords, two stimuli, no paired data", {
 })
 
 test_that("not enough datapoints", {
-  yaml = get_testyaml_object("dir", analyser = "Auc", changes = "PlotSettings$Paired = TRUE")
+  yaml = get_testyaml_object("dir", analyser = "Auc", changes = c("PlotSettings$Paired = TRUE",
+                                                                  "DataManipulation$Stimulus = 41",
+                                                                  "DataManipulation$PeakSearchWindow$BeforeStim = 1",
+                                                                  "DataManipulation$CalculationWindow$AfterPeak = 1.5"))
   ana = get_analyser_object("Auc", yaml)
 
   df = data.frame(Time = seq(from=0, to=41, by=0.5),

@@ -18,7 +18,7 @@ separate_data_by_key(df, keys, global_cols = NULL)
 \item{global_cols}{List of column names to be part of the result}
 }
 \value{
-List of data.frames.
+Named list of data.frames.
 }
 \description{
 A data frame is separated into named lists (keywords).

@@ -5,5 +5,5 @@ test_that("no metadata sheet", {
 
 test_that("reads 'Spike Detection' sheet with different tables", {
   nsr <- NosaResultLoader$new()
-  expect_output(nsr$loadNosaResults("files", sheet_p =list(metadata=FALSE, 'Spike Detection'=c("Train", "Time of Peak (s)"))), "Searching nosa results")
+  expect_output(nsr$loadNosaResults("files", sheet_p =list(metadata=list(), "Spike Detection"=list("Train", "Time of Peak (s)"))), "Searching nosa results")
 })

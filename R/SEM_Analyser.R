@@ -16,91 +16,93 @@ SEM_Analyser = setRefClass(
         plotl = list()
         datal = list()
         xlab = grep("Time", names(data), value = TRUE)
-        ycol_name = "Values"
 
-        data = data %>% rename(Time = xlab)
+        data = data %>% rename(x = xlab)
 
         if (isTRUE(params$Trace))
         {
-          longer_df = tidyr::pivot_longer(data, -Time, names_to = "Name", values_to = "Values", values_drop_na=TRUE) %>%
-            mutate(Name = get_key_df(Name, params$GroupingKeyWord)$Key)
-          t_plot = ggpubr::ggline(longer_df, "Time", "Values", add="mean_se", add.params = list(color="grey"), error.plot="linerange",
-                                  plot_type = "l", color = "green", numeric.x.axis=TRUE,
-                                  xlab = xlab, ylab = plot_settings$ylabTeX, facet.by = c("Name"))
+          longer_df = tidyr::pivot_longer(data, -x, names_to = "Key", values_to = "y", values_drop_na=TRUE) %>%
+            mutate(Key = get_key_df(Key, params$GroupingKeyWord)$Key) %>%
+            group_by(Key)
+          t_plot = plot_line(longer_df, add="mean_se", display=plot_settings$Lineplots$ErrorDisplay,
+                             facet_by="Key", color_column = "Key" )
 
           if (params$Threshold)
           {
-            t_plot = t_plot +
+            t_plot$plot = t_plot$plot +
               geom_hline(data = data.frame(Name=params$GroupingKeyWords, yint = plot_settings$Threshold),
-                         aes(yintercept = yint), linetype="dotted", colour="darkgreen")
+                         aes(yintercept = yint), linetype="dotted", colour="grey")
           }
-          t_plot = ggpubr::facet(t_plot, facet.by = "Name", ncol = 1)
-          t_plot$width = 1
-          t_plot$file_name = paste0(.self$ana_name, "_Trace")
-          plotl[[t_plot$file_name]] = t_plot
-          plotdata = extract_plot_data(t_plot, additional = c("ymin", "ymax"), facet_levels=params$GroupingKeyWord)
-          datal[[t_plot$file_name]] =  plotdata  %>% rename(!!xlab:="x", !!ycol_name:="y")
+          t_plot$plot = ggpubr::facet(t_plot$plot, facet.by = "Key", ncol = 1) +
+            ylab(plot_settings$ylabTeX) +
+            xlab(xlab)
+          t_plot$plot$width = 1
+          t_plot$plot$file_name = paste0(.self$ana_name, "_Trace")
+          plotl[[t_plot$plot$file_name]] = t_plot$plot
+          datal[[t_plot$plot$file_name]] =  t_plot$data  %>% rename(!!all_of(xlab):="x")
         }
 
         if (params$PeakAverage)
         {
-          time_frequency = sum(data$Time < data$Time[1]+1)
-          timeline = seq(0-params$CalculationWindow$BeforePeak,0+params$CalculationWindow$AfterPeak, 1.0/time_frequency)
-          df_average = setNames(data.frame(matrix(ncol = 5, nrow = 0)), c("Time", "Name", "Values", "Key", "Stimulus"))
+          df_average = setNames(data.frame(matrix(ncol = 4, nrow = 0)), c("x", "y", "Key", "Stimulus"))
 
           for (stim in params$Stimulus)
           {
             time_of_max = get_times_of_max_in_window(data, stim-params$PeakSearchWindow$BeforeStim,
-                                                     stim+params$PeakSearchWindow$AfterStim, "Time")
+                                                     stim+params$PeakSearchWindow$AfterStim, "x")
 
             for(elem in names(time_of_max))
             {
-              tmp = data %>% select(c(Time,eval(elem))) %>% na.omit()
-              tmp_values = extract_values_between_two_given_times(tmp,
-                                                                  from = time_of_max[[elem]]-params$CalculationWindow$BeforePeak,
-                                                                  to = time_of_max[[elem]]+params$CalculationWindow$AfterPeak,
-                                                                  analyser = "SEM_Average")
+              tmp_values = filter_between_two_given_times(data %>% select(c("x",all_of(elem))) %>% na.omit(),
+                                                          col_name = "x",
+                                                          from = time_of_max[[elem]]-params$CalculationWindow$BeforePeak,
+                                                          to = time_of_max[[elem]]+params$CalculationWindow$AfterPeak,
+                                                          analyser = "SEM_Average")
               if(!tmp_values$success)
               {
                 return(list(plots = plotl, data = datal, success=FALSE))
               }
-              df_average = rbind(df_average, data.frame(Time=timeline,
-                                                        Name=elem,
-                                                        Values=tmp_values[[2]],
+              names(tmp_values$df) = c("x","y")
+              tmp_values$df = tmp_values$df %>%
+                na.omit() %>%
+                mutate(x = round(x-time_of_max[[elem]], 3))
+              df_average = rbind(df_average, data.frame(tmp_values$df,
                                                         Key=extract_key(elem, params$GroupingKeyWord),
                                                         Stimulus=paste0("x",stim)))
             }
           }
           df_average = df_average %>% mutate(Key = factor(Key, levels=params$GroupingKeyWord),
-                                             Stimulus = factor(Stimulus))
+                                             Stimulus = factor(Stimulus)) %>%
+            group_by(Key, Stimulus)
 
-          c_plot = ggpubr::ggline(df_average, "Time", "Values", add="mean_se", add.params = list(color="grey"), error.plot="linerange",
-                                  plot_type = "l", color = "green", numeric.x.axis=TRUE,
-                                  xlab = xlab, ylab = plot_settings$ylabTeX, facet.by = c("Key", "Stimulus"))
-          c_plot$file_name = paste0(.self$ana_name, "_byStimulus")
-          c_plot$width = 1
-          plotl[[c_plot$file_name]] = c_plot
-          c_plot_data = extract_plot_data(c_plot, additional = c("ymin", "ymax"),
-                                          facet_levels=paste(rep(levels(df_average$Key), each=nlevels(df_average$Stimulus)),
-                                                             levels(df_average$Stimulus), sep="_"))
-          datal[[c_plot$file_name]] = c_plot_data  %>% rename(!!xlab:="x", !!ycol_name:="y")
+          s_plot = plot_line(df_average, add="mean_se", display=plot_settings$Lineplots$ErrorDisplay,
+                             facet_by=c("Key", "Stimulus"), color_column = "Key" )
+          s_plot$plot = s_plot$plot +
+            ylab(plot_settings$ylabTeX) +
+            xlab(xlab)
+          s_plot$plot$file_name = paste0(.self$ana_name, "_byStimulus")
+          s_plot$plot$width = 1
+          plotl[[s_plot$plot$file_name]] = s_plot$plot
+          datal[[s_plot$plot$file_name]] = s_plot$data  %>% rename(!!all_of(xlab):="x")
 
-          a_plot = ggpubr::ggline(df_average, "Time", "Values", add="mean_se", add.params = list(color="grey"), error.plot="linerange",
-                                  plot_type = "l", color = "green", numeric.x.axis=TRUE,
-                                  xlab = xlab, ylab = plot_settings$ylabTeX, facet.by = "Key")
-          a_plot$file_name = paste0(.self$ana_name, "_PeakAvg_facet")
-          a_plot$width = 1
-          plotl[[a_plot$file_name]] = a_plot
-          a_plot_data = extract_plot_data(a_plot, additional = c("ymin", "ymax"), facet_levels=params$GroupingKeyWord)
-          datal[[a_plot$file_name]] = a_plot_data  %>% rename(!!xlab:="x", !!ycol_name:="y")
+          af_plot = plot_line(df_average, add="mean_se", display=plot_settings$Lineplots$ErrorDisplay,
+                             facet_by="Key", color_column = "Key" )
+          af_plot$plot = af_plot$plot +
+            ylab(plot_settings$ylabTeX) +
+            xlab(xlab)
+          af_plot$plot$file_name = paste0(.self$ana_name, "_PeakAvg_facet")
+          af_plot$plot$width = 1
+          plotl[[af_plot$plot$file_name]] = af_plot$plot
+          datal[[af_plot$plot$file_name]] = af_plot$data  %>% rename(!!all_of(xlab):="x")
 
-          a_plot = ggpubr::ggline(df_average, "Time", "Values", add=c("mean_se"),
-                                  palette=c("green", "blue"), error.plot="linerange",
-                                  plot_type = "l", numeric.x.axis=TRUE,
-                                  xlab = xlab, ylab = plot_settings$ylabTeX, color = "Key")
-          a_plot$file_name = paste0(.self$ana_name, "_PeakAvg")
-          a_plot$width = 1
-          plotl[[a_plot$file_name]] = a_plot
+          a_plot = plot_line(df_average, add="mean_se", display=plot_settings$Lineplots$ErrorDisplay,
+                             facet_by=NULL, color_column = "Key" )
+          a_plot$plot = a_plot$plot +
+            ylab(plot_settings$ylabTeX) +
+            xlab(xlab)
+          a_plot$plot$file_name = paste0(.self$ana_name, "_PeakAvg")
+          a_plot$plot$width = 1
+          plotl[[a_plot$plot$file_name]] = a_plot$plot
         }
         return(list(plots = plotl, data = datal, success = TRUE))
       },

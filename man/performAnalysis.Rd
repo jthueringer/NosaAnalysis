@@ -13,10 +13,12 @@ The function 'writeDefaultYaml(filename)' can be used to create
 this file filled with all default parameters and values.}
 }
 \value{
-List with sections data and plots.
+List with sections data = List with original data frames,
+manipulated_data = List with pre-processed data frames,
+results = List of analyser objects containing 'plots' and 'plot_data'.
 }
 \description{
-By calling this function, all data specified under "Sheets" in the loaded Yaml
+By calling this function, all data specified under "Directories$Sheets" in the Yaml
 file are read into data.frames. Additional parameters and plots can be defined
 with the Yaml configuration. It is advisable to create a file with the function
 "writeDefaultYaml(filename)" and to adjust or deactivate the desired metrics.

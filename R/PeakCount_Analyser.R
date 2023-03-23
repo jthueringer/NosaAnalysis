@@ -5,7 +5,7 @@ PeakCount_Analyser = setRefClass(
   methods = list(initialize = function()
   {
     callSuper(
-      description = "Count Peaks within user defined time window and return resulting boxplot, faceted by user defined keywords.",
+      description = "Counts Peaks within user defined time window and return resulting boxplot. Grouping is done according to user-defined keywords.",
 
       plot_fnc = function(.self, data)
       {
@@ -28,8 +28,9 @@ PeakCount_Analyser = setRefClass(
         if (length(params$GroupingKeyWords) > 1)
         {
           plot = plot +
-            ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=plot_settings$Paired) +
-            ggpubr::stat_compare_means(label =  "p.signif", label.y = max(df$Counts)*0.93)
+            ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=plot_settings$Paired, label.x.npc="center") +
+            ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=plot_settings$Paired,
+                                       label =  "p.signif", label.y = max(df$Counts)*0.93, label.x.npc="center")
         }
         plot =  ggpubr::ggpar(plot, xlab = "", ylab = paste0("Counts\n[",params$PeakSearchWindow$BeforeStim, " s - ",
                                                              params$PeakSearchWindow$AfterStim, " s]"))

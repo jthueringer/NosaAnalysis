@@ -4,7 +4,7 @@ Trace_Analyser = setRefClass(
   methods = list(initialize = function()
   {
     callSuper(
-      description = "Plots the time sequence for each entry per specified sheet.",
+      description = "Plots the time sequence for each sample per specified sheet.",
 
       plot_fnc = function(.self, data)
       {
@@ -24,8 +24,8 @@ Trace_Analyser = setRefClass(
 
         for (col in names(data %>% select(-Time)))
         {
-          df = data.frame(Time = data$Time, Value = data[[col]]) %>% na.omit()
-          plot = get_traceplot(df, "Time", "Value", xlab, plot_settings$ylabTeX)
+          df = data.frame(x = data$Time, y = data[[col]]) %>% na.omit()
+          plot = plot_line(df, add="none", display=NULL)
           if (plot_settings$Threshold)
           {
             plot = plot +

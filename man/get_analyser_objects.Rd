@@ -2,18 +2,18 @@
 % Please edit documentation in R/misc.R
 \name{get_analyser_objects}
 \alias{get_analyser_objects}
-\title{Get all requested analyser from outputs parameter list}
+\title{Get all requested analyser from analyser parameter list and set the parameter to the analyser.}
 \usage{
-get_analyser_objects(params, manipulations)
+get_analyser_objects(analyser_params, data_params)
 }
 \arguments{
-\item{params}{List of analyser to be requested as well as their user defined parameters}
+\item{analyser_params}{List of analyser to be requested as well as their user defined parameters}
 
-\item{manipulations}{Named List}
+\item{data_params}{Named List}
 }
 \value{
 List of analyser objects
 }
 \description{
-Get all requested analyser from outputs parameter list
+Get all requested analyser from analyser parameter list and set the parameter to the analyser.
 }

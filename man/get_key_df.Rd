@@ -2,7 +2,8 @@
 % Please edit documentation in R/misc.R
 \name{get_key_df}
 \alias{get_key_df}
-\title{From a given list of column names extract substrings and return a new data.frame containing the column Name with substring reduced names
+\title{From a given list of names extract substrings and return a
+data.frame containing the column Name with substring reduced names
 and the second column Key containing the extracted substrings}
 \usage{
 get_key_df(names, keys)
@@ -16,6 +17,7 @@ get_key_df(names, keys)
 Data.frame: first column holds substring reduced names, second column holds extracted substrings
 }
 \description{
-From a given list of column names extract substrings and return a new data.frame containing the column Name with substring reduced names
+From a given list of names extract substrings and return a
+data.frame containing the column Name with substring reduced names
 and the second column Key containing the extracted substrings
 }

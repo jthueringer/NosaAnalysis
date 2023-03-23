@@ -2,7 +2,7 @@
 % Please edit documentation in R/misc.R
 \name{extract_key}
 \alias{extract_key}
-\title{Extract keys from given name list.}
+\title{Extract key words from given name list.}
 \usage{
 extract_key(names, keys)
 }
@@ -12,8 +12,8 @@ extract_key(names, keys)
 \item{keys}{List with keys.}
 }
 \value{
-List of found keys. If not found, entry is 'NA'.
+Vector of found keys. If not found, entry is 'NA'.
 }
 \description{
-Extract keys from given name list.
+Extract key words from given name list.
 }

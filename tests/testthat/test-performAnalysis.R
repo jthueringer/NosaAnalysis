@@ -9,7 +9,9 @@ test_that("data reduced by keywords", {
                                  "DataManipulation$PeakSearchWindow$BeforeStim = 0",
                                  "DataManipulation$PeakSearchWindow$AfterStim = 0",
                                  "DataManipulation$CalculationWindow$BeforeStim = 0.5",
-                                 "DataManipulation$CalculationWindow$AfterStim = 0.5"))
+                                 "DataManipulation$CalculationWindow$AfterStim = 0.5",
+                                 "Output$TimeSlots$Begin = 0",
+                                 "Output$TimeSlots$End = 1"))
 
   expect_output(nsr <-suppressMessages(performAnalysis(paste0(path, "/test.yaml"))))
   expect_equal(names(nsr$results), c("Responses", "TimeSlots"))
@@ -17,7 +19,7 @@ test_that("data reduced by keywords", {
   unlink(paste0(path, "/test.yaml"))
 })
 
-test_that("one of two keywords not in data", {
+test_that("skipping because no success in manipulate_data", {
   pdf(NULL) # to prevent generating an empty RPlots.pdf
   path <- tempdir()
   on.exit(unlink(path))
@@ -31,17 +33,19 @@ test_that("one of two keywords not in data", {
   unlink(paste0(path, "/test.yaml"))
 })
 
-test_that("keyword not in data", {
+test_that("analyser returns FALSE", {
   pdf(NULL)
   path <- tempdir()
   on.exit(unlink(path))
 
   write_testyamlfile(path, analyser = "TimeSlots",
-                     changes=c("DataManipulation$Normalization$KeyWord = 'nonsense'",
-                               "DataManipulation$Normalization$Execute = TRUE"))
+                     changes=c("Output$TimeSlots$Begin = 1",
+                               "Output$TimeSlots$End = 10"))
 
-  expect_message(nsr <- expect_output(performAnalysis(paste0(path, "/test.yaml"))),
-                 "Can`t normalize data: The 'KeyWord'")
+  expect_message(
+    expect_message(nsr <- expect_output(performAnalysis(paste0(path, "/test.yaml"))),
+                 "TimeSlots analysis not possible."),
+    "..Skipping..")
   expect_equal(names(nsr), c("data", "manipulated_data", "results"))
 
   unlink(paste0(path, "/result"), recursive = TRUE)

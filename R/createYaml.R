@@ -1,13 +1,14 @@
 #'
 #' Creates a yaml file storing the parameters that are used for the analysis of the NOSA software results
-#' and returns these parameters as well as a list of available Metrics objects.
+#' and returns these parameters.
 #'
-#' @param yc A yaml class object created by YAMLClass$new()
-#' @param sheets List sheet names that should be loaded; if empty, it is filled with defaults
-#' @param prep List of parameters; if empty, it is filled with defaults
-#' @param outputs List of metric names that should be plotted; if empty, it is filled with defaults
-#' @return list of all parameters used for the analysis#'
+#' @param yc A yaml class object created by YAMLClass$new().
+#' @param dirs List with the paths to the input and result directories and the sheet names to be read in.
+#' @param manipulate List of parameters for editing input data; if empty, it is filled with defaults.
+#' @param plot_settings List of parameters for designing plots.
+#' @param outputs List of analyser names and their parameter; if empty, it is filled with defaults.
 #'
+#' @return List of all parameters used for the analysis#'
 #'
 createYaml <- function(yc, dirs = list(), manipulate = list(), plot_settings = list(), outputs = list()){
 
@@ -49,6 +50,9 @@ createYaml <- function(yc, dirs = list(), manipulate = list(), plot_settings = l
   default_plot_settings$TestMethod = "Allowed methods are one of t.test, wilcox.test, anova, kruskal.test"
   default_plot_settings$Threshold = 0.5
   default_plot_settings$ylabTeX = "Delta F/ F"
+  default_plot_settings$Lineplots = list()
+  default_plot_settings$Lineplots$Colours = c("green", "blue")
+  default_plot_settings$Lineplots$ErrorDisplay = "Allowed are one of 'linerange', 'ribbon'"
 
   default_outputs = list()
   default_outputs$DataAsRObject = TRUE
@@ -99,7 +103,7 @@ createYaml <- function(yc, dirs = list(), manipulate = list(), plot_settings = l
   }
 
   ############
-  ## check for invalid parameters
+  ## check for invalid parameter names
   ############
   for (elem in c("dirs", "manipulate", "plot_settings", "outputs"))
   {
@@ -110,7 +114,7 @@ createYaml <- function(yc, dirs = list(), manipulate = list(), plot_settings = l
       }
       else
       {
-        if (is.list(eval(parse(text = elem))[[i]]))
+        if (length(names(eval(parse(text = elem))[[i]])))
         {
           for(j in c(length(eval(parse(text = elem))[[i]]):1)){
             if(!names(eval(parse(text = elem))[[i]])[j] %in% c(NA, names(eval(parse(text = paste0("default_", elem)))[[names(eval(parse(text = elem)))[i]]]))) {

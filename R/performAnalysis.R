@@ -1,6 +1,6 @@
 #' Perform the analysis of NOSA software results.
 #'
-#' By calling this function, all data specified under "Sheets" in the loaded Yaml
+#' By calling this function, all data specified under "Directories$Sheets" in the Yaml
 #' file are read into data.frames. Additional parameters and plots can be defined
 #' with the Yaml configuration. It is advisable to create a file with the function
 #' "writeDefaultYaml(filename)" and to adjust or deactivate the desired metrics.
@@ -11,7 +11,9 @@
 #'                 The function 'writeDefaultYaml(filename)' can be used to create
 #'                 this file filled with all default parameters and values.
 #'
-#' @return List with sections data and plots.
+#' @return List with sections data = List with original data frames,
+#' manipulated_data = List with pre-processed data frames,
+#' results = List of analyser objects containing 'plots' and 'plot_data'.
 #'
 #' @import openxlsx
 #' @import dplyr
@@ -43,9 +45,7 @@ performAnalysis = function(yaml_file = NULL )
   dirs = yaml$dirs
   manipulations = yaml$manipulate
   plot_settings = yaml$plot_settings
-  plot_settings$ylabTeX = latex2exp::TeX(ifelse(manipulations$Normalization$Execute,
-                                     paste0(manipulations$Normalization$Type, " norm. ", plot_settings$ylabTeX),
-                                     plot_settings$ylabTeX))
+  plot_settings$ylabTeX = latex2exp::TeX(plot_settings$ylabTeX)
   outputs = yaml$outputs
 
   output_dir = paste0(dirs$ResultsDirectory, "/")
@@ -78,24 +78,18 @@ performAnalysis = function(yaml_file = NULL )
     }
     else
     {
-      if (parameter$Sheet %in% names(nsr$data))
+      result = manipulate_data(nsr$data[[parameter$Sheet]], parameter, plot_settings$Paired, ana_name)
+      yaml$yc$yaml_obj$PlotSettings$Paired = result$paired
+      plot_settings$Paired = result$paired
+      if( isTRUE(result$skipping))
       {
-        result = manipulate_data(nsr$data[[parameter$Sheet]], parameter, plot_settings, ana_name, skips)
-        if( isTRUE(result$skipping))
-        {
-          skipping = result$skipping
-          skips=result$skips
-        }
-        else
-        {
-          data = result$data
-          manipulated_data[[parameter$Sheet]] = data
-        }
+        skipping = result$skipping
+        skips = c(skips, ana_name)
       }
       else
       {
-        message(paste0("\tThe data sheet ", parameter$Sheet, " does not exist. Skipping.."))
-        skipping = TRUE
+        data = result$data
+        manipulated_data[[parameter$Sheet]] = data
       }
     }
 
@@ -134,7 +128,17 @@ performAnalysis = function(yaml_file = NULL )
     cat(paste0("\t", analysis$ana_name, " output:\n"))
     for (plot in analysis$plots)
     {
-      ggexport(plot, filename=paste0(output_dir, analysis$ana_name, "/", plot$file_name, ".png"), width = 800*plot$width, height = 800, res = 150, verbose = FALSE)
+      filename = plot$file_name
+      width = plot$width
+      plot = plot  +
+        ggplot2::scale_colour_manual(values=plot_settings$Lineplots$Colours) +
+        ggplot2::scale_fill_manual(values=plot_settings$Lineplots$Colours)
+      if(plot$file_name == "TimeSlots_Trace")
+      {
+        plot = adjust_facet_width_of_plot(plot, lapply(manipulations$GroupingKeyWords,
+                                                       function(key) analysis$plot_data[[plot$file_name]] %>% filter(.data$Key==key)))
+      }
+      ggexport(plot, filename=paste0(output_dir, analysis$ana_name, "/", filename, ".png"), width = 800*width, height = 800, res = 150, verbose = FALSE)
     }
   }
 

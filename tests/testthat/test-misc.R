@@ -43,11 +43,9 @@ test_that("extract rows where 'Time' is within given range", {
   df = data.frame(Time = seq(from=1, to=4, by=0.25),
                   a = seq(from=0, to=1, length.out=13),
                   b = seq(from=0.1, to=0.9, length.out=13))
-  result = data.frame(a = seq(from=0, to=1, length.out=13)[5:12],
-                      b = seq(from=0.1, to=0.9, length.out=13)[5:12])
-  values = extract_values_between_two_given_times(df, 2, 3.75, "SEM")
-  expect_equal(values$a, result$a)
-  expect_equal(values$b, result$b)
+  result = data.frame(df[5:12,], row.names = 1:8)
+  values = filter_between_two_given_times(df, col_name="Time", from=2, to=3.75, "SEM")
+  expect_equal(values$df, result)
   expect_true(values$success)
 })
 
@@ -55,6 +53,7 @@ test_that("timepoints are out of range", {
   df = data.frame(Time = seq(from=1, to=4, by=0.25),
                   a = seq(from=0, to=1, length.out=13),
                   b = seq(from=0.1, to=0.9, length.out=13))
-  expect_message(list <- extract_values_between_two_given_times(df, 0.9, 4.1, "SEM"), "SEM analysis: not possible")
+  expect_message(list <- filter_between_two_given_times(df,col_name="Time", from=0.9, to=4.1, "SEM"),
+                 "SEM analysis: not possible")
   expect_false(list$success)
 })

@@ -21,11 +21,8 @@ NosaResultLoader = setRefClass(
     },
 
     loadNosaResults = function(.self, data_directory, sheet_p) {
-      "Read all existing nosa results of specified directory into a list of 4 data.frames (one df per nosa results sheet).
-  Data.frames in the resulting list are named as the sheets:
-  'Metadata', 'Raw', 'Processed', 'Baseline'.
-  The last sheet 'Spike Detection' is provided as list that contains up to 4 data.frames
-  "
+      "Reads all existing nosa results from the specified directory into a list. Each sheet is represented as a data.frame.
+      The different tables of the 'Spike Detection' sheet are stored as independent data.frames."
 
       cat("\n\tSearching nosa results in ", data_directory, " ...\n", sep = "")
 
@@ -95,10 +92,11 @@ NosaResultLoader = setRefClass(
           }
         }
 
-        # if the timelanes between sources differ from each other, stop
+        timeline_name = "Time (s)"
+        # if the timelines between sources differ from each other, stop
         for (sheet in sheets)
         {
-          if (!sheet %in% c("metadata", "Spike Detection"))
+          if (sheet %in% c("Raw", "Processed", "Baseline"))
           {
             if (sum(grepl("Time", names(complete_df[[sheet]]))) < 1)
             {
@@ -107,9 +105,10 @@ NosaResultLoader = setRefClass(
             }
             else if (sum(grepl("Time", names(complete_df[[sheet]]))) > 1)
             {
-              stop( paste0("\nThe dataset  of ", file, " contains different timelanes, which therefore cannot be processed.
+              stop( paste0("\nThe dataset  of ", file, " contains different timelines, which therefore cannot be processed.
                            Manually merge the different tables into one."))
             }
+            timeline_name = grep("Time", names(complete_df[[sheet]]), value=TRUE)
           }
         }
 
@@ -117,16 +116,22 @@ NosaResultLoader = setRefClass(
         if ("Spike Detection" %in% sheets)
         {
           spike_detection_names = sheet_p[["Spike Detection"]]
-          spike_detection_sheet = names(complete_df[['Spike Detection']])
+          spike_detection_sheet = names(complete_df[["Spike Detection"]])
           tmp_spike = list()
           for (df_name in spike_detection_names)
           {
             col_number = grep(df_name, spike_detection_sheet, fixed = TRUE)
-            tmp_spike[[df_name]] = complete_df[['Spike Detection']][col_number]
+            tmp_spike[[df_name]] = complete_df[["Spike Detection"]][col_number]
             names(tmp_spike[[df_name]]) = sub(df_name, "", names(tmp_spike[[df_name]]), fixed = TRUE)
             if (identical(df_name, "Train"))
             {
-              tmp_spike[[df_name]] = cbind("Time (s)" = complete_df[['Spike Detection']][,"Time (s)"], tmp_spike[[df_name]])
+              tmp_spike[[df_name]] = cbind(Time = complete_df[["Spike Detection"]][,timeline_name], tmp_spike[[df_name]]) %>%
+                rename(!!timeline_name:="Time")
+
+              if (sum(grepl("Time", names(tmp_spike[[df_name]]))) != 1)
+              {
+                stop( paste0("\nThe 'Train' dataset of ", file, " contains no or different timelines, which therefore cannot be processed."))
+              }
             }
 
             # remove empty rows
@@ -151,7 +156,7 @@ NosaResultLoader = setRefClass(
             if (table %in% c("Raw", "Processed", "Baseline", "Train"))
             {
               tmp_df[[table]] = merge(tmp_df[[table]], complete_df[[table]],
-                                      by = "Time (s)", all = TRUE)
+                                      by = timeline_name, all = TRUE)
             }
             else
             {

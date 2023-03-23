@@ -9,7 +9,7 @@ extract_plot_data(plot, additional = NULL, facet_levels = NULL)
 \arguments{
 \item{plot}{Plot generated with ggpubr}
 
-\item{additional}{List containing names of other values to be extracted (e.g. 'y-max', 'y-min')}
+\item{additional}{List containing names of other values to be extracted (e.g. 'y-max', 'y-min', 'PANEL')}
 
 \item{facet_levels}{List of group combination in the order of the resulting facetted plot}
 }

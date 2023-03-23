@@ -50,18 +50,18 @@ check_yaml_file = function(yaml_file = NULL)
   else
   {
     stop(paste0("\nYou must provide a yaml_file.\n
-                You can create a yaml file filled with default values using
+                You can create a yaml file with all default values by using
                 'writeDefaultYaml(filename)'.\n"));
   }
 }
 
 #'
-#' Extract keys from given name list.
+#' Extract key words from given name list.
 #'
 #' @param names List with names to search for keys.
 #' @param keys List with keys.
 #'
-#' @return List of found keys. If not found, entry is 'NA'.
+#' @return Vector of found keys. If not found, entry is 'NA'.
 #'
 extract_key = function(names, keys)
 {
@@ -75,43 +75,44 @@ extract_key = function(names, keys)
 }
 
 #'
-#' Takes a data frame with two or more columns, one named as 'Time'.
-#' Extracts the values for all columns, that are between
-#' (and include) 'from' and 'to' of the 'Time' column.
+#' Takes a data frame with two or more columns.
+#' Subset the data frame, retaining all rows where the values
+#' are between (and include) 'from' and 'to' of the specified column.
 #' Throws an error if 'from' or 'to' is not present.
 #'
-#' @param df Data frame of two columns. One named as 'Time'
-#' @param from First timepoint of extracted values
-#' @param to Last timepoint of extracted values
+#' @param df Data frame of two or more columns, at least one of them is numeric.
+#' @param col_name String representing the name of the (numeric) column to filter on.
+#' @param from First point in time of resulting data frame
+#' @param to Last point in time of resulting data frame
 #' @param analyser String for error output. optional
 #'
-#' @return named columns with extracted values
+#' @return Subset of the input data frame
 #'
-extract_values_between_two_given_times = function(df, from, to, analyser="")
+filter_between_two_given_times = function(df, col_name, from, to, analyser="")
 {
   success = TRUE
-  if (sum(df$Time <= from)==0 | sum(df$Time >= to)==0)
+  if (sum(df[[col_name]] <= from)==0 | sum(df[[col_name]] >= to)==0)
   {
     success = FALSE
     message(paste0("\t", analyser, " analysis: not possible, because the chosen time window is too large. Please reduce time window."))
   }
   tmp = df %>%
-    filter(.data$Time >= from & .data$Time <= to)
+    filter(.data[[col_name]] >= from & .data[[col_name]] <= to)
 
-  return(c(success=success, data.frame(tmp %>% select(-"Time"))))
+  return(list(success=success, df=data.frame(tmp)))
 }
 
 #'
-#' Get all requested analyser from outputs parameter list
+#' Get all requested analyser from analyser parameter list and set the parameter to the analyser.
 #'
-#' @param params List of analyser to be requested as well as their user defined parameters
-#' @param manipulations Named List
+#' @param analyser_params List of analyser to be requested as well as their user defined parameters
+#' @param data_params Named List
 #' @return List of analyser objects
 #'
-get_analyser_objects = function(params, manipulations)
+get_analyser_objects = function(analyser_params, data_params)
 {
   analysers = list()
-  for (ana_name in names(params))
+  for (ana_name in names(analyser_params))
   {
     if (!ana_name %in% c("DataAsRObject", "DataAsXlsx"))
     {
@@ -119,7 +120,7 @@ get_analyser_objects = function(params, manipulations)
       if (inherits(ana, "refObjectGenerator"))
       {
         analysers[[ana_name]] = ana$new()
-        analysers[[ana_name]]$setParams(c(params[[ana_name]], manipulations))
+        analysers[[ana_name]]$setParams(c(analyser_params[[ana_name]], data_params))
       }
     }
   }
@@ -127,36 +128,8 @@ get_analyser_objects = function(params, manipulations)
 }
 
 #'
-#' Extract all columns that contain a given string and return new data.frame.
-#' If no list of strings is provided, all data are returned.
-#'
-#' @param data Data frame.
-#' @param substr_colnames List with strings that are searched for in the column names of a given data.frame.
-#' @param include_col String for an additional colum. Optional.
-#'
-#' @return Data.frame that consists only of the columns that contain the substr_colnames you are looking for in their names.
-#'
-#' @importFrom stats na.omit
-#'
-get_columns_by_key = function(data, substr_colnames, include_col = NA_character_)
-{
-  if (is.null(substr_colnames))
-  {
-    return(data)
-  }
-  if (!is.na(include_col))
-  {
-    return(data %>% select(contains(c(include_col, substr_colnames))))
-  }
-  else
-  {
-    return(data %>% select(contains(substr_colnames)))
-  }
-}
-
-
-#'
-#' From a given list of column names extract substrings and return a new data.frame containing the column Name with substring reduced names
+#' From a given list of names extract substrings and return a
+#' data.frame containing the column Name with substring reduced names
 #' and the second column Key containing the extracted substrings
 #'
 #' @param names List of Strings
@@ -178,72 +151,80 @@ get_key_df = function(names, keys)
 }
 
 #'
-#' For each column find the max value and return the timepoint.
+#' Takes a data frame with two or more columns.
+#' Subsets the data frame, retaining all rows where the values
+#' are between (and include) 'from' and 'to' of the specified column.
+#' For each column finds the maximum value and returns its point of time.
 #'
 #' @param df Data frame containing the column "Time" as well as other columns in which the maximum value is to be found.
 #' @param start Double that defines the start time
 #' @param end Double that defines the end time
 #' @param time_col_name String containing the column name of time.
 #'
-#' @return Named list. Names were column names from input data frame; values is the timepoint, where the max value was found
+#' @return Named list: Names are column names from input data frame; values is the point of time, where the max value was found
 #'
 #' @importFrom rlang .data
 #'
 get_times_of_max_in_window <- function(df, start, end, time_col_name) {
   subs = df %>%
     filter(.data[[time_col_name]] >= start & .data[[time_col_name]] <= end)
-  times_of_max = lapply(subs[grep(time_col_name, names(subs),invert=TRUE)], function(col) { subs[which.max(col), time_col_name] })
+  times_of_max = lapply(subs[grep(time_col_name, names(subs),invert=TRUE)], function(col)
+    { subs[which.max(col), time_col_name] })
   return(times_of_max)
 }
 
 #'
+#' Checks whether given parameters can be applied and edits the data accordingly if necessary:
+#' * subset by GroupingKeyWords
+#' * checks whether the data can be paired by name
+#' * crops data frames containing a time column
+#' * normalizes data frames containing a time column
 #'
+#' @param data A data frame.
+#' @param params Named list of parameters to be tested.
+#' @param paired Boolean indicating whether the data is paired data.
+#' @param ana_name String indicating the name of the analyser for which the data is to be processed.
 #'
+#' @return List with data = manipulated data, skipping = boolean for success, paired = boolean for pairable data
 #'
-#'
-#'
-#'
-#'
-manipulate_data = function(data, params, plot_settings, ana_name, skips)
+manipulate_data = function(data, params, paired, ana_name)
 {
   skipping = FALSE
-  if(!isFALSE(params$GroupingKeyWords))
+  if(!isFALSE(params$GroupingKeyWords) | !is.null(params$GroupingKeyWords))
   {
     for (key in params$GroupingKeyWords)
     {
       if (sum(grepl(key, names(data))) == 0 )
       {
         message(paste0("\tIn ", ana_name, " analysis: Can not find the keyword ", key, "\n\t..Skipping..\n"));
-        skips = c(skips, ana_name)
         skipping = TRUE
         break;
       }
     }
   }
 
-
-  if (plot_settings$Paired)
+  if (paired)
   {
     key_df =  get_key_df(grep("Time", names(data), invert=TRUE, value=TRUE), params$GroupingKeyWords)
-    key_df=key_df %>% count(Name)
+    key_df=key_df %>% count(.data$Name)
     if (nrow(key_df) != nrow(key_df%>%filter(n==length(params$GroupingKeyWords))))
     {
       message("\tNOTE: Not all of the samples can be paired.\n\t...Changing the yaml value for 'paired' to 'no'")
-      plot_settings$Paired = FALSE
+      paired = FALSE
     }
   }
 
   if (params$Sheet %in% c("Raw", "Processed", "Baseline", "Train") & !skipping)
   {
-    data = get_columns_by_key(data, params$GroupingKeyWords, include_col = "Time")
+    data = subset_by_key(data, params$GroupingKeyWords, include_col = "Time")
     timename = grep("Time", names(data), value=TRUE)
 
     if(params$Normalization$Execute)
     {
-      data = normalize(data, params$Normalization, params$GroupingKeyWords)
-      if (isFALSE(data))
+      res = normalize(data, params$Normalization, params$GroupingKeyWords)
+      data = res$data
+      if (isFALSE(res$success))
       {
-        skips = c(skips, ana_name)
         skipping = TRUE
       }
     }
@@ -256,35 +237,47 @@ manipulate_data = function(data, params, plot_settings, ana_name, skips)
   }
   else if (!skipping)
   {
-    data = get_columns_by_key(data, params$GroupingKeyWords)
+    data = subset_by_key(data, params$GroupingKeyWords)
   }
-  return(list(skipping=skipping, data=data, skips=skips))
+  return(list(data=data, skipping=skipping, paired=paired))
 }
 
 #'
+#' Subset a data frame by (a) matching a pattern in names and (b) keeping
+#' all rows where the numeric 'Time' values are between (and include) 'From' and 'To'.
+#' Form row means for each sample and subtract (absolute normalization) or
+#' divide (relative normalization) this mean from all paired samples.
 #'
+#' @param data A data frame. One column must contain the keyword 'Time'.
+#' @param params Named list of normalization parameter.
+#' @param grouping_keys Vector or array of strings for paired sample detection.
 #'
+#' @return List with success=boolean, data=data frame with normalized data
 #'
-#'
-#'
-#'
-#'
-#'
+#' @import utils
 normalize = function(data, params, grouping_keys)
 {
   if (sum(grepl(params$KeyWord, names(data)))>0)
   {
     timename = grep("Time", names(data), value=TRUE)
+
     tmp = data %>%
-      filter(!!as.symbol(timename) >= params$From & !!as.symbol(timename) <= params$To) %>%
+      select(contains(c(timename, params$KeyWord))) %>%
+      filter(!!as.symbol(timename) >= params$From & !!as.symbol(timename) <= params$To) %>% na.omit()
+    if (head(tmp[[timename]], 1)>params$From | tail(tmp[[timename]], 1)<params$To)
+    {
+      message(paste0("\tCan not normalize data: The time window does not fit the data."))
+      return(list(success=FALSE, data=data))
+    }
+    tmp = tmp %>%
       select(contains(c(params$KeyWord))) %>%
-      rename_with(~ gsub(params$KeyWord, "", .x, fixed = TRUE), contains(params$KeyWord)) %>% na.omit()
+      rename_with(~ gsub(params$KeyWord, "", .x, fixed = TRUE), contains(params$KeyWord))
     norm_means = rowMeans(data.frame(t(tmp)))
   }
   else
   {
     message(paste0("\tCan`t normalize data: The 'KeyWord' must be one of the sample name keywords."))
-    return(success=FALSE)
+    return(list(success=FALSE,data=data))
   }
 
   if (params$Type == "absolute")
@@ -304,9 +297,9 @@ normalize = function(data, params, grouping_keys)
   else
   {
     message(paste0("\tCan`t normalize data: The Type must be either 'relative' or 'absolute."))
-    return(success=FALSE)
+    return(list(success=FALSE,data=data))
   }
-  return(data)
+  return(list(success=TRUE,data=data))
 }
 
 #'
@@ -320,7 +313,7 @@ normalize = function(data, params, grouping_keys)
 #' @param keys List of Strings
 #' @param global_cols List of column names to be part of the result
 #'
-#' @return List of data.frames.
+#' @return Named list of data.frames.
 #'
 separate_data_by_key = function(df, keys, global_cols = NULL)
 {
@@ -335,4 +328,46 @@ separate_data_by_key = function(df, keys, global_cols = NULL)
     names(dfs[[key]]) = gsub(names(dfs[[key]]), pattern = key, replacement="")
   }
   return(dfs)
+}
+
+#'
+#' Subset a data frame by matching patterns in their names.
+#' If no list of patterns is provided, all data are returned.
+#'
+#' @param data Data frame.
+#' @param substr_colnames List with strings that are searched for in the column names.
+#' @param include_col String for an additional column. Optional.
+#'
+#' @return Data.frame, which consists only of the columns containing the substr_colnames and the include_col in their names.
+#'
+subset_by_key = function(data, substr_colnames, include_col = NA_character_)
+{
+  if (is.null(substr_colnames))
+  {
+    return(data)
+  }
+  if (!is.na(include_col))
+  {
+    return(data %>% select(contains(c(include_col, substr_colnames))))
+  }
+  else
+  {
+    return(data %>% select(contains(substr_colnames)))
+  }
+}
+
+#' Write a yaml file with all possible default values for the nosa software analysis.
+#'
+#' It is recommended to make a copy and then modify it according to the
+#' requirements of the analysis.
+#'
+#' @param filename A literal string naming a file and its full path for writing
+#'
+#' @export
+#'
+writeDefaultYaml = function(filename)
+{
+  yaml_class = YamlClass$new()
+  yaml_list = createYaml(yc=yaml_class)
+  yaml_list$yc$writeYaml(filename)
 }

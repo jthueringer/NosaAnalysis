@@ -3,7 +3,7 @@
 \name{createYaml}
 \alias{createYaml}
 \title{Creates a yaml file storing the parameters that are used for the analysis of the NOSA software results
-and returns these parameters as well as a list of available Metrics objects.}
+and returns these parameters.}
 \usage{
 createYaml(
   yc,
@@ -14,18 +14,20 @@ createYaml(
 )
 }
 \arguments{
-\item{yc}{A yaml class object created by YAMLClass$new()}
+\item{yc}{A yaml class object created by YAMLClass$new().}
 
-\item{outputs}{List of metric names that should be plotted; if empty, it is filled with defaults}
+\item{dirs}{List with the paths to the input and result directories and the sheet names to be read in.}
 
-\item{sheets}{List sheet names that should be loaded; if empty, it is filled with defaults}
+\item{manipulate}{List of parameters for editing input data; if empty, it is filled with defaults.}
 
-\item{prep}{List of parameters; if empty, it is filled with defaults}
+\item{plot_settings}{List of parameters for designing plots.}
+
+\item{outputs}{List of analyser names and their parameter; if empty, it is filled with defaults.}
 }
 \value{
-list of all parameters used for the analysis#'
+List of all parameters used for the analysis#'
 }
 \description{
 Creates a yaml file storing the parameters that are used for the analysis of the NOSA software results
-and returns these parameters as well as a list of available Metrics objects.
+and returns these parameters.
 }

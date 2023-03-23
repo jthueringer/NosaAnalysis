@@ -11,7 +11,8 @@ test_that("generates plots and plot_data", {
                                          "DataManipulation$PeakSearchWindow$BeforeStim = 0",
                                          "DataManipulation$PeakSearchWindow$AfterStim = 5",
                                          "DataManipulation$CalculationWindow$BeforePeak = 2",
-                                         "DataManipulation$CalculationWindow$AfterPeak = 5"))
+                                         "DataManipulation$CalculationWindow$AfterPeak = 5",
+                                         "Output$SEM$Threshold = TRUE"))
   ana = get_analyser_object("SEM", yaml)
 
   df = data.frame(seq(0, 49),
@@ -19,15 +20,15 @@ test_that("generates plots and plot_data", {
                            rep(rep(c(6,8), each=25), times=5)), nrow = 50, ncol = 10))
   names(df) = c("Time", paste("pre", letters[1:5], sep="_"), paste("post", letters[1:5], sep="_"))
 
-  result_trace = data.frame(Time=c(df$Time,df$Time), Values= rep(c(2,4,6,8), each=25)) %>%
-    mutate(ymin = Values, ymax = Values, facet = rep(c("pre", "post"), each=50))
+  result_trace = data.frame(Time=c(df$Time,df$Time), y= rep(c(2,4,6,8), each=25)) %>%
+    mutate(ymin = y, ymax = y, Key = factor(rep(c("pre", "post"), each=50), levels=c("pre", "post")))
   expect_true(ana$setData(df))
   expect_equal(length(ana$plots), 4)
   expect_equal(ana$plot_data[["SEM_Trace"]], result_trace)
 
   stderror=0.333
-  result_PeakAvg = data.frame(Time=seq(-2,5), Values= rep(c(3,7), each=8)) %>%
-    mutate(ymin = Values-stderror, ymax = Values+stderror, facet = rep(c("pre", "post"), each=8))
+  result_PeakAvg = data.frame(Time=seq(-2,5), y= rep(c(3,7), each=8)) %>%
+    mutate(ymin = y-stderror, ymax = y+stderror, Key = factor(rep(c("pre", "post"), each=8), levels=c("pre", "post")))
   expect_equal(ana$plot_data[["SEM_PeakAvg_facet"]], result_PeakAvg, tolerance = 1e-4)
 
 })

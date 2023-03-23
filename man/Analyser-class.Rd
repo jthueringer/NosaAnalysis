@@ -17,7 +17,7 @@ are generated at runtime.
 
 \item{\code{plot_fnc}}{Function that generates plots.}
 
-\item{\code{plots}}{List of plots}
+\item{\code{plots}}{List of generated plots}
 
 \item{\code{plot_data}}{List of data frames for each generated plot.}
 

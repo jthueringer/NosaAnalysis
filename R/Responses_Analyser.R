@@ -4,8 +4,9 @@ Responses_Analyser = setRefClass(
   methods = list(initialize = function()
   {
     callSuper(
-      description = "Extract responses (maximum peak values). The time of the stimulus and a
-      time window are defined by the user. The x-axis is grouped by keywords.
+      description = "Extracts responses (maximum peak values). Within a
+      peak search window the highest value for each point of time (stimulus) is found.
+      The x-axis is grouped by keywords.
       Additional grouping of different stimuli is possible.",
 
       plot_fnc = function(.self, data)
@@ -46,8 +47,9 @@ Responses_Analyser = setRefClass(
             if (length(params$GroupingKeyWords) > 1)
             {
               b_plot = b_plot +
-                ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=plot_settings$Paired) +
-                ggpubr::stat_compare_means(label =  "p.signif", label.y = max(h$MaxPeak)*0.93)
+                ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=plot_settings$Paired, label.x.npc="center") +
+                ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=plot_settings$Paired,
+                                           label =  "p.signif", label.y = max(h$MaxPeak)*0.93, label.x.npc="center")
             }
             b_plot =  b_plot + xlab("") + ylab(plot_settings$ylabTeX)
             b_plot$file_name = paste0(.self$ana_name, "_groupByStim")
@@ -69,8 +71,9 @@ Responses_Analyser = setRefClass(
             if (length(params$GroupingKeyWords) > 1)
             {
               b_plot = b_plot +
-                ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=plot_settings$Paired) +
-                ggpubr::stat_compare_means(label =  "p.signif", label.y = max(h$Mean)*0.93)
+                ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=plot_settings$Paired, label.x.npc="center") +
+                ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=plot_settings$Paired,
+                                           label =  "p.signif", label.y = max(h$Mean)*0.93, label.x.npc="center")
             }
             b_plot =  b_plot + xlab("") + ylab(plot_settings$ylabTeX)
             b_plot$file_name = .self$ana_name

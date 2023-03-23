@@ -2,7 +2,10 @@
 % Please edit documentation in R/misc.R
 \name{get_times_of_max_in_window}
 \alias{get_times_of_max_in_window}
-\title{For each column find the max value and return the timepoint.}
+\title{Takes a data frame with two or more columns.
+Subsets the data frame, retaining all rows where the values
+are between (and include) 'from' and 'to' of the specified column.
+For each column finds the maximum value and returns its point of time.}
 \usage{
 get_times_of_max_in_window(df, start, end, time_col_name)
 }
@@ -16,8 +19,11 @@ get_times_of_max_in_window(df, start, end, time_col_name)
 \item{time_col_name}{String containing the column name of time.}
 }
 \value{
-Named list. Names were column names from input data frame; values is the timepoint, where the max value was found
+Named list: Names are column names from input data frame; values is the point of time, where the max value was found
 }
 \description{
-For each column find the max value and return the timepoint.
+Takes a data frame with two or more columns.
+Subsets the data frame, retaining all rows where the values
+are between (and include) 'from' and 'to' of the specified column.
+For each column finds the maximum value and returns its point of time.
 }
