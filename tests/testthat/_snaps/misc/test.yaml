@@ -1,0 +1,79 @@
+# This is a configuration file for NOSAAnalysis.
+# By changing the values, you can determine the files or plots to be output.
+#
+# This file has a structure, that should be kept when editing.
+#
+Directories:
+  InputDirectory: /path/to/nosa/results
+  ResultsDirectory: /path/to/results
+  Sheets:
+    metadata: []
+    Raw: []
+    Processed: []
+    Baseline: []
+    Smoothing: []
+    Spike Detection:
+    - Train
+    - Peak (s)
+    - Amplitude of Peak
+    - Spike Frequency (#Spikes / second)
+DataManipulation:
+  DataCrop:
+    Start: 0.0
+    End: .inf
+  Normalization:
+    Execute: no
+    Type: relative or absolute
+    KeyWord: pre
+    From: 0.0
+    To: 1.5
+  GroupingKeyWords:
+  - pre
+  - post
+  Stimulus:
+  - 10.0
+  - 41.0
+  PeakSearchWindow:
+    BeforeStim: 2.0
+    AfterStim: 5.0
+  CalculationWindow:
+    BeforePeak: 1.5
+    AfterPeak: 1.5
+PlotSettings:
+  Paired: no
+  TestMethod: Allowed methods are one of t.test, wilcox.test, anova, kruskal.test
+  Threshold: 0.5
+  ylabTeX: Delta F/ F
+  Lineplots:
+    Colours:
+    - green
+    - blue
+    ErrorDisplay: Allowed are one of 'linerange', 'ribbon'
+Output:
+  DataAsRObject: yes
+  DataAsXlsx: yes
+  Trace:
+    Sheet: Processed
+    Threshold: no
+  SEM:
+    Sheet: Processed
+    Trace: yes
+    PeakAverage: yes
+    Threshold: no
+  Responses:
+    Sheet: Processed
+    GroupByStimulus:
+    - no
+    - yes
+  PeakCount:
+    Sheet: Peak (s)
+  Auc:
+    Sheet: Processed
+    GroupByStimulus:
+    - no
+    - yes
+    ControlPlots: yes
+  TimeSlots:
+    Sheet: Processed
+    Begin: 0.0
+    End: 1.5

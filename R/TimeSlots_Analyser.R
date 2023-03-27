@@ -4,10 +4,10 @@ TimeSlots_Analyser = setRefClass(
   methods = list(initialize = function()
   {
     callSuper(
-      description = "Two time windows are analysed for each sample. For both, each time window and sample,
-      the mean of the specified normalisation key is determined and substracted from both time window values
-      (normalised). The mean is then displayed in a boxplot, separated by time window, as well as a trace plot
-      with standard error of the mean (SEM)",
+      description = "For each keyword found in the sample names, the input data is subseted.
+      Then, for each subset, the mean values for a given time window are calculated and
+      displayed graphically. If the data has been normalized, then the time window for
+      the associated subset of the normalization keyword is the same as that of the normalization.",
 
       plot_fnc = function(.self, data)
       {
@@ -15,28 +15,32 @@ TimeSlots_Analyser = setRefClass(
         datal = list()
         xlab = grep("Time", names(data), value = TRUE)
         data = data %>%
-          rename(Time = contains("Time"))
+          rename(x = xlab)
 
         df_means = setNames(data.frame(matrix(ncol = 3, nrow = 0)), c("Name", "Key", "Mean"))
 
         for (key in params$GroupingKeyWords)
         {
-          if (key==params$Normalization$KeyWord)
+          time_slot = data %>%
+            select(contains(c("x",key))) %>% na.omit()
+          if (key==params$Normalization$KeyWord & params$Normalization$Execute)
           {
-            time_slot = data %>%
-              select(contains(c("Time",key))) %>%
-              filter(Time >= params$Normalization$From & Time <= params$Normalization$To) %>% na.omit()
+            time_slot = time_slot %>%
+              filter(x >= params$Normalization$From & x <= params$Normalization$To) %>% na.omit()
           }
           else
           {
-            time_slot = data %>%
-              select(contains(c("Time",key))) %>%
-              filter(Time >= params$Begin & Time <= params$End) %>% na.omit()
+            if (head(time_slot[["x"]],1)>params$Begin | tail(time_slot[["x"]],1)<params$End)
+            {
+              message("\tTimeSlots analysis not possible. The time window is out of range.")
+              return(list(plots = plotl, data = datal, success = FALSE))
+            }
+            time_slot = time_slot %>%  filter(x >= params$Begin & x <= params$End) %>% na.omit()
           }
-          means = data.frame(t(time_slot %>% select(-Time))) %>%
+          means = data.frame(t(time_slot %>% select(-x))) %>%
             mutate(Mean = unname(rowMeans(., na.rm = TRUE))) %>%
             select(Mean)
-          df_means = rbind(df_means, cbind(get_key_df(names(time_slot %>% select(-Time)), key), Mean = means$Mean))
+          df_means = rbind(df_means, cbind(get_key_df(names(time_slot %>% select(-x)), key), Mean = means$Mean))
         }
 
         if(plot_settings$Paired)
@@ -45,14 +49,15 @@ TimeSlots_Analyser = setRefClass(
         }
         else
         {
-          b_plot = ggpubr::ggboxplot(df_means, x="Key", y="Mean", add = "jitter")
+          b_plot = ggpubr::ggboxplot(df_means, x="Key", y="Mean")
         }
 
         if (length(params$GroupingKeyWord) > 1)
         {
           b_plot = b_plot +
-            ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=plot_settings$Paired) +
-            ggpubr::stat_compare_means(label =  "p.signif", label.y = max(df_means$Mean)*0.93)
+            ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=plot_settings$Paired, label.x.npc="center") +
+            ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=plot_settings$Paired,
+                                       label =  "p.signif", label.y = max(df_means$Mean)*0.93, label.x.npc="center")
         }
         b_plot =  b_plot + xlab("") + ylab(plot_settings$ylabTeX)
         b_plot$file_name = paste0(.self$ana_name, "_Boxplot" )
@@ -63,36 +68,36 @@ TimeSlots_Analyser = setRefClass(
         sem_plot_data = data.frame()
         for (key in params$GroupingKeyWords)
         {
-          sem_plot_data = bind_rows(sem_plot_data, data %>% select(contains(c("Time", key))) %>%
+          sem_plot_data = bind_rows(sem_plot_data, data %>% select(contains(c("x", key))) %>%
                                       rename_with(~gsub(key, "", .x, fixed=TRUE)) %>%
                                       mutate(Key=factor(key, levels=params$GroupingKeyWords)) %>% na.omit())
         }
 
-        longer_df = tidyr::pivot_longer(sem_plot_data, -c(Time, Key), names_to = "Name", values_to = "Values")
-        sem_plot = ggpubr::ggline(longer_df, x="Time", y="Values", add="mean_se", add.params = list(color="grey"),
-                                  error.plot="linerange", plot_type = "l", color = "green",
-                                  numeric.x.axis=TRUE, facet.by = "Key", scales = "free_x")
+        longer_df = tidyr::pivot_longer(sem_plot_data, -c(x, Key), names_to = "Name", values_to = "y")
+        t_plot = plot_line(longer_df, add="mean_se", display=plot_settings$Lineplots$ErrorDisplay,
+                           facet_by="Key", color_column = "Key", xlab=xlab, ylab=plot_settings$ylabTeX)
 
-        sem_plot =  sem_plot +
-          ylab(plot_settings$ylabTeX) +
-          sapply(c(params$Normalization$From, params$Normalization$To),
-                 function(xint) geom_vline(data=filter(sem_plot_data, Key==params$Normalization$KeyWord),
-                                           aes(xintercept=xint), linetype="dotted", colour="darkgreen")) +
-          mapply(function(key, x) geom_vline(data=filter(sem_plot_data, Key==key),
-                                             aes(xintercept=x), linetype="dotted", colour="darkgreen"),
-                 params$GroupingKeyWords[!params$GroupingKeyWords %in% params$Normalization$KeyWord],
-                 c(params$Begin, params$End))
+        for (key in params$GroupingKeyWords)
+        {
+          if (key==params$Normalization$KeyWord & params$Normalization$Execute)
+          {
+            t_plot$plot = add_geom_vlines(t_plot$plot, df = filter(t_plot$data, Key==key),
+                                          xintercepts = c(params$Normalization$From, params$Normalization$To),
+                                          linetype="dotted", colour="grey")
+          }
+          else
+          {
+            t_plot$plot = add_geom_vlines(t_plot$plot, df = filter(t_plot$data, Key==key),
+                                          xintercepts = c(params$Begin, params$End),
+                                          linetype="dotted", colour="grey")
+          }
+        }
 
-        sem_plot_data_extr = extract_plot_data(sem_plot, additional = c("ymin", "ymax")) %>%
-          rename("Time" = x)
-
-        sem_plot = adjust_facet_width_of_plot(sem_plot,
-                                              lapply(params$GroupingKeyWord, function(key) sem_plot_data %>% filter(Key==key)))
-
-        sem_plot$file_name = paste0(.self$ana_name, "_Trace" )
-        sem_plot$width = 2
-        plotl[[sem_plot$file_name]] = sem_plot
-        datal[[sem_plot$file_name]] = sem_plot_data_extr
+        file_name = paste0(.self$ana_name, "_Trace" )
+        t_plot$plot$width = 2
+        t_plot$plot$file_name = file_name
+        plotl[[file_name]] = t_plot$plot
+        datal[[file_name]] = t_plot$data  %>% rename(!!all_of(xlab):="x")
 
         return(list(plots = plotl, data = datal, success = TRUE))
       },

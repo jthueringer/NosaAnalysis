@@ -21,7 +21,10 @@ test_that("correct calculation", {
 
   stde = 0.1
   trace_result = data.frame(Time = c(df$Time[1:10], df$Time),
-                            y = c(rep(0, 10), rep(5.5, 20)))
+                            y = c(rep(0, 10), rep(5.5, 20))) %>%
+    mutate(ymin = y-stde,
+           ymax = y+stde,
+           Key = factor(c(rep("pre", 10), rep("post", 20)), levels=c("pre", "post")))
   trace_result$ymin = trace_result$y-stde
   trace_result$ymax = trace_result$y+stde
   expect_equal(ana$plot_data[[2]], trace_result, tolerance = 0.1)
@@ -30,7 +33,8 @@ test_that("correct calculation", {
 test_that("paired Boxplot", {
   pdf(NULL) # to prevent generating an empty RPlots.pdf
 
-  yaml = get_testyaml_object("dir", analyser = "TimeSlots", changes = "PlotSettings$Paired = TRUE")
+  yaml = get_testyaml_object("dir", analyser = "TimeSlots", changes = c("PlotSettings$Paired = TRUE",
+                                                                        "DataManipulation$Normalization$Execute = TRUE"))
   ana = get_analyser_object("TimeSlots", yaml)
 
   df = data.frame(seq(0, 3.2, by = 1.0/6.0),

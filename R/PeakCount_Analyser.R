@@ -23,7 +23,7 @@ PeakCount_Analyser = setRefClass(
         }
         else
         {
-          plot = ggpubr::ggboxplot(df, x="Key", y="Counts", add = "jitter")
+          plot = ggpubr::ggboxplot(df, x="Key", y="Counts")
         }
         if (length(params$GroupingKeyWords) > 1)
         {
