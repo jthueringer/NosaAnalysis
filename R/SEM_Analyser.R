@@ -86,20 +86,16 @@ SEM_Analyser = setRefClass(
           datal[[s_plot$plot$file_name]] = s_plot$data  %>% rename(!!all_of(xlab):="x")
 
           af_plot = plot_line(df_average, add="mean_se", display=plot_settings$Lineplots$ErrorDisplay,
-                             facet_by="Key", color_column = "Key" )
-          af_plot$plot = af_plot$plot +
-            ylab(plot_settings$ylabTeX) +
-            xlab(xlab)
+                             facet_by="Key", color_column = "Key",
+                             xlab=xlab, ylab=plot_settings$ylabTeX)
           af_plot$plot$file_name = paste0(.self$ana_name, "_PeakAvg_facet")
           af_plot$plot$width = 1
           plotl[[af_plot$plot$file_name]] = af_plot$plot
           datal[[af_plot$plot$file_name]] = af_plot$data  %>% rename(!!all_of(xlab):="x")
 
           a_plot = plot_line(df_average, add="mean_se", display=plot_settings$Lineplots$ErrorDisplay,
-                             facet_by=NULL, color_column = "Key" )
-          a_plot$plot = a_plot$plot +
-            ylab(plot_settings$ylabTeX) +
-            xlab(xlab)
+                             facet_by=NULL, color_column = "Key",
+                             xlab=xlab, ylab=plot_settings$ylabTeX)
           a_plot$plot$file_name = paste0(.self$ana_name, "_PeakAvg")
           a_plot$plot$width = 1
           plotl[[a_plot$plot$file_name]] = a_plot$plot

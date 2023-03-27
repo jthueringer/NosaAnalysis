@@ -13,7 +13,9 @@ plot_line(
   facet_by = NULL,
   color_column = "white",
   area_from = 0,
-  area_to = 0
+  area_to = 0,
+  xlab = "",
+  ylab = ""
 )
 }
 \arguments{
@@ -30,6 +32,10 @@ plot_line(
 \item{area_from}{Starting value of geom_area.}
 
 \item{area_to}{End value of geom_area.}
+
+\item{xlab}{String for x axis title.}
+
+\item{ylab}{String for y axis title.}
 }
 \value{
 List with 'plot' = lineplot and 'data' = plot data (including 'mean_se' if calculated)

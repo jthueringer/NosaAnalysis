@@ -171,5 +171,4 @@ performAnalysis = function(yaml_file = NULL )
   }
 
   return(list(data=nsr$data, manipulated_data=manipulated_data, results=analysis_list))
-  # return(nsr)
 }

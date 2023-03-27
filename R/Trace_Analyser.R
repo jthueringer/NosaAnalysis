@@ -25,7 +25,8 @@ Trace_Analyser = setRefClass(
         for (col in names(data %>% select(-Time)))
         {
           df = data.frame(x = data$Time, y = data[[col]]) %>% na.omit()
-          plot = plot_line(df, add="none", display=NULL)
+          plot = plot_line(df, add="none", display=NULL,
+                           xlab=xlab, ylab=plot_settings$ylabTeX)
           if (plot_settings$Threshold)
           {
             plot = plot +

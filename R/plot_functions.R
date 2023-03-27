@@ -1,5 +1,24 @@
 
 #'
+#' Adds vertical lines to a ggplot object.
+#'
+#' @param plot Ggplot object
+#' @param df A data frame with relevant plot data. (If the plot is faceted, then df must be the subset of data for the corresponding facet)
+#' @param xintercepts Numerical x axis values that control the position of the line
+#' @param linetype Aesthetic passed on to layer()
+#' @param colour Aesthetic passed on to layer()
+#'
+#' @return Plot with vertical lines.
+#'
+add_geom_vlines = function(plot, df, xintercepts, linetype, colour)
+{
+  plot = plot +
+    sapply(xintercepts,
+           function(xint) geom_vline(data=df, aes(xintercept=xint), linetype=linetype, colour=colour))
+  return(plot)
+}
+
+#'
 #' Converts a ggplot object to grob object, gets the amount of unique x-axis values per facet
 #' by counting the rows from given list elements, and change the relative width of the facet
 #' columns according to the amount.
@@ -69,6 +88,8 @@ extract_plot_data = function(plot, additional = NULL, facet_levels = NULL)
 #' @param color_column String matching a column name for the group by which the plot lines are to be coloured.
 #' @param area_from Starting value of geom_area.
 #' @param area_to End value of geom_area.
+#' @param xlab String for x axis title.
+#' @param ylab String for y axis title.
 #'
 #' @return List with 'plot' = lineplot and 'data' = plot data (including 'mean_se' if calculated)
 #'
@@ -76,7 +97,8 @@ extract_plot_data = function(plot, additional = NULL, facet_levels = NULL)
 #' @import ggplot2
 #' @import ggpubr
 #'
-plot_line = function(df, add="none", display=NULL, facet_by = NULL, color_column = "white", area_from=0, area_to=0)
+plot_line = function(df, add="none", display=NULL, facet_by = NULL, color_column = "white", area_from=0, area_to=0,
+                     xlab="", ylab="")
 {
   facet_levels = NULL
   plot = list()
@@ -128,5 +150,6 @@ plot_line = function(df, add="none", display=NULL, facet_by = NULL, color_column
 	{
 		plot = plot + ggpubr::geom_exec(geom_linerange, ymin = plotdata$ymin, ymax = plotdata$ymax, alpha = 0.3, position = "identity")
 	}
+  plot = plot + xlab(xlab) + ylab(ylab)
 	return(list(plot=plot, data=plotdata))
 }

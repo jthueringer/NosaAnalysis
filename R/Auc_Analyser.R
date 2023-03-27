@@ -122,10 +122,8 @@ Auc_Analyser = setRefClass(
               t_plot = plot_line(trace_data, add="mean_se", display=c(plot_settings$Lineplots$ErrorDisplay, "area"),
                                  facet_by=c("Stimulus", "Key"), color_column = "Key",
                                  area_from = -params$CalculationWindow$BeforePeak,
-                                 area_to = params$CalculationWindow$AfterPeak)
-              t_plot$plot = t_plot$plot +
-                ylab(plot_settings$ylabTeX) +
-                xlab(xlab)
+                                 area_to = params$CalculationWindow$AfterPeak,
+                                 xlab=xlab, ylab=plot_settings$ylabTeX)
               file_name = paste(.self$ana_name, "trace_byStim", sep="_" )
               t_plot$plot$width = 1
               t_plot$plot$file_name = file_name
@@ -163,10 +161,8 @@ Auc_Analyser = setRefClass(
               t_plot = plot_line(trace_data, add="mean_se", display=c(plot_settings$Lineplots$ErrorDisplay, "area"),
                         facet_by=c("Key"), color_column = "Key",
                         area_from = -params$CalculationWindow$BeforePeak,
-                        area_to = params$CalculationWindow$AfterPeak)
-              t_plot$plot = t_plot$plot +
-                ylab(plot_settings$ylabTeX) +
-                xlab(xlab)
+                        area_to = params$CalculationWindow$AfterPeak,
+                        xlab=xlab, ylab=plot_settings$ylabTeX)
               file_name = paste(.self$ana_name, "trace_byKey", sep="_" )
               t_plot$plot$width = 1
               t_plot$plot$file_name = file_name
