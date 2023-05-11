@@ -11,7 +11,7 @@ test_that("generates all plots and plot data", {
   ana = get_analyser_object("Trace", yaml)
 
   df = data.frame(matrix(1:50, nrow = 10, ncol = 5))
-  names(df) = c("Time", letters[1:4])
+  names(df) = c("Time", paste0("pre",letters[1:4]))
 
   ana$setData(df)
   expect_equal(length(ana$plots), 4)
