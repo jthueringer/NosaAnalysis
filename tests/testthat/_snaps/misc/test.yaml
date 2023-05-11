@@ -41,7 +41,8 @@ DataManipulation:
     AfterPeak: 1.5
 PlotSettings:
   Paired: no
-  TestMethod: Allowed methods are one of t.test, wilcox.test, anova, kruskal.test
+  TestMethod: Allowed methods are one of 'none', 't.test', 'wilcox.test', 'anova',
+    'kruskal.test'
   Threshold: 0.5
   ylabTeX: Delta F/ F
   Lineplots:

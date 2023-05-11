@@ -2,7 +2,7 @@
 % Please edit documentation in R/misc.R
 \name{manipulate_data}
 \alias{manipulate_data}
-\title{Checks whether given parameters can be applied and edits the data accordingly if necessary:
+\title{Checks whether given parameters can be applied and edits the data accordingly, if necessary:
 * subset by GroupingKeyWords
 * checks whether the data can be paired by name
 * crops data frames containing a time column
@@ -23,7 +23,7 @@ manipulate_data(data, params, paired, ana_name)
 List with data = manipulated data, skipping = boolean for success, paired = boolean for pairable data
 }
 \description{
-Checks whether given parameters can be applied and edits the data accordingly if necessary:
+Checks whether given parameters can be applied and edits the data accordingly, if necessary:
 * subset by GroupingKeyWords
 * checks whether the data can be paired by name
 * crops data frames containing a time column

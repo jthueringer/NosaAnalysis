@@ -117,7 +117,7 @@ test_that("normalization keyword unknown", {
                   a_test2 = seq(from=0.1, to=0.9, length.out=13))
   params = list(KeyWord="nonsense")
   expect_message(normalize(df, params=params, grouping_keys = c("test1","test2")),
-                 "The 'KeyWord' must be one of the sample name keywords")
+                 "The 'KeyWord' must be one of the sample names 'GroupingKeyWords'")
 })
 
 test_that("default yaml snapshot", {

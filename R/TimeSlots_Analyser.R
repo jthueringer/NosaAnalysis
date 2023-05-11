@@ -4,7 +4,7 @@ TimeSlots_Analyser = setRefClass(
   methods = list(initialize = function()
   {
     callSuper(
-      description = "For each keyword found in the sample names, the input data is subseted.
+      description = "For each GroupingKeyWord found in the sample names, the input data is subseted.
       Then, for each subset, the mean values for a given time window are calculated and
       displayed graphically. If the data has been normalized, then the time window for
       the associated subset of the normalization keyword is the same as that of the normalization.",
@@ -32,7 +32,7 @@ TimeSlots_Analyser = setRefClass(
           {
             if (head(time_slot[["x"]],1)>params$Begin | tail(time_slot[["x"]],1)<params$End)
             {
-              message("\tTimeSlots analysis not possible. The time window is out of range.")
+              message(paste0("\tTimeSlots analysis not possible. The time window for the keyword ", key, " is out of range."))
               return(list(plots = plotl, data = datal, success = FALSE))
             }
             time_slot = time_slot %>%  filter(x >= params$Begin & x <= params$End) %>% na.omit()
@@ -52,7 +52,7 @@ TimeSlots_Analyser = setRefClass(
           b_plot = ggpubr::ggboxplot(df_means, x="Key", y="Mean")
         }
 
-        if (length(params$GroupingKeyWord) > 1)
+        if (length(params$GroupingKeyWord) > 1 & plot_settings$TestMethod != "none")
         {
           b_plot = b_plot +
             ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=plot_settings$Paired, label.x.npc="center") +

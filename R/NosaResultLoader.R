@@ -56,12 +56,9 @@ NosaResultLoader = setRefClass(
               sheet = x
             ))
           }, sheets)
-        complete_df <-
-          lapply(complete_data, as.data.frame)
+        complete_df = lapply(complete_data, as.data.frame)
 
-        # assigning names to data frames
-        names(complete_df) <-
-          sheets[]
+        names(complete_df) = sheets[]
 
         # cut source name
         # TODO: maybe better done by user instead of software?
@@ -115,12 +112,12 @@ NosaResultLoader = setRefClass(
         # prepare data of spike detection sheet
         if ("Spike Detection" %in% sheets)
         {
-          spike_detection_names = sheet_p[["Spike Detection"]]
-          spike_detection_sheet = names(complete_df[["Spike Detection"]])
+          user_spike_detection_names = sheet_p[["Spike Detection"]]
+          input_spike_detection_names = names(complete_df[["Spike Detection"]])
           tmp_spike = list()
-          for (df_name in spike_detection_names)
+          for (df_name in user_spike_detection_names)
           {
-            col_number = grep(df_name, spike_detection_sheet, fixed = TRUE)
+            col_number = grep(df_name, input_spike_detection_names, fixed = TRUE)
             tmp_spike[[df_name]] = complete_df[["Spike Detection"]][col_number]
             names(tmp_spike[[df_name]]) = sub(df_name, "", names(tmp_spike[[df_name]]), fixed = TRUE)
             if (identical(df_name, "Train"))

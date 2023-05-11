@@ -9,13 +9,13 @@ performAnalysis(yaml_file = NULL)
 \arguments{
 \item{yaml_file}{A character string that provides the path and name of a yaml_file containing
 the configuration parameters.
-The function 'writeDefaultYaml(filename)' can be used to create
+The function \code{\link{writeDefaultYaml}} can be used to create
 this file filled with all default parameters and values.}
 }
 \value{
 List with sections data = List with original data frames,
 manipulated_data = List with pre-processed data frames,
-results = List of analyser objects containing 'plots' and 'plot_data'.
+results = List of analyser objects each containing 'plots' and 'plot_data'.
 }
 \description{
 By calling this function, all data specified under "Directories$Sheets" in the Yaml

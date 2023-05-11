@@ -86,20 +86,19 @@ extract_key = function(names, keys)
 #' @param to Last point in time of resulting data frame
 #' @param analyser String for error output. optional
 #'
-#' @return Subset of the input data frame
+#' @return List containing a boolean for success and the (subsetted) data frame.
 #'
 filter_between_two_given_times = function(df, col_name, from, to, analyser="")
 {
-  success = TRUE
   if (sum(df[[col_name]] <= from)==0 | sum(df[[col_name]] >= to)==0)
   {
-    success = FALSE
     message(paste0("\t", analyser, " analysis: not possible, because the chosen time window is too large. Please reduce time window."))
+    return(list(success=FALSE, df=df))
   }
   tmp = df %>%
     filter(.data[[col_name]] >= from & .data[[col_name]] <= to)
 
-  return(list(success=success, df=data.frame(tmp)))
+  return(list(success=TRUE, df=data.frame(tmp)))
 }
 
 #'
@@ -174,7 +173,7 @@ get_times_of_max_in_window <- function(df, start, end, time_col_name) {
 }
 
 #'
-#' Checks whether given parameters can be applied and edits the data accordingly if necessary:
+#' Checks whether given parameters can be applied and edits the data accordingly, if necessary:
 #' * subset by GroupingKeyWords
 #' * checks whether the data can be paired by name
 #' * crops data frames containing a time column
@@ -276,7 +275,7 @@ normalize = function(data, params, grouping_keys)
   }
   else
   {
-    message(paste0("\tCan`t normalize data: The 'KeyWord' must be one of the sample name keywords."))
+    message(paste0("\tCan not normalize data: The 'KeyWord' must be one of the sample names 'GroupingKeyWords'."))
     return(list(success=FALSE,data=data))
   }
 

@@ -47,7 +47,7 @@ createYaml <- function(yc, dirs = list(), manipulate = list(), plot_settings = l
 
   default_plot_settings = list()
   default_plot_settings$Paired = FALSE
-  default_plot_settings$TestMethod = "Allowed methods are one of t.test, wilcox.test, anova, kruskal.test"
+  default_plot_settings$TestMethod = "Allowed methods are one of 'none', 't.test', 'wilcox.test', 'anova', 'kruskal.test'"
   default_plot_settings$Threshold = 0.5
   default_plot_settings$ylabTeX = "Delta F/ F"
   default_plot_settings$Lineplots = list()

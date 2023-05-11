@@ -21,7 +21,7 @@ filter_between_two_given_times(df, col_name, from, to, analyser = "")
 \item{analyser}{String for error output. optional}
 }
 \value{
-Subset of the input data frame
+List containing a boolean for success and the (subsetted) data frame.
 }
 \description{
 Takes a data frame with two or more columns.

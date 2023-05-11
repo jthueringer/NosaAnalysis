@@ -4,7 +4,7 @@ Auc_Analyser = setRefClass(
   methods = list(initialize = function()
   {
     callSuper(
-      description = "For each time (stimulus) and sample, the time of the
+      description = "For each time oint (stimulus) and sample, the time of the
       maximum value is found within a PeakSearchWindow in order to subsequently
       calculate the area under the curve (AUC) in the period of the CalculationWindow.
 
@@ -106,7 +106,7 @@ Auc_Analyser = setRefClass(
               b_plot = ggpubr::ggboxplot(h, x="Key", y="AUC", facet.by="Stimuli", short.panel.labs=FALSE, add = "jitter")
             }
 
-            if (length(params$GroupingKeyWord) > 1)
+            if (length(params$GroupingKeyWord) > 1 & plot_settings$TestMethod != "none")
             {
               b_plot = b_plot +
                 ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=plot_settings$Paired, label.x.npc="center") +
@@ -144,7 +144,7 @@ Auc_Analyser = setRefClass(
               b_plot = ggpubr::ggboxplot(h, x="Key", y="AUC", add = "jitter")
             }
 
-            if (length(params$GroupingKeyWord) > 1)
+            if (length(params$GroupingKeyWord) > 1 & plot_settings$TestMethod != "none")
             {
               b_plot = b_plot +
                 ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=plot_settings$Paired, label.x.npc="center") +

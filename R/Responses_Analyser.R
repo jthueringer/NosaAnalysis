@@ -4,9 +4,10 @@ Responses_Analyser = setRefClass(
   methods = list(initialize = function()
   {
     callSuper(
-      description = "Extracts responses (maximum peak values). Within a
-      peak search window the highest value for each point of time (stimulus) is found.
-      The x-axis is grouped by keywords.
+      description = "Within a user defined peak search window, the highest value
+      for each time point (stimulus) is found.
+
+      The resulting plot is a boxplot where the x-axis is grouped by keywords.
       Additional grouping of different stimuli is possible.",
 
       plot_fnc = function(.self, data)
@@ -44,7 +45,7 @@ Responses_Analyser = setRefClass(
               b_plot = ggpubr::ggboxplot(h, x="Key", y="MaxPeak", add = "jitter", facet.by="Stimuli", short.panel.labs=FALSE)
             }
 
-            if (length(params$GroupingKeyWords) > 1)
+            if (length(params$GroupingKeyWords) > 1 & plot_settings$TestMethod != "none")
             {
               b_plot = b_plot +
                 ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=plot_settings$Paired, label.x.npc="center") +
@@ -68,7 +69,7 @@ Responses_Analyser = setRefClass(
               b_plot = ggpubr::ggboxplot(h, x="Key", y="Mean", add = "jitter")
             }
 
-            if (length(params$GroupingKeyWords) > 1)
+            if (length(params$GroupingKeyWords) > 1 & plot_settings$TestMethod != "none")
             {
               b_plot = b_plot +
                 ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=plot_settings$Paired, label.x.npc="center") +

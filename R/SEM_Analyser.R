@@ -6,10 +6,9 @@ SEM_Analyser = setRefClass(
     callSuper(
       description = "Creates the standard error of mean of a given dataset.
       If PeakAverage is TRUE: 1. finds for each stimulus and each sample the maximum
-      value of a given time window, 2. shifts the time window to specified seconds
-      before and after the maximum of each sample, and finally 3. plots the averaged
-      standard error of mean of all samples seperated by stimulus.
-      If no keyword (key) is provided, all existing data is used for the analysis.",
+      value of a given PeakSearchWindow, 2. shifts the time window to specified seconds
+      before and after the maximum of each sample (CalculationWindow), and finally 3. plots the averaged
+      standard error of mean of all samples seperated by stimulus.",
 
       plot_fnc = function(.self, data)
       {

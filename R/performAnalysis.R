@@ -8,12 +8,12 @@
 #'
 #' @param yaml_file A character string that provides the path and name of a yaml_file containing
 #'                 the configuration parameters.
-#'                 The function 'writeDefaultYaml(filename)' can be used to create
+#'                 The function \code{\link{writeDefaultYaml}} can be used to create
 #'                 this file filled with all default parameters and values.
 #'
 #' @return List with sections data = List with original data frames,
 #' manipulated_data = List with pre-processed data frames,
-#' results = List of analyser objects containing 'plots' and 'plot_data'.
+#' results = List of analyser objects each containing 'plots' and 'plot_data'.
 #'
 #' @import openxlsx
 #' @import dplyr
@@ -44,8 +44,14 @@ performAnalysis = function(yaml_file = NULL )
 
   dirs = yaml$dirs
   manipulations = yaml$manipulate
+  #plot_settings = prepare_plot_settings(yaml$plot_settings, group_number = length(manipulations$GroupingKeyWords))
   plot_settings = yaml$plot_settings
   plot_settings$ylabTeX = latex2exp::TeX(plot_settings$ylabTeX)
+  if (length(manipulations$GroupingKeyWords) != length(plot_settings$Lineplots$Colours))
+  {
+    message("\tInformation: The number of GroupingKeyWords does not match the number of defined colors for the lineplots.\n
+            \tYou may get an error during the analysis.")
+  }
   outputs = yaml$outputs
 
   output_dir = paste0(dirs$ResultsDirectory, "/")
@@ -129,16 +135,18 @@ performAnalysis = function(yaml_file = NULL )
     for (plot in analysis$plots)
     {
       filename = plot$file_name
-      width = plot$width
       plot = plot  +
         ggplot2::scale_colour_manual(values=plot_settings$Lineplots$Colours) +
         ggplot2::scale_fill_manual(values=plot_settings$Lineplots$Colours)
-      if(plot$file_name == "TimeSlots_Trace")
+      if(filename == "TimeSlots_Trace")
       {
+        width = plot$width
         plot = adjust_facet_width_of_plot(plot, lapply(manipulations$GroupingKeyWords,
-                                                       function(key) analysis$plot_data[[plot$file_name]] %>% filter(.data$Key==key)))
-      }
-      ggexport(plot, filename=paste0(output_dir, analysis$ana_name, "/", filename, ".png"), width = 800*width, height = 800, res = 150, verbose = FALSE)
+                                                       function(key) analysis$plot_data[[filename]] %>% filter(.data$Key==key)))
+        plot$width = width
+        }
+      ggexport(plot, filename=paste0(output_dir, analysis$ana_name, "/", filename, ".png"),
+               width = 800*plot$width, height = 800, res = 150, verbose = FALSE)
     }
   }
 
