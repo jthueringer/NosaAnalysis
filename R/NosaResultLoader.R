@@ -150,7 +150,11 @@ NosaResultLoader = setRefClass(
         {
           for(table in names(tmp_df[names(tmp_df) !='Spike Detection']))
           {
-            if (table %in% c("Raw", "Processed", "Baseline", "Train"))
+            if (table == "metadata")
+            {
+              tmp_df[[table]] = rbind(tmp_df[[table]], complete_df[[table]])
+            }
+            else if (table %in% c("Raw", "Processed", "Baseline", "Train"))
             {
               tmp_df[[table]] = merge(tmp_df[[table]], complete_df[[table]],
                                       by = timeline_name, all = TRUE)
@@ -163,7 +167,7 @@ NosaResultLoader = setRefClass(
         }
         else
         {
-          tmp_df <- complete_df
+          tmp_df <- complete_df[names(complete_df)!='Spike Detection']
         }
       }
 
