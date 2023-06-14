@@ -16,8 +16,8 @@ createYaml <- function(yc, dirs = list(), manipulate = list(), plot_settings = l
   ## YAML default config
   ############
   default_dirs = list()
-  default_dirs$InputDirectory = "/path/to/nosa/results"
-  default_dirs$ResultsDirectory = "/path/to/results"
+  default_dirs$InputDirectory = "'/path/to/nosa/results'"
+  default_dirs$ResultsDirectory = "'/path/to/results'"
   default_dirs$Sheets = list()
   default_dirs$Sheets$metadata = list()
   default_dirs$Sheets$Raw = list()
@@ -46,7 +46,7 @@ createYaml <- function(yc, dirs = list(), manipulate = list(), plot_settings = l
   default_manipulate$CalculationWindow$AfterPeak = 1.5
 
   default_plot_settings = list()
-  default_plot_settings$Paired = FALSE
+  default_plot_settings$Paired = TRUE
   default_plot_settings$TestMethod = "Allowed methods are one of 'none', 't.test', 'wilcox.test', 'anova', 'kruskal.test'"
   default_plot_settings$Threshold = 0.5
   default_plot_settings$ylabTeX = "Delta F/ F"
@@ -57,27 +57,27 @@ createYaml <- function(yc, dirs = list(), manipulate = list(), plot_settings = l
   default_outputs = list()
   default_outputs$DataAsRObject = TRUE
   default_outputs$DataAsXlsx = TRUE
-  default_outputs$Trace = list()
-  default_outputs$Trace$Sheet = "Processed"
-  default_outputs$Trace$Threshold = FALSE
+  default_outputs$Auc = list()
+  default_outputs$Auc$Sheet = "Processed"
+  default_outputs$Auc$GroupByStimulus = c(FALSE, TRUE)
+  default_outputs$Auc$ControlPlots = TRUE
+  default_outputs$PeakCount = list()
+  default_outputs$PeakCount$Sheet = "Peak (s)"
+  default_outputs$Responses = list()
+  default_outputs$Responses$Sheet = "Processed"
+  default_outputs$Responses$GroupByStimulus = c(FALSE, TRUE)
   default_outputs$SEM = list()
   default_outputs$SEM$Sheet = "Processed"
   default_outputs$SEM$Trace =  TRUE
   default_outputs$SEM$PeakAverage = TRUE
   default_outputs$SEM$Threshold = FALSE
-  default_outputs$Responses = list()
-  default_outputs$Responses$Sheet = "Processed"
-  default_outputs$Responses$GroupByStimulus = c(FALSE, TRUE)
-  default_outputs$PeakCount = list()
-  default_outputs$PeakCount$Sheet = "Peak (s)"
-  default_outputs$Auc = list()
-  default_outputs$Auc$Sheet = "Processed"
-  default_outputs$Auc$GroupByStimulus = c(FALSE, TRUE)
-  default_outputs$Auc$ControlPlots = TRUE
   default_outputs$TimeSlots = list()
   default_outputs$TimeSlots$Sheet = "Processed"
   default_outputs$TimeSlots$Begin = 0
   default_outputs$TimeSlots$End = 1.5
+  default_outputs$Trace = list()
+  default_outputs$Trace$Sheet = "Processed"
+  default_outputs$Trace$Threshold = FALSE
 
   ############
   ## add missing parameters from default parameter list

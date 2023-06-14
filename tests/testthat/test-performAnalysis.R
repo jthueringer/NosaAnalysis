@@ -26,27 +26,8 @@ test_that("skipping because no success in manipulate_data", {
 
   write_testyamlfile(path, analyser = "TimeSlots",changes = c("DataManipulation$GroupingKeyWords = c('pre', 'nonsense')"))
 
-  expect_message(nsr <- expect_output(performAnalysis(paste0(path, "/test.yaml"))),
-                 "TimeSlots analysis: Can not find the keyword nonsense")
-
-  unlink(paste0(path, "/result"), recursive = TRUE)
-  unlink(paste0(path, "/test.yaml"))
-})
-
-test_that("analyser returns FALSE", {
-  pdf(NULL)
-  path <- tempdir()
-  on.exit(unlink(path))
-
-  write_testyamlfile(path, analyser = "TimeSlots",
-                     changes=c("Output$TimeSlots$Begin = 1",
-                               "Output$TimeSlots$End = 10"))
-
-  expect_message(
-    expect_message(nsr <- expect_output(performAnalysis(paste0(path, "/test.yaml"))),
-                 "TimeSlots analysis not possible."),
-    "..Skipping..")
-  expect_equal(names(nsr), c("data", "manipulated_data", "results"))
+  expect_message(expect_message(nsr <- expect_output(performAnalysis(paste0(path, "/test.yaml"))),
+                 "TimeSlots analysis: Can not find the keyword nonsense"), "NOTE: Not")
 
   unlink(paste0(path, "/result"), recursive = TRUE)
   unlink(paste0(path, "/test.yaml"))

@@ -38,7 +38,7 @@ SEM_Analyser = setRefClass(
           t_plot$plot$width = 1
           t_plot$plot$file_name = paste0(.self$ana_name, "_Trace")
           plotl[[t_plot$plot$file_name]] = t_plot$plot
-          datal[[t_plot$plot$file_name]] =  t_plot$data  %>% rename(!!all_of(xlab):="x")
+          datal[[t_plot$plot$file_name]] =  t_plot$data  %>% rename(!!xlab:="x")
         }
 
         if (params$PeakAverage)
@@ -82,7 +82,7 @@ SEM_Analyser = setRefClass(
           s_plot$plot$file_name = paste0(.self$ana_name, "_byStimulus")
           s_plot$plot$width = 1
           plotl[[s_plot$plot$file_name]] = s_plot$plot
-          datal[[s_plot$plot$file_name]] = s_plot$data  %>% rename(!!all_of(xlab):="x")
+          datal[[s_plot$plot$file_name]] = s_plot$data  %>% rename(!!xlab:="x")
 
           af_plot = plot_line(df_average, add="mean_se", display=plot_settings$Lineplots$ErrorDisplay,
                              facet_by="Key", color_column = "Key",
@@ -90,7 +90,7 @@ SEM_Analyser = setRefClass(
           af_plot$plot$file_name = paste0(.self$ana_name, "_PeakAvg_facet")
           af_plot$plot$width = 1
           plotl[[af_plot$plot$file_name]] = af_plot$plot
-          datal[[af_plot$plot$file_name]] = af_plot$data  %>% rename(!!all_of(xlab):="x")
+          datal[[af_plot$plot$file_name]] = af_plot$data  %>% rename(!!xlab:="x")
 
           a_plot = plot_line(df_average, add="mean_se", display=plot_settings$Lineplots$ErrorDisplay,
                              facet_by=NULL, color_column = "Key",

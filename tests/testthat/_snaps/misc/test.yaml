@@ -4,8 +4,8 @@
 # This file has a structure, that should be kept when editing.
 #
 Directories:
-  InputDirectory: /path/to/nosa/results
-  ResultsDirectory: /path/to/results
+  InputDirectory: '''/path/to/nosa/results'''
+  ResultsDirectory: '''/path/to/results'''
   Sheets:
     metadata: []
     Raw: []
@@ -40,7 +40,7 @@ DataManipulation:
     BeforePeak: 1.5
     AfterPeak: 1.5
 PlotSettings:
-  Paired: no
+  Paired: yes
   TestMethod: Allowed methods are one of 'none', 't.test', 'wilcox.test', 'anova',
     'kruskal.test'
   Threshold: 0.5
@@ -53,28 +53,28 @@ PlotSettings:
 Output:
   DataAsRObject: yes
   DataAsXlsx: yes
-  Trace:
-    Sheet: Processed
-    Threshold: no
-  SEM:
-    Sheet: Processed
-    Trace: yes
-    PeakAverage: yes
-    Threshold: no
-  Responses:
-    Sheet: Processed
-    GroupByStimulus:
-    - no
-    - yes
-  PeakCount:
-    Sheet: Peak (s)
   Auc:
     Sheet: Processed
     GroupByStimulus:
     - no
     - yes
     ControlPlots: yes
+  PeakCount:
+    Sheet: Peak (s)
+  Responses:
+    Sheet: Processed
+    GroupByStimulus:
+    - no
+    - yes
+  SEM:
+    Sheet: Processed
+    Trace: yes
+    PeakAverage: yes
+    Threshold: no
   TimeSlots:
     Sheet: Processed
     Begin: 0.0
     End: 1.5
+  Trace:
+    Sheet: Processed
+    Threshold: no

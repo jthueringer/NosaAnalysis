@@ -128,7 +128,7 @@ Auc_Analyser = setRefClass(
               t_plot$plot$width = 1
               t_plot$plot$file_name = file_name
               plotl[[file_name]] = t_plot$plot
-              datal[[file_name]] = t_plot$data  %>% rename(!!all_of(xlab):="x")
+              datal[[file_name]] = t_plot$data  %>% rename(!!xlab:="x")
             }
           }
           else if (isFALSE(group))
@@ -167,7 +167,7 @@ Auc_Analyser = setRefClass(
               t_plot$plot$width = 1
               t_plot$plot$file_name = file_name
               plotl[[file_name]] = t_plot$plot
-              datal[[file_name]] = t_plot$data  %>% rename(!!all_of(xlab):="x")
+              datal[[file_name]] = t_plot$data  %>% rename(!!xlab:="x")
             }
           }
           b_plot$width = 1

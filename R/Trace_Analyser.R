@@ -28,7 +28,7 @@ Trace_Analyser = setRefClass(
             df = data.frame(x = data$Time, y = data[[col]]) %>% na.omit()
             plot = plot_line(df, add="none", display=NULL, color_column = plot_settings$Lineplots$Colours[i],
                              xlab=xlab, ylab=plot_settings$ylabTeX)$plot
-            if (plot_settings$Threshold)
+            if (params$Threshold)
             {
               plot = plot +
                 geom_hline(yintercept = plot_settings$Threshold, linetype="dotted", colour=plot_settings$Lineplots$Colours[i])

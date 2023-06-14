@@ -195,7 +195,7 @@ manipulate_data = function(data, params, paired, ana_name)
     {
       if (sum(grepl(key, names(data))) == 0 )
       {
-        message(paste0("\tIn ", ana_name, " analysis: Can not find the keyword ", key, "\n\t..Skipping..\n"));
+        message(paste0("\n\tIn ", ana_name, " analysis: Can not find the keyword ", key, "\n\t..Skipping..\n"));
         skipping = TRUE
         break;
       }
