@@ -2,7 +2,7 @@
 get_analyser_object = function(analyser, yaml)
 {
   ana = get(paste0(analyser, "_Analyser"))$new()
-  ana$setParams(c(yaml$DataManipulation, yaml$Output[[analyser]]))
+  ana$setParams(c(yaml$DataSettings, yaml$Output[[analyser]]))
   ana$setPlotSettings(yaml$PlotSettings)
   return(ana)
 }

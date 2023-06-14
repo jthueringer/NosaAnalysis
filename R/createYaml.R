@@ -27,6 +27,7 @@ createYaml <- function(yc, dirs = list(), manipulate = list(), plot_settings = l
   default_dirs$Sheets[["Spike Detection"]] = c("Train", "Peak (s)", "Amplitude of Peak", "Spike Frequency (#Spikes / second)")
 
   default_manipulate = list()
+  default_manipulate$PairedData = TRUE
   default_manipulate$DataCrop = list()
   default_manipulate$DataCrop$Start = 0
   default_manipulate$DataCrop$End = Inf
@@ -38,6 +39,8 @@ createYaml <- function(yc, dirs = list(), manipulate = list(), plot_settings = l
   default_manipulate$Normalization$To = 1.5
   default_manipulate$GroupingKeyWords = c("pre", "post")
   default_manipulate$Stimulus = c(10,41)
+  #default_manipulate$Stimulus$Time = c(10,40)
+  #default_manipulate$Stimulus$Name = c('A','B')
   default_manipulate$PeakSearchWindow = list()
   default_manipulate$PeakSearchWindow$BeforeStim = 2
   default_manipulate$PeakSearchWindow$AfterStim = 5
@@ -128,7 +131,7 @@ createYaml <- function(yc, dirs = list(), manipulate = list(), plot_settings = l
   }
 
   yc$setYaml("Directories", dirs)
-  yc$setYaml("DataManipulation", manipulate)
+  yc$setYaml("DataSettings", manipulate)
   yc$setYaml("PlotSettings", plot_settings)
   yc$setYaml("Output", outputs)
 

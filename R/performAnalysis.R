@@ -84,9 +84,14 @@ performAnalysis = function(yaml_file = NULL )
     }
     else
     {
-      result = manipulate_data(nsr$data[[parameter$Sheet]], parameter, plot_settings$Paired, ana_name)
-      yaml$yc$yaml_obj$PlotSettings$Paired = result$paired
-      plot_settings$Paired = result$paired
+      result = manipulate_data(nsr$data[[parameter$Sheet]], parameter, ana_name)
+      yaml$yc$yaml_obj$DataSettings$PairedData = result$paired
+      manipulations$PairedData = result$paired
+      if(plot_settings$Paired & !result$paired)
+      {
+        yaml$yc$yaml_obj$PlotSettings$Paired = result$paired
+        plot_settings$Paired = result$paired
+      }
       if( isTRUE(result$skipping))
       {
         skipping = result$skipping

@@ -38,7 +38,7 @@ test_that("get default values, if empty yaml given", {
 
   yc = YamlClass$new(list())
   yml = createYaml(yc)
-  expect_equal(length(yml$manipulate), 6)
+  expect_equal(length(yml$manipulate), 7)
   expect_equal(length(yml$dirs), 3)
   expect_equal(length(yml$outputs), 8)
   expect_false(yml$manipulate$Normalization$Execute)

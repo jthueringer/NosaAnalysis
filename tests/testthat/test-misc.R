@@ -62,8 +62,11 @@ test_that("no pairable data", {
   df = data.frame(Time = seq(from=1, to=4, by=0.25),
                   a_test1 = seq(from=0, to=1, length.out=13),
                   b_test2 = seq(from=0.1, to=0.9, length.out=13))
-  params = list(DataCrop = list(Start=1, End=4), GroupingKeyWords = c("test1", "test2"), Sheet = "test")
-  expect_message(manipulate_data(df, params=params, paired=TRUE, ana_name="test"),
+  params = list(PairedData = TRUE,
+                DataCrop = list(Start=1, End=4),
+                GroupingKeyWords = c("test1", "test2"),
+                Sheet = "test")
+  expect_message(manipulate_data(df, params=params, ana_name="test"),
                  "Not all of the samples can be paired")
 })
 
@@ -71,26 +74,28 @@ test_that("manipulate_data() normalizes absolute", {
   df = data.frame(Time = seq(from=1, to=4, by=0.25),
                   a_test1 = seq(from=0, to=1, length.out=13),
                   a_test2 = seq(from=0.1, to=0.9, length.out=13))
-  params = list(DataCrop = list(Start=1, End=4),
+  params = list(PairedData = TRUE,
+                DataCrop = list(Start=1, End=4),
                 GroupingKeyWords = c("test1", "test2"),
                 Sheet = "Raw",
                 Normalization = list(Execute=TRUE, Type="absolute", KeyWord="test1", From=1, To=4))
   result = list(data =df %>% mutate(a_test1 = a_test1-0.5, a_test2 = a_test2-0.5),
                 skipping=FALSE, paired=TRUE)
-  expect_equal(manipulate_data(df, params=params, paired=TRUE, ana_name="test"), result)
+  expect_equal(manipulate_data(df, params=params, ana_name="test"), result)
 })
 
 test_that("manipulate_data() normalizes relative", {
   df = data.frame(Time = seq(from=1, to=4, by=0.25),
                   a_test1 = seq(from=0, to=1, length.out=13),
                   a_test2 = seq(from=0.1, to=0.9, length.out=13))
-  params = list(DataCrop = list(Start=1, End=4),
+  params = list(PairedData = TRUE,
+                DataCrop = list(Start=1, End=4),
                 GroupingKeyWords = c("test1", "test2"),
                 Sheet = "Raw",
                 Normalization = list(Execute=TRUE, Type="relative", KeyWord="test1", From=1, To=4))
   result = list(data =df %>% mutate(a_test1 = a_test1/0.5, a_test2 = a_test2/0.5),
                 skipping=FALSE, paired=TRUE)
-  expect_equal(manipulate_data(df, params=params, paired=TRUE, ana_name="test"), result)
+  expect_equal(manipulate_data(df, params=params, ana_name="test"), result)
 })
 
 test_that("normalization type unknown", {

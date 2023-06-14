@@ -181,12 +181,11 @@ get_times_of_max_in_window <- function(df, start, end, time_col_name) {
 #'
 #' @param data A data frame.
 #' @param params Named list of parameters to be tested.
-#' @param paired Boolean indicating whether the data is paired data.
 #' @param ana_name String indicating the name of the analyser for which the data is to be processed.
 #'
 #' @return List with data = manipulated data, skipping = boolean for success, paired = boolean for pairable data
 #'
-manipulate_data = function(data, params, paired, ana_name)
+manipulate_data = function(data, params, ana_name)
 {
   skipping = FALSE
   if(!isFALSE(params$GroupingKeyWords) | !is.null(params$GroupingKeyWords))
@@ -202,14 +201,14 @@ manipulate_data = function(data, params, paired, ana_name)
     }
   }
 
-  if (paired)
+  if (params$PairedData)
   {
     key_df =  get_key_df(grep("Time", names(data), invert=TRUE, value=TRUE), params$GroupingKeyWords)
     key_df=key_df %>% count(.data$Name)
     if (nrow(key_df) != nrow(key_df%>%filter(n==length(params$GroupingKeyWords))))
     {
       message("\tNOTE: Not all of the samples can be paired.\n\t...Changing the yaml value for 'paired' to 'no'")
-      paired = FALSE
+      params$PairedData = FALSE
     }
   }
 
@@ -238,7 +237,7 @@ manipulate_data = function(data, params, paired, ana_name)
   {
     data = subset_by_key(data, params$GroupingKeyWords)
   }
-  return(list(data=data, skipping=skipping, paired=paired))
+  return(list(data=data, skipping=skipping, paired=params$PairedData))
 }
 
 #'

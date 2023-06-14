@@ -55,8 +55,8 @@ TimeSlots_Analyser = setRefClass(
         if (length(params$GroupingKeyWord) > 1 & plot_settings$TestMethod != "none")
         {
           b_plot = b_plot +
-            ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=plot_settings$Paired, label.x.npc="center") +
-            ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=plot_settings$Paired,
+            ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=params$PairedData, label.x.npc="center") +
+            ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=params$PairedData,
                                        label =  "p.signif", label.y = max(df_means$Mean)*0.93, label.x.npc="center")
         }
         b_plot =  b_plot + xlab("") + ylab(plot_settings$ylabTeX)

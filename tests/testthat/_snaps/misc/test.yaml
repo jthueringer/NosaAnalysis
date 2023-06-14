@@ -17,7 +17,8 @@ Directories:
     - Peak (s)
     - Amplitude of Peak
     - Spike Frequency (#Spikes / second)
-DataManipulation:
+DataSettings:
+  PairedData: yes
   DataCrop:
     Start: 0.0
     End: .inf

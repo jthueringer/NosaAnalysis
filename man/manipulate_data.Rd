@@ -8,14 +8,12 @@
 * crops data frames containing a time column
 * normalizes data frames containing a time column}
 \usage{
-manipulate_data(data, params, paired, ana_name)
+manipulate_data(data, params, ana_name)
 }
 \arguments{
 \item{data}{A data frame.}
 
 \item{params}{Named list of parameters to be tested.}
-
-\item{paired}{Boolean indicating whether the data is paired data.}
 
 \item{ana_name}{String indicating the name of the analyser for which the data is to be processed.}
 }
