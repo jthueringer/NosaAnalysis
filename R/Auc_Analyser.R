@@ -136,6 +136,7 @@ Auc_Analyser = setRefClass(
                                          label =  "p.signif", label.y = max(plot_data$data$AUC)*0.93, label.x.npc="center")
           }
           b_plot =  b_plot + xlab("") + ylab("AUC")
+          ggpar(b_plot, palette = plot_settings$Lineplots$Colours)
           b_plot$file_name = paste(.self$ana_name, plot_data$plot_name, sep="_")
 
           if (params$ControlPlots)

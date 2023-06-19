@@ -67,7 +67,6 @@ createYaml <- function(yc, dirs = list(), manipulate = list(), plot_settings = l
   default_outputs$PeakCount$Sheet = "Peak (s)"
   default_outputs$Responses = list()
   default_outputs$Responses$Sheet = "Processed"
-  default_outputs$Responses$GroupByStimulus = c(FALSE, TRUE)
   default_outputs$SEM = list()
   default_outputs$SEM$Sheet = "Processed"
   default_outputs$SEM$Trace =  TRUE
