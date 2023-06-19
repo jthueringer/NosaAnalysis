@@ -38,12 +38,13 @@ performAnalysis = function(yaml_file = NULL )
 
   yaml_class = YamlClass$new(yaml_obj)
   yaml = createYaml(yc=yaml_class, dirs = yaml_class$yaml_obj$Directories,
-                         manipulate = yaml_class$yaml_obj$DataManipulation,
+                         manipulate = yaml_class$yaml_obj$DataSettings,
                          plot_settings = yaml_class$yaml_obj$PlotSettings,
                          outputs = yaml_class$yaml_obj$Output)
 
   dirs = yaml$dirs
   manipulations = yaml$manipulate
+  manipulations$stimuli = setNames(manipulations$Stimulus$Time, manipulations$Stimulus$Name)
   #plot_settings = prepare_plot_settings(yaml$plot_settings, group_number = length(manipulations$GroupingKeyWords))
   plot_settings = yaml$plot_settings
   plot_settings$ylabTeX = latex2exp::TeX(plot_settings$ylabTeX)

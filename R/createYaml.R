@@ -16,8 +16,8 @@ createYaml <- function(yc, dirs = list(), manipulate = list(), plot_settings = l
   ## YAML default config
   ############
   default_dirs = list()
-  default_dirs$InputDirectory = "'/path/to/nosa/results'"
-  default_dirs$ResultsDirectory = "'/path/to/results'"
+  default_dirs$InputDirectory = "/path/to/nosa/result"
+  default_dirs$ResultsDirectory = "/path/to/results"
   default_dirs$Sheets = list()
   default_dirs$Sheets$metadata = list()
   default_dirs$Sheets$Raw = list()
@@ -38,9 +38,9 @@ createYaml <- function(yc, dirs = list(), manipulate = list(), plot_settings = l
   default_manipulate$Normalization$From = 0
   default_manipulate$Normalization$To = 1.5
   default_manipulate$GroupingKeyWords = c("pre", "post")
-  default_manipulate$Stimulus = c(10,41)
-  #default_manipulate$Stimulus$Time = c(10,40)
-  #default_manipulate$Stimulus$Name = c('A','B')
+  default_manipulate$Stimulus = list()
+  default_manipulate$Stimulus$Time = c(10,41)
+  default_manipulate$Stimulus$Name = c('x','x')
   default_manipulate$PeakSearchWindow = list()
   default_manipulate$PeakSearchWindow$BeforeStim = 2
   default_manipulate$PeakSearchWindow$AfterStim = 5
@@ -62,7 +62,6 @@ createYaml <- function(yc, dirs = list(), manipulate = list(), plot_settings = l
   default_outputs$DataAsXlsx = TRUE
   default_outputs$Auc = list()
   default_outputs$Auc$Sheet = "Processed"
-  default_outputs$Auc$GroupByStimulus = c(FALSE, TRUE)
   default_outputs$Auc$ControlPlots = TRUE
   default_outputs$PeakCount = list()
   default_outputs$PeakCount$Sheet = "Peak (s)"

@@ -25,13 +25,15 @@ Auc_Analyser = setRefClass(
         df_stim_reduced = list()
         trace_data = data.frame()
 
-        for (stim in params$Stimulus)
+        for (i in 1:length(params$Stimulus$Time))
         {
+          stim = params$Stimulus$Time[i]
+          name = params$Stimulus$Name[i]
           time_of_max = get_times_of_max_in_window(df_auc, start=stim-params$PeakSearchWindow$BeforeStim,
                                                    end=stim+params$PeakSearchWindow$AfterStim, time_col_name = "x")
 
           # empty data.frame with correct row numbers
-          stim_col_name = paste0("x", stim)
+          stim_col_name = paste0(name, stim)
           df_stim_reduced[[stim_col_name]] = data.frame()
 
           for(elem in names(time_of_max))
@@ -61,7 +63,10 @@ Auc_Analyser = setRefClass(
 
           trace_data = rbind(trace_data, tidyr::pivot_longer(df_stim_reduced[[stim_col_name]], cols=3:length(names(df_stim_reduced[[stim_col_name]])),
                                        names_to = "Name", values_to = "y") %>%
-            mutate(get_key_df(.data$Name, params$GroupingKeyWord), Stimulus = factor(stim_col_name)))
+            mutate(get_key_df(.data$Name, params$GroupingKeyWord),
+                   Stimulus = factor(stim_col_name),
+                   Stim_Name = factor(name),
+                   Stim_Time = factor(stim)))
           df_stim_reduced[[stim_col_name]] = separate_data_by_key(df_stim_reduced[[stim_col_name]], keys=params$GroupingKeyWord,
                                                                   global_cols = c("x", "Extended"))
         }
@@ -79,8 +84,8 @@ Auc_Analyser = setRefClass(
               #calculate auc
               timeline = df_stim_reduced[[stim]]$x[df_stim_reduced[[stim]]$Extended]
               f1 = approxfun(timeline, df_stim_reduced[[stim]][[key]][[sample]][df_stim_reduced[[stim]]$Extended])
-              f1_integral = integrate(f1, head(timeline,1), tail(timeline,1), subdivisions = 500)
-              stim_auc = rbind(stim_auc, data.frame(Name = sample, Key = key, stim = f1_integral$value))
+              f1_integral = cubature::cubintegrate(f1, lower=head(timeline,1), upper=tail(timeline,1), method="pcubature")
+              stim_auc = rbind(stim_auc, data.frame(Name = sample, Key = key, stim = f1_integral$integral))
             }
           }
           names(stim_auc) = sub("stim", stim, names(stim_auc))
@@ -88,91 +93,69 @@ Auc_Analyser = setRefClass(
           auc = merge(auc, stim_auc, by=c("Name", "Key"), sort=FALSE)
         }
 
-        for (group in params$GroupByStimulus)
+        h=list()
+        h$stimulus$data = tidyr::pivot_longer(auc, (names(auc %>% select(-c("Name", "Key")))), names_to = "Stimuli", values_to = "AUC") %>%
+          mutate(Stimuli = factor(.data$Stimuli, levels = paste0(params$Stimulus$Name,params$Stimulus$Time)))
+        h$stimulus$id = "Name"
+        h$stimulus$facets = c("Key", "Stimulus")
+        h$stimulus$plot_name = "byStim"
+        h$stimulus$fill = "Key"
+        h$stimulus$facet_bp = "Stimuli"
+
+        h$name$data = auc %>% select(c("Name", "Key"))
+        for (name in unique(params$Stimulus$Name)) {
+          h$name$data[name] = rowMeans(auc %>% select(contains(name)) %>% select(-any_of(c("Name", "Key"))))
+        }
+        h$name$data=tidyr::pivot_longer(h$name$data, (names(h$name$data %>% select(-c("Name", "Key")))), names_to = "Stimuli", values_to = "AUC") %>%
+          mutate(Stimuli = factor(.data$Stimuli, levels = unique(params$Stimulus$Name)))
+        h$name$id = "Name"
+        h$name$facets = c("Key", "Stim_Name")
+        h$name$plot_name = "byName"
+        h$name$fill = "Key"
+        h$name$facet_bp = "Stimuli"
+
+        for (plot_data in h)
         {
-          b_plot = NULL
-          l_plot = NULL
-          if (isTRUE(group))
+          if (plot_settings$Paired)
           {
-            h = tidyr::pivot_longer(auc, (names(auc %>% select(-c("Name", "Key")))), names_to = "Stimuli", values_to = "AUC") %>%
-              mutate(Stimuli = factor(.data$Stimuli, levels = paste0("x",params$Stimulus)))
-
-            if (plot_settings$Paired)
-            {
-             b_plot = ggpubr::ggpaired (h, x="Key", y="AUC", id="Name", line.color = "gray", facet.by="Stimuli", short.panel.labs=FALSE)
-            }
-            else
-            {
-              b_plot = ggpubr::ggboxplot(h, x="Key", y="AUC", facet.by="Stimuli", short.panel.labs=FALSE, add = "jitter")
-            }
-
-            if (length(params$GroupingKeyWord) > 1 & plot_settings$TestMethod != "none")
-            {
-              b_plot = b_plot +
-                ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=params$PairedData, label.x.npc="center") +
-                ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=params$PairedData,
-                                           label =  "p.signif", label.y = max(h$AUC)*0.93, label.x.npc="center")
-            }
-            b_plot =  b_plot + xlab("") + ylab(plot_settings$ylabTeX)
-            b_plot$file_name = paste0(.self$ana_name,"_byStim")
-
-            if (params$ControlPlots)
-            {
-              ## trace plot with auc under curve
-              t_plot = plot_line(trace_data, add="mean_se", display=c(plot_settings$Lineplots$ErrorDisplay, "area"),
-                                 facet_by=c("Stimulus", "Key"), color_column = "Key",
-                                 area_from = -params$CalculationWindow$BeforePeak,
-                                 area_to = params$CalculationWindow$AfterPeak,
-                                 xlab=xlab, ylab=plot_settings$ylabTeX)
-              file_name = paste(.self$ana_name, "trace_byStim", sep="_" )
-              t_plot$plot$width = 1
-              t_plot$plot$file_name = file_name
-              plotl[[file_name]] = t_plot$plot
-              datal[[file_name]] = t_plot$data  %>% rename(!!xlab:="x")
-            }
+            b_plot = ggpubr::ggpaired (plot_data$data, x="Key", y="AUC", id=plot_data$id,
+                                       line.color = "gray", facet.by=plot_data$facet_bp,
+                                       color = plot_data$fill, short.panel.labs=FALSE)
           }
-          else if (isFALSE(group))
+          else
           {
-            h = auc %>% select(c("Name", "Key"))
-            h$AUC = rowMeans(auc %>% select(-c("Name", "Key")))
-            if(plot_settings$Paired)
-            {
-              b_plot = ggpubr::ggpaired (h, x="Key", y="AUC", id="Name", line.color = "gray")
-            }
-            else
-            {
-              b_plot = ggpubr::ggboxplot(h, x="Key", y="AUC", add = "jitter")
-            }
-
-            if (length(params$GroupingKeyWord) > 1 & plot_settings$TestMethod != "none")
-            {
-              b_plot = b_plot +
-                ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=params$PairedData, label.x.npc="center") +
-                ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=params$PairedData,
-                                           label =  "p.signif", label.y = max(h$AUC)*0.93, label.x.npc="center")
-            }
-            b_plot =  b_plot + xlab("") + ylab(plot_settings$ylabTeX)
-            b_plot$file_name = paste0(.self$ana_name,"_byKey")
-
-
-            if (params$ControlPlots)
-            {
-              ## trace plot with auc under curve
-              t_plot = plot_line(trace_data, add="mean_se", display=c(plot_settings$Lineplots$ErrorDisplay, "area"),
-                        facet_by=c("Key"), color_column = "Key",
-                        area_from = -params$CalculationWindow$BeforePeak,
-                        area_to = params$CalculationWindow$AfterPeak,
-                        xlab=xlab, ylab=plot_settings$ylabTeX)
-              file_name = paste(.self$ana_name, "trace_byKey", sep="_" )
-              t_plot$plot$width = 1
-              t_plot$plot$file_name = file_name
-              plotl[[file_name]] = t_plot$plot
-              datal[[file_name]] = t_plot$data  %>% rename(!!xlab:="x")
-            }
+            b_plot = ggpubr::ggboxplot(plot_data$data, x="Key", y="AUC", facet.by=plot_data$facet_bp,
+                                       color = plot_data$fill, short.panel.labs=FALSE, add = "jitter")
           }
+
+          if (length(params$GroupingKeyWord) > 1 & plot_settings$TestMethod != "none")
+          {
+            b_plot = b_plot +
+              ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=params$PairedData, label.x.npc="center") +
+              ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=params$PairedData,
+                                         label =  "p.signif", label.y = max(plot_data$data$AUC)*0.93, label.x.npc="center")
+          }
+          b_plot =  b_plot + xlab("") + ylab("AUC")
+          b_plot$file_name = paste(.self$ana_name, plot_data$plot_name, sep="_")
+
+          if (params$ControlPlots)
+          {
+            ## trace plot with auc under curve
+            t_plot = plot_line(trace_data, add="mean_se", display=c(plot_settings$Lineplots$ErrorDisplay, "area"),
+                               facet_by=plot_data$facets, color_column = "Key",
+                               area_from = -params$CalculationWindow$BeforePeak,
+                               area_to = params$CalculationWindow$AfterPeak,
+                               xlab=xlab, ylab=plot_settings$ylabTeX)
+            file_name = paste(.self$ana_name, "trace", plot_data$plot_name, sep="_" )
+            t_plot$plot$width = 1
+            t_plot$plot$file_name = file_name
+            plotl[[file_name]] = t_plot$plot
+            datal[[file_name]] = t_plot$data  %>% rename(!!xlab:="x")
+          }
+
           b_plot$width = 1
           plotl[[b_plot$file_name]] = b_plot
-          datal[[b_plot$file_name]] = h
+          datal[[b_plot$file_name]] = plot_data$data
         }
 
         return(list(plots = plotl, data = datal, success=TRUE))
