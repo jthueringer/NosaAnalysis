@@ -15,16 +15,18 @@ test_that("two keywords, two stimuli, paired data", {
                           post_b = c(rep(5,19), 6, rep(4,69), 10, rep(5, 10)))
   expect_true(ana$setData(input_data))
 
-  byKey_result = data.frame(Name=rep(c("_a","_b"), times=2),
+  byKey_result = tibble(Name=rep(c("_a","_b"), times=2),
                             Key=factor(rep(c("pre","post"), each=2), levels=c("pre","post")),
+                            Stimuli=factor("x", levels="x"),
                             AUC=c(8.75, 8.75, 15.25, 15.25))
-  expect_equal(ana$plot_data[["AUC_byKey"]], byKey_result)
+  expect_equal(ana$plot_data[["AUC_byName"]], byKey_result, tolerance = 0.0001)
 
   byStimulus_result = data.frame(Name=rep(c("_a","_b"), each=2),
                                  Key=factor(rep("pre", times=2*2), levels=c("pre","post")),
                                  Stimuli=factor(rep(c("x10","x41"), times=2)),
                                  AUC=rep(c(8.25, 9.25), times=2))
-  expect_equal(data.frame(ana$plot_data[["AUC_byStim"]] %>% dplyr::filter(Key=="pre")), byStimulus_result)
+  expect_equal(data.frame(ana$plot_data[["AUC_byStim"]] %>% dplyr::filter(Key=="pre")),
+               byStimulus_result, tolerance = 0.0001)
 })
 
 test_that("two keywords, two stimuli, no paired data", {
@@ -38,21 +40,23 @@ test_that("two keywords, two stimuli, no paired data", {
                           post_b = c(rep(5,19), 6, rep(4,69), 10, rep(5, 10)))
   expect_true(ana$setData(input_data))
 
-  byKey_result = data.frame(Name=rep(c("_a","_b"), times=2),
-                            Key=factor(rep(c("pre","post"), each=2), levels=c("pre","post")),
-                            AUC=c(8.75, 8.75, 15.25, 15.25))
-  expect_equal(ana$plot_data[["AUC_byKey"]], byKey_result)
+  byKey_result = tibble(Name=rep(c("_a","_b"), times=2),
+                        Key=factor(rep(c("pre","post"), each=2), levels=c("pre","post")),
+                        Stimuli=factor("x", levels="x"),
+                        AUC=c(8.75, 8.75, 15.25, 15.25))
+  expect_equal(ana$plot_data[["AUC_byName"]], byKey_result, tolerance = 0.0001)
 
   byStimulus_result = data.frame(Name=rep(c("_a","_b"), each=2),
                                  Key=factor(rep("pre", times=2*2), levels=c("pre","post")),
                                  Stimuli=factor(rep(c("x10","x41"), times=2)),
                                  AUC=rep(c(8.25, 9.25), times=2))
-  expect_equal(data.frame(ana$plot_data[["AUC_byStim"]] %>% dplyr::filter(Key=="pre")), byStimulus_result)
+  expect_equal(data.frame(ana$plot_data[["AUC_byStim"]] %>% dplyr::filter(Key=="pre")),
+               byStimulus_result, tolerance = 0.0001)
 })
 
 test_that("not enough datapoints", {
   yaml = get_testyaml_object("dir", analyser = "Auc", changes = c("DataSettings$PairedData = TRUE",
-                                                                  "DataSettings$Stimulus = 41",
+                                                                  "DataSettings$Stimulus$Time = 41",
                                                                   "DataSettings$PeakSearchWindow$BeforeStim = 1",
                                                                   "DataSettings$CalculationWindow$AfterPeak = 1.5"))
   ana = get_analyser_object("Auc", yaml)

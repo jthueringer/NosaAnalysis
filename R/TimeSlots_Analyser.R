@@ -30,12 +30,12 @@ TimeSlots_Analyser = setRefClass(
           }
           else
           {
-            if (head(time_slot[["x"]],1)>params$Begin | tail(time_slot[["x"]],1)<params$End)
+            if (head(time_slot[["x"]],1)>params$CalculationWindow$BeforePeak | tail(time_slot[["x"]],1)<params$CalculationWindow$AfterPeak)
             {
-              message(paste0("\tTimeSlots analysis not possible. The time window for the keyword ", key, " is out of range."))
+              message(paste0("\n\tTimeSlots analysis not possible. The time window for the keyword ", key, " is out of range."))
               return(list(plots = plotl, data = datal, success = FALSE))
             }
-            time_slot = time_slot %>%  filter(x >= params$Begin & x <= params$End) %>% na.omit()
+            time_slot = time_slot %>%  filter(x >= params$CalculationWindow$BeforePeak & x <= params$CalculationWindow$AfterPeak) %>% na.omit()
           }
           means = data.frame(t(time_slot %>% select(-x))) %>%
             mutate(Mean = unname(rowMeans(., na.rm = TRUE))) %>%
@@ -88,7 +88,7 @@ TimeSlots_Analyser = setRefClass(
           else
           {
             t_plot$plot = add_geom_vlines(t_plot$plot, df = filter(t_plot$data, Key==key),
-                                          xintercepts = c(params$Begin, params$End),
+                                          xintercepts = c(params$CalculationWindow$BeforePeak, params$CalculationWindow$AfterPeak),
                                           linetype="dotted", colour="grey")
           }
         }

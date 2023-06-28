@@ -4,8 +4,8 @@
 # This file has a structure, that should be kept when editing.
 #
 Directories:
-  InputDirectory: '''/path/to/nosa/results'''
-  ResultsDirectory: '''/path/to/results'''
+  InputDirectory: /path/to/nosa/result
+  ResultsDirectory: /path/to/results
   Sheets:
     metadata: []
     Raw: []
@@ -32,8 +32,12 @@ DataSettings:
   - pre
   - post
   Stimulus:
-  - 10.0
-  - 41.0
+    Time:
+    - 10.0
+    - 41.0
+    Name:
+    - x
+    - x
   PeakSearchWindow:
     BeforeStim: 2.0
     AfterStim: 5.0
@@ -49,24 +53,18 @@ PlotSettings:
   Lineplots:
     Colours:
     - green
-    - blue
+    - '''#E7B800'''
     ErrorDisplay: Allowed are one of 'linerange', 'ribbon'
 Output:
   DataAsRObject: yes
   DataAsXlsx: yes
   Auc:
     Sheet: Processed
-    GroupByStimulus:
-    - no
-    - yes
     ControlPlots: yes
   PeakCount:
     Sheet: Peak (s)
   Responses:
     Sheet: Processed
-    GroupByStimulus:
-    - no
-    - yes
   SEM:
     Sheet: Processed
     Trace: yes

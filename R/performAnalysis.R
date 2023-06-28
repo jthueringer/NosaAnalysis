@@ -75,6 +75,7 @@ performAnalysis = function(yaml_file = NULL )
   manipulated_data = list()
   for (ana_name in names(analysis_list))
   {
+    cat(paste0("\n\t", ana_name, "\n"))
     skipping = FALSE
     parameter = analysis_list[[ana_name]]$params
     data = data.frame()

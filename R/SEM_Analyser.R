@@ -43,12 +43,12 @@ SEM_Analyser = setRefClass(
 
         if (params$PeakAverage)
         {
-          df_average = setNames(data.frame(matrix(ncol = 4, nrow = 0)), c("x", "y", "Key", "Stimulus"))
+          df_average = setNames(data.frame(matrix(ncol = 5, nrow = 0)), c("x", "y", "Key", "Stimulus", "Name"))
 
-          for (stim in params$Stimulus)
+          for (i in 1:length(params$Stimulus$Time))
           {
-            time_of_max = get_times_of_max_in_window(data, stim-params$PeakSearchWindow$BeforeStim,
-                                                     stim+params$PeakSearchWindow$AfterStim, "x")
+            time_of_max = get_times_of_max_in_window(data, params$Stimulus$Time[i]-params$PeakSearchWindow$BeforeStim,
+                                                     params$Stimulus$Time[i]+params$PeakSearchWindow$AfterStim, "x")
 
             for(elem in names(time_of_max))
             {
@@ -67,37 +67,50 @@ SEM_Analyser = setRefClass(
                 mutate(x = round(x-time_of_max[[elem]], 3))
               df_average = rbind(df_average, data.frame(tmp_values$df,
                                                         Key=extract_key(elem, params$GroupingKeyWord),
-                                                        Stimulus=paste0("x",stim)))
+                                                        Stimulus=paste0(params$Stimulus$Name[i],params$Stimulus$Time[i]),
+                                                        Name = params$Stimulus$Name[i]))
             }
           }
-          df_average = df_average %>% mutate(Key = factor(Key, levels=params$GroupingKeyWord),
-                                             Stimulus = factor(Stimulus)) %>%
-            group_by(Key, Stimulus)
+          #df_average = df_average %>% group_by(Key, Name, Stimulus)
+          df_average = df_average %>%
+            mutate(Key = factor(Key, levels=params$GroupingKeyWord),
+                   Stimulus = factor(Stimulus, levels=paste0(params$Stimulus$Name, params$Stimulus$Time)),
+                   Name = factor(Name, levels=unique(params$Stimulus$Name)))
 
-          s_plot = plot_line(df_average, add="mean_se", display=plot_settings$Lineplots$ErrorDisplay,
+          stimulus_plot = plot_line(df_average %>% group_by(Key, Stimulus),
+                             add="mean_se", display=plot_settings$Lineplots$ErrorDisplay,
                              facet_by=c("Key", "Stimulus"), color_column = "Key" )
-          s_plot$plot = s_plot$plot +
+          stimulus_plot$plot = stimulus_plot$plot +
             ylab(plot_settings$ylabTeX) +
             xlab(xlab)
-          s_plot$plot$file_name = paste0(.self$ana_name, "_byStimulus")
-          s_plot$plot$width = 1
-          plotl[[s_plot$plot$file_name]] = s_plot$plot
-          datal[[s_plot$plot$file_name]] = s_plot$data  %>% rename(!!xlab:="x")
+          stimulus_plot$plot$file_name = paste0(.self$ana_name, "_byStimulus")
+          stimulus_plot$plot$width = 1
+          plotl[[stimulus_plot$plot$file_name]] = stimulus_plot$plot
+          datal[[stimulus_plot$plot$file_name]] = stimulus_plot$data  %>% rename(!!xlab:="x")
 
-          af_plot = plot_line(df_average, add="mean_se", display=plot_settings$Lineplots$ErrorDisplay,
-                             facet_by="Key", color_column = "Key",
-                             xlab=xlab, ylab=plot_settings$ylabTeX)
-          af_plot$plot$file_name = paste0(.self$ana_name, "_PeakAvg_facet")
-          af_plot$plot$width = 1
-          plotl[[af_plot$plot$file_name]] = af_plot$plot
-          datal[[af_plot$plot$file_name]] = af_plot$data  %>% rename(!!xlab:="x")
+          stimulus_plot_wrap = stimulus_plot$plot +
+            facet_wrap(vars(Stimulus)) +
+            ylab(plot_settings$ylabTeX) +
+            xlab(xlab)
+          stimulus_plot_wrap$file_name = paste0(.self$ana_name, "_byStimulusGroup")
+          stimulus_plot_wrap$width = 1
+          plotl[[stimulus_plot_wrap$file_name]] = stimulus_plot_wrap
 
-          a_plot = plot_line(df_average, add="mean_se", display=plot_settings$Lineplots$ErrorDisplay,
-                             facet_by=NULL, color_column = "Key",
+          name_plot = plot_line(df_average %>% group_by(Key, Name), add="mean_se", display=plot_settings$Lineplots$ErrorDisplay,
+                             facet_by=c("Key", "Name"), color_column = "Key",
                              xlab=xlab, ylab=plot_settings$ylabTeX)
-          a_plot$plot$file_name = paste0(.self$ana_name, "_PeakAvg")
-          a_plot$plot$width = 1
-          plotl[[a_plot$plot$file_name]] = a_plot$plot
+          name_plot$plot$file_name = paste0(.self$ana_name, "_byName")
+          name_plot$plot$width = 1
+          plotl[[name_plot$plot$file_name]] = name_plot$plot
+          datal[[name_plot$plot$file_name]] = name_plot$data  %>% rename(!!xlab:="x")
+
+          name_plot_wrap = name_plot$plot +
+            facet_wrap(vars(Name)) +
+            ylab(plot_settings$ylabTeX) +
+            xlab(xlab)
+          name_plot_wrap$file_name = paste0(.self$ana_name, "_byNameGroup")
+          name_plot_wrap$width = 1
+          plotl[[name_plot_wrap$file_name]] = name_plot_wrap
         }
         return(list(plots = plotl, data = datal, success = TRUE))
       },

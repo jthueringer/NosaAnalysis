@@ -110,7 +110,7 @@ plot_line = function(df, add="none", display=NULL, facet_by = NULL, color_column
     }
     else if (length(facet_by) >2) stop("Can not facet by more than two groups")
     else facet_levels = levels(df[[facet_by]])
-    plot = ggpubr::ggline(df, "x", "y", add=add,
+    plot = ggpubr::ggline(df, "x", "y", add=add, group=color_column, color = color_column,
                           plot_type = "l", numeric.x.axis=TRUE, facet.by = facet_by)
 
     plotdata = extract_plot_data(plot, additional = c("ymin", "ymax", "PANEL"), facet_levels=facet_levels)
@@ -136,7 +136,8 @@ plot_line = function(df, add="none", display=NULL, facet_by = NULL, color_column
     plotdata = plotdata %>% select(-.data$group)
   }
   plot = ggpubr::ggline(plotdata, "x", "y", ymin="ymin", ymax="ymax", plot_type = "l",
-                        color=color_column, facet.by = facet_by, numeric.x.axis = TRUE, scales = "free_x")
+                        color=color_column,
+                        facet.by = facet_by, numeric.x.axis = TRUE, scales = "free_x")
 	if ("area" %in% display)
 	{
 		plot = plot + ggpubr::geom_exec(geom_area, data=plotdata %>% filter(.data$x>=area_from & .data$x<=area_to),

@@ -7,7 +7,7 @@ test_that("get analyser object", {
 
 test_that("generates plots and plot_data", {
   yaml = get_testyaml_object("dir", analyser = "SEM",
-                             changes = c("DataSettings$Stimulus = c(10, 30)",
+                             changes = c("DataSettings$Stimulus$Time = c(10, 30)",
                                          "DataSettings$PeakSearchWindow$BeforeStim = 0",
                                          "DataSettings$PeakSearchWindow$AfterStim = 5",
                                          "DataSettings$CalculationWindow$BeforePeak = 2",
@@ -23,18 +23,20 @@ test_that("generates plots and plot_data", {
   result_trace = data.frame(Time=c(df$Time,df$Time), y= rep(c(2,4,6,8), each=25)) %>%
     mutate(ymin = y, ymax = y, Key = factor(rep(c("pre", "post"), each=50), levels=c("pre", "post")))
   expect_true(ana$setData(df))
-  expect_equal(length(ana$plots), 4)
+  expect_equal(length(ana$plots), 5)
   expect_equal(ana$plot_data[["SEM_Trace"]], result_trace)
 
   stderror=0.333
   result_PeakAvg = data.frame(Time=seq(-2,5), y= rep(c(3,7), each=8)) %>%
-    mutate(ymin = y-stderror, ymax = y+stderror, Key = factor(rep(c("pre", "post"), each=8), levels=c("pre", "post")))
-  expect_equal(ana$plot_data[["SEM_PeakAvg_facet"]], result_PeakAvg, tolerance = 1e-4)
+    mutate(ymin = y-stderror, ymax = y+stderror,
+           Key = factor(rep(c("pre", "post"), each=8), levels=c("pre", "post")),
+           Name = factor("x", levels="x"))
+  expect_equal(ana$plot_data[["SEM_byName"]], result_PeakAvg, tolerance = 1e-4)
 
 })
 
 test_that("time window too large", {
-  yaml = get_testyaml_object("dir", analyser = "SEM", changes = c("DataSettings$Stimulus = c(5,40)",
+  yaml = get_testyaml_object("dir", analyser = "SEM", changes = c("DataSettings$Stimulus$Time = c(5,40)",
                              "DataSettings$PeakSearchWindow$BeforeStim = 0",
                              "DataSettings$PeakSearchWindow$AfterStim = 5",
                              "DataSettings$CalculationWindow$BeforePeak = 2",
