@@ -136,8 +136,9 @@ performAnalysis = function(yaml_file = NULL )
   {
     dir.create(paste0(output_dir, analysis$ana_name), recursive = TRUE)
     cat(paste0("\t", analysis$ana_name, " output:\n"))
-    for (plot in analysis$plots)
+    for (i in 1:length(names(analysis$plots)))
     {
+      plot = analysis$plots[[i]]
       filename = plot$file_name
       plot = plot  +
         ggplot2::scale_colour_manual(values=plot_settings$Colours) +
@@ -149,7 +150,8 @@ performAnalysis = function(yaml_file = NULL )
         plot = adjust_facet_width_of_plot(plot, lapply(manipulations$GroupingKeyWords,
                                                        function(key) analysis$plot_data[[filename]] %>% filter(.data$Key==key)))
         plot$width = width
-        }
+      }
+      analysis$plots[[i]]=plot
       ggexport(plot, filename=paste0(output_dir, analysis$ana_name, "/", filename, ".png"),
                width = 800*plot$width, height = 800, res = 150, verbose = FALSE)
     }
