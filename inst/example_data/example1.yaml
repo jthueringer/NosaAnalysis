@@ -1,0 +1,67 @@
+# This is a configuration file for NOSAAnalysis.
+# By changing the values, you can determine the files or plots to be output.
+#
+# This file has a structure, that should be kept when editing.
+#
+Directories:
+  InputDirectory: /path/to/nosa/result
+  ResultsDirectory: /path/to/results
+  Sheets:
+    metadata: []
+    Processed: []
+DataSettings:
+  PairedData: yes
+  DataCrop:
+    Start: 0.0
+    End: .inf
+  Normalization:
+    Execute: no
+    Type: relative or absolute
+    KeyWord: pre
+    From: 0.0
+    To: 1.5
+  GroupingKeyWords:
+  - pre
+  - post
+  Stimulus:
+    Time:
+    - 200
+    - 450
+    - 700
+    - 1000
+    Name:
+    - A
+    - B
+    - A
+    - B
+  PeakSearchWindow:
+    BeforeStim: 0
+    AfterStim: 100
+  CalculationWindow:
+    Start: 50
+    End: 50
+PlotSettings:
+  Paired: yes
+  TestMethod: t.test
+  Threshold: 0.5
+  ylabTeX: $\Delta$ F/F
+  Colours:
+  - green
+  - '#E7B800'
+  ErrorDisplay: ribbon
+Output:
+  DataAsRObject: no
+  DataAsXlsx: no
+  Auc:
+    Sheet: Processed
+    ControlPlots: yes
+  Responses:
+    Sheet: Processed
+  SEM:
+    Sheet: Processed
+    Trace: yes
+    PeakAverage: yes
+    Threshold: no
+  Trace:
+    Sheet: Processed
+    Threshold: yes

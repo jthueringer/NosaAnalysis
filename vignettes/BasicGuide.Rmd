@@ -1,0 +1,197 @@
+---
+title: "Basic Guide for NosaAnalysis"
+author: "Julia Thüringer"
+date: '`r Sys.Date()`'
+output:
+  html_document: default
+  pdf_document: null
+vignette: >
+  %\VignetteIndexEntry{Basic Guide for NosaAnalysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+### Introduction
+
+Because all settings are made via a YAML configuration file, the default YAML file should be created first using the command
+```
+writeDefaultYaml('path/filename.yaml')
+```
+
+Then the settings in the file are adjusted and saved under a different file name, if necessary. This file name is needed to start the analysis using the command
+```
+performAnalysis('path/filename.yaml')
+```
+
+### YAML configuration
+
+The yaml is devided into four different sections. Some of the default values can be deleted, but other must be provided for propper function. Please read the following descriptions carefully to avoid error messages that may occur when reading the file (if the underlying structure has been changed).
+
+Content:
+
+1. [Directories](#directories)
+2. [DataSettings](#datasettings)
+3. [PlotSettings](#plotsettings)
+4. [Output](#output)
+
+### Directories
+
+```
+  InputDirectory: /path/to/nosa/results
+  ResultsDirectory: /path/to/results
+  Sheets:
+    metadata: []
+    Raw: []
+    Processed: []
+    Baseline: []
+    Smoothing: []
+    Spike Detection:
+    - Train
+    - Peak (s)
+    - Amplitude of Peak
+    - Spike Frequency (#Spikes / second)
+```
+
+The **InputDirectory** should already exist and contain the NOSA result files to be read. If several files are provided, all data are combined to one large table.
+
+The **ResultsDirectory** must not exist yet, but no new subfolders can be created recursively. This means that the path to the result folder must already exist.
+
+The default **Sheets** show the allowed sheets that can be read in. These can be customized, but the metadata sheet must always be specified. E.g. it can look like this:
+
+```
+  Sheets:
+    metadata: []
+    Processed: []
+    Spike Detection:
+    - Peak (s)
+```
+
+### DataSettings
+
+```
+  PairedData: no
+  DataCrop:
+    Start: 0.0
+    End: .inf
+  Normalization:
+    Execute: no
+    Type: relative or absolute
+    KeyWord: pre
+    From: 0.0
+    To: 1.5
+  GroupingKeyWords:
+  - pre
+  - post
+  Stimulus:
+    Time:
+    - 10.0
+    - 41.0
+    Name:
+    - x
+    - x
+  PeakSearchWindow:
+    BeforeStim: 2.0
+    AfterStim: 5.0
+  CalculationWindow:
+    Start: -1.5
+    End: 1.5
+```
+
+**DataCrop**: Sometimes the recordings exhibit artifacts at the beginning (e.g. sharp drop in fluorescence values within the first second), which is reflected in a large y-axis scale in the trace plots. Or the recordings of the individual samples take different lengths of time and only a certain time interval is needed for the analysis. **Start** and **End** need unquoted integers or floating numbers representing the source recording time unit (e.g. second).
+
+**Normalization**: Subsets a data frame by (a) matching the pattern **KeyWord** in the source names of the samples and (b) keeping all rows where the numeric 'Time' values are between (and include) **From** and **To**. Forms row means for each sample and subtracts (absolute normalization) or divides (relative normalization) this mean from all *paired* samples.
+
+**GroupingKeyWords**: Must be provided as a list. Sample names are groupable if the keyword is extracted and they are subsequently identical. E.g. example1_`pre`\_2 and example1_`post`\_2 are groupable, because both result to example1_\_2, but example1_`pre`\_2 and example1_2_`post` are not.
+
+**Stimulus**: Values of the recording time units at which an event was triggered during the experimental recording. These time points are anchor points for a peak search and further calculations. Each stimulus must be named. If the names are the same, they are grouped together, otherwise they are considered as individual groups.
+
+**PeakSearchWindow**: Not every living individual behaves the same way, so one individual's response to a stimulus may occur slightly earlier than another individual's response. Sometimes, however, you may want to focus on the level of fluorescence measured. For this purpose, a search window can be specified in which the highest value is searched for. This then serves as a peak for the calculation window. If one wants to examine the values at the same time points for each individual, then the values of **Start** and **End** are set to zero.
+
+**CalculationWindow**: Defines the subsets of the data on which to perform the analyses.
+
+### PlotSettings
+
+```
+  Paired: yes
+  TestMethod: Allowed methods are one of 'none', 't.test', 'wilcox.test', 'anova',
+    'kruskal.test'
+  Threshold: 0.5
+  ylabTeX: Delta F/ F
+  Colours:
+  - green
+  - '#E7B800'
+  ErrorDisplay: Allowed are one of 'linerange', 'ribbon'
+```
+
+NOTE: None of the PlotSettings have any effect on the analyses, but are graphical options.
+
+**Paired**: Specifies only whether groupable data in boxplots should be connected with lines.
+
+**TestMethod**: The result is shown in the boxplot. A test for normal distribution of the data is not performed here. Which test makes the most sense for the data must be determined by the user.
+
+**Threshold**: Draws a horizontal dotted line in some trace plots.
+
+**ylabTex**: Latex can be used to represent a formula or Greek letters in the title of the y-axis, e.g. `$\Delta$ F/F`
+
+The correct number of **Colours** is necessary for displaying all groups (defined by **GroupingKeyWords**) within the same plot. Colors can be specified as hexadecimal numbers or you can use the built-in colour names that R knows. See
+
+```{r, eval=FALSE}
+colours()
+```
+
+### Output
+
+```
+  DataAsRObject: yes
+  DataAsXlsx: yes
+  Trace:
+    Sheet: Processed
+    Threshold: no
+  SEM:
+    Sheet: Processed
+    Trace: yes
+    PeakAverage: yes
+    Threshold: no
+  Responses:
+    Sheet: Processed
+    GroupByStimulus:
+    - no
+    - yes
+  PeakCount:
+    Sheet: Peak (s)
+  Auc:
+    Sheet: Processed
+    GroupByStimulus:
+    - no
+    - yes
+    ControlPlots: yes
+  TimeSlots:
+    Sheet: Processed
+    Begin: 0.0
+    End: 1.5
+```
+
+The **Output** section may be empty. Insert only the sections that are interesting. For example, if you just want the data to be read in and stored as R object on disc, then your output can look like this:
+```
+Output:
+  DataAsRObject: yes
+  DataAsXlsx: no
+```
+
+**DataAsRObject**: If 'yes', a list object is stored as 'dataframes.rds' in the **ResultsDirectory**. This list contains three named lists:
+
+* data: list of data frames containing all original read in data
+* manipulated_data: if an original data frame is manipulated during analysis it is stored here
+* results: for each analysis you can access the resulting plots via `..$results$analysisName$plots` and the corresponding data to the plots via `..$results$analysisName$plot_data`
+
+**DataAsXlsx**: If 'yes', all relevant data is written to 'data.xlsx' in the **ResultsDirectory**.
+
+For detailed descriptions of the provided analyses see
+```{r, eval=FALSE}
+vignette("Auc", package = "NosaAnalysis")
+vignette("PeakCount", package = "NosaAnalysis")
+vignette("Responses", package = "NosaAnalysis")
+vignette("SEM", package = "NosaAnalysis")
+vignette("TimeSlots", package = "NosaAnalysis")
+vignette("Trace", package = "NosaAnalysis")
+```

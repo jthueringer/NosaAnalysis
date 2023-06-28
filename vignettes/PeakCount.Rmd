@@ -1,0 +1,67 @@
+---
+title: "PeakCount Guide for NosaAnalysis"
+author: "Julia Thüringer"
+date: '`r Sys.Date()`'
+output:
+  html_document: default
+  pdf_document: null
+vignette: >
+  %\VignetteIndexEntry{PeakCount Guide for NosaAnalysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+### Description
+
+```{r description, eval=TRUE, echo=FALSE}
+cat(NosaAnalysis:::get_analyser_objects(list(PeakCount=list()), list())$PeakCount$description)
+```
+      
+### YAML configuration
+
+For a general description of the yaml configuration see:
+
+```{r, eval=FALSE}
+vignette("BasicGuide", package = "NosaAnalysis")
+```
+
+1. [Sheets](#sheets)
+2. [DataSettings](#datasettings)
+3. [Output](#output)
+
+### Sheets
+
+This analysis can be performed on both table 'Peak (s)' and table 'Amplitude of Peak' of the 'Spike Detection' sheet. Depending on which table is used, the data to be used can be analyzed according to different criteria: 'Peak (s)' contains time points, while 'Amplitude of Peak' contains values.
+
+```
+  Sheets:
+    metadata: []
+    Spike Detection:
+    - Peak (s)
+    - Amplitude of Peak
+```
+
+### DataSettings
+
+```
+  PairedData: yes
+  GroupingKeyWords:
+  - pre
+  - post
+  CalculationWindow:
+    Start: 263
+    End: 1063
+```
+
+**PairedData**: Specifies whether the mean comparisons p-values added to the resulting boxplot should be a paired test or not. Used only in t.test and in wilcox.test.
+
+**GroupingKeyWords**: Must always be specified. If no keywords have been assigned in the source name, then a single letter or number can also be specified, which is present in all names.
+
+**CalculationWindow**: If table 'Peak (s)' is used for the analysis, then only those peaks are counted that lie between and include the **Start** or **End** time points. If table 'Amplitude of Peak' is used, then only those peaks are counted whose values are >= **Start** or <= **End**. 
+
+### Output
+
+```
+  PeakCount:
+    Sheet: Peak (s)
+```
