@@ -66,7 +66,8 @@ Responses_Analyser = setRefClass(
           if (length(params$GroupingKeyWord) > 1 & plot_settings$TestMethod != "none")
           {
             b_plot = b_plot +
-              ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=params$PairedData, label.x.npc="center") +
+              ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=params$PairedData,
+                                         label.y = max(plot_data$data$values)*0.99, label.x.npc="center") +
               ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=params$PairedData,
                                          label =  "p.signif", label.y = max(plot_data$data$values)*0.93, label.x.npc="center")
           }

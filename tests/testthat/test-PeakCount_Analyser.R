@@ -1,7 +1,7 @@
 test_that("correct calculation, unpaired", {
   pdf(NULL) # to prevent generating an empty RPlots.pdf
-  yaml = get_testyaml_object("dir", analyser = "PeakCount", changes = c("DataSettings$PeakSearchWindow$BeforeStim = 3",
-                                                                        "DataSettings$PeakSearchWindow$AfterStim = 10",
+  yaml = get_testyaml_object("dir", analyser = "PeakCount", changes = c("DataSettings$CalculationWindow$Start = 3",
+                                                                        "DataSettings$CalculationWindow$End = 10",
                                                                         "DataSettings$PairedData=FALSE"))
 
   df = data.frame(pre_1 = c(seq(2,10, length.out=4), rep(NA,6)),
@@ -21,8 +21,8 @@ test_that("correct calculation, unpaired", {
 
 test_that("correct calculation, paired", {
   pdf(NULL) # to prevent generating an empty RPlots.pdf
-  yaml = get_testyaml_object("dir", analyser = "PeakCount", changes = c("DataSettings$PeakSearchWindow$BeforeStim = 3",
-                                                                        "DataSettings$PeakSearchWindow$AfterStim = 10",
+  yaml = get_testyaml_object("dir", analyser = "PeakCount", changes = c("DataSettings$CalculationWindow$Start = 3",
+                                                                        "DataSettings$CalculationWindow$End = 10",
                                                                         "DataSettings$PairedData=TRUE"))
 
   df = data.frame(pre_1 = c(seq(2,10, length.out=4), rep(NA,6)),

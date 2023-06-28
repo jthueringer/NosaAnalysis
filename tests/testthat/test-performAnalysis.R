@@ -9,9 +9,9 @@ test_that("data reduced by keywords", {
                                  "DataSettings$Stimulus$Name = 'x'",
                                  "DataSettings$PeakSearchWindow$BeforeStim = 0",
                                  "DataSettings$PeakSearchWindow$AfterStim = 0",
-                                 "DataSettings$CalculationWindow$BeforePeak = 0.5", #TimeSlots:0
-                                 "DataSettings$CalculationWindow$AfterPeak = 0.5",
-                                 "PlotSettings$Colours = c('green', '#E7B800')")) #TimeSlots:1
+                                 "DataSettings$CalculationWindow$Start = 0.5",
+                                 "DataSettings$CalculationWindow$End = 0.5",
+                                 "PlotSettings$Colours = c('green', '#E7B800')"))
 
   expect_output(nsr <-suppressMessages(performAnalysis(paste0(path, "/test.yaml"))))
   expect_equal(names(nsr$results), c("Responses", "TimeSlots"))
@@ -24,7 +24,9 @@ test_that("skipping because no success in manipulate_data", {
   path <- tempdir()
   on.exit(unlink(path))
 
-  write_testyamlfile(path, analyser = "TimeSlots",changes = c("DataSettings$GroupingKeyWords = c('pre', 'nonsense')"))
+  write_testyamlfile(path, analyser = "TimeSlots",
+                     changes = c("DataSettings$GroupingKeyWords = c('pre', 'nonsense')",
+                     "DataSettings$CalculationWindow$Start = 1.5"))
 
   expect_message(expect_message(nsr <- expect_output(performAnalysis(paste0(path, "/test.yaml"))),
                  "TimeSlots analysis: Can not find the keyword nonsense"), "NOTE: Not")

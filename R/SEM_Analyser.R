@@ -54,8 +54,8 @@ SEM_Analyser = setRefClass(
             {
               tmp_values = filter_between_two_given_times(data %>% select(c("x",all_of(elem))) %>% na.omit(),
                                                           col_name = "x",
-                                                          from = time_of_max[[elem]]-params$CalculationWindow$BeforePeak,
-                                                          to = time_of_max[[elem]]+params$CalculationWindow$AfterPeak,
+                                                          from = time_of_max[[elem]]+params$CalculationWindow$Start,
+                                                          to = time_of_max[[elem]]+params$CalculationWindow$End,
                                                           analyser = "SEM_Average")
               if(!tmp_values$success)
               {

@@ -141,7 +141,8 @@ performAnalysis = function(yaml_file = NULL )
       filename = plot$file_name
       plot = plot  +
         ggplot2::scale_colour_manual(values=plot_settings$Colours) +
-        ggplot2::scale_fill_manual(values=plot_settings$Colours)
+        ggplot2::scale_fill_manual(values=plot_settings$Colours) +
+        theme(legend.position = "none")
       if(filename == "TimeSlots_Trace")
       {
         width = plot$width

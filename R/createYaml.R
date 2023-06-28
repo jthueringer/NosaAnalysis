@@ -45,8 +45,8 @@ createYaml <- function(yc, dirs = list(), manipulate = list(), plot_settings = l
   default_manipulate$PeakSearchWindow$BeforeStim = 2
   default_manipulate$PeakSearchWindow$AfterStim = 5
   default_manipulate$CalculationWindow = list()
-  default_manipulate$CalculationWindow$BeforePeak = 1.5
-  default_manipulate$CalculationWindow$AfterPeak = 1.5
+  default_manipulate$CalculationWindow$Start = -1.5
+  default_manipulate$CalculationWindow$End = 1.5
 
   default_plot_settings = list()
   default_plot_settings$Paired = TRUE

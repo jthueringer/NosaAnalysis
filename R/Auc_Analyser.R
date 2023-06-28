@@ -9,7 +9,7 @@ Auc_Analyser = setRefClass(
       calculate the area under the curve (AUC) in the period of the CalculationWindow.
 
       A paired or an unpaired boxplot is created. If multiple stimuli are
-      specified, then the boxplot can be faceted by stimulus.
+      specified, then the boxplot can be faceted.
 
       Control plots show the trace associated with the boxplot data.
       The area from which the AUC was calculated is also plotted.",
@@ -39,17 +39,17 @@ Auc_Analyser = setRefClass(
           for(elem in names(time_of_max))
           {
             tmp = df_auc %>% select(c(x,eval(elem))) %>%
-              filter(.data$x >= time_of_max[[elem]]-params$CalculationWindow$BeforePeak-2 &
-                       .data$x <= time_of_max[[elem]]+params$CalculationWindow$AfterPeak+2) %>% na.omit()
-            if (head(tmp$x, n=1) > time_of_max[[elem]]-params$CalculationWindow$BeforePeak |
-                tail(tmp$x, n=1) < time_of_max[[elem]]+params$CalculationWindow$AfterPeak)
+              filter(.data$x >= time_of_max[[elem]]+params$CalculationWindow$Start-2 &
+                       .data$x <= time_of_max[[elem]]+params$CalculationWindow$End+2) %>% na.omit()
+            if (head(tmp$x, n=1) > time_of_max[[elem]]+params$CalculationWindow$Start |
+                tail(tmp$x, n=1) < time_of_max[[elem]]+params$CalculationWindow$End)
             {
               message(paste0("\tAUC_Average analysis is not possible, because '", elem, "' has not enough data. Please reduce time window."))
               return(list(plots = plotl, data = datal, success=FALSE))
             }
             tmp = tmp %>% mutate(x = round(x-time_of_max[[elem]],3)) %>%
-              mutate(Extended = ifelse(.data$x<(-1*params$CalculationWindow$BeforePeak) |
-                                         .data$x>params$CalculationWindow$AfterPeak, FALSE, TRUE))
+              mutate(Extended = ifelse(.data$x<(params$CalculationWindow$Start) |
+                                         .data$x>params$CalculationWindow$End, FALSE, TRUE))
             if(nrow(df_stim_reduced[[stim_col_name]]) == 0)
             {
               df_stim_reduced[[stim_col_name]] = tmp
@@ -74,6 +74,7 @@ Auc_Analyser = setRefClass(
 
         sample_names = grep("x", names(df_auc), value=TRUE, invert=TRUE)
         auc = get_key_df(names=sample_names, keys=params$GroupingKeyWord)
+
         for (stim in names(df_stim_reduced))
         {
           stim_auc = NULL
@@ -131,7 +132,8 @@ Auc_Analyser = setRefClass(
           if (length(params$GroupingKeyWord) > 1 & plot_settings$TestMethod != "none")
           {
             b_plot = b_plot +
-              ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=params$PairedData, label.x.npc="center") +
+              ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=params$PairedData,
+                                         label.y = max(plot_data$data$AUC)*0.99, label.x.npc="center") +
               ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=params$PairedData,
                                          label =  "p.signif", label.y = max(plot_data$data$AUC)*0.93, label.x.npc="center")
           }
@@ -144,8 +146,8 @@ Auc_Analyser = setRefClass(
             ## trace plot with auc under curve
             t_plot = plot_line(trace_data, add="mean_se", display=c(plot_settings$ErrorDisplay, "area"),
                                facet_by=plot_data$facets, color_column = "Key",
-                               area_from = -params$CalculationWindow$BeforePeak,
-                               area_to = params$CalculationWindow$AfterPeak,
+                               area_from = params$CalculationWindow$Start,
+                               area_to = params$CalculationWindow$End,
                                xlab=xlab, ylab=plot_settings$ylabTeX)
             file_name = paste(.self$ana_name, "trace", plot_data$plot_name, sep="_" )
             t_plot$plot$width = 1

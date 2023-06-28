@@ -42,8 +42,8 @@ DataSettings:
     BeforeStim: 2.0
     AfterStim: 5.0
   CalculationWindow:
-    BeforePeak: 1.5
-    AfterPeak: 1.5
+    Start: -1.5
+    End: 1.5
 PlotSettings:
   Paired: yes
   TestMethod: Allowed methods are one of 'none', 't.test', 'wilcox.test', 'anova',

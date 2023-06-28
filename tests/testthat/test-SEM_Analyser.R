@@ -10,8 +10,8 @@ test_that("generates plots and plot_data", {
                              changes = c("DataSettings$Stimulus$Time = c(10, 30)",
                                          "DataSettings$PeakSearchWindow$BeforeStim = 0",
                                          "DataSettings$PeakSearchWindow$AfterStim = 5",
-                                         "DataSettings$CalculationWindow$BeforePeak = 2",
-                                         "DataSettings$CalculationWindow$AfterPeak = 5",
+                                         "DataSettings$CalculationWindow$Start = -2",
+                                         "DataSettings$CalculationWindow$End = 5",
                                          "Output$SEM$Threshold = TRUE"))
   ana = get_analyser_object("SEM", yaml)
 
@@ -39,8 +39,8 @@ test_that("time window too large", {
   yaml = get_testyaml_object("dir", analyser = "SEM", changes = c("DataSettings$Stimulus$Time = c(5,40)",
                              "DataSettings$PeakSearchWindow$BeforeStim = 0",
                              "DataSettings$PeakSearchWindow$AfterStim = 5",
-                             "DataSettings$CalculationWindow$BeforePeak = 2",
-                             "DataSettings$CalculationWindow$BeforePeak = 2"))
+                             "DataSettings$CalculationWindow$Start = -2",
+                             "DataSettings$CalculationWindow$End = 2"))
   ana = get_analyser_object("SEM", yaml)
   df = data.frame(matrix(rep(seq(1, 46),each=5), nrow = 46, ncol = 5, byrow = TRUE))
   names(df) = c("Time", paste("pre", letters[1:2], sep="_"), paste("post", letters[1:2], sep="_"))
