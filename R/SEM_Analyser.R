@@ -23,7 +23,7 @@ SEM_Analyser = setRefClass(
           longer_df = tidyr::pivot_longer(data, -x, names_to = "Key", values_to = "y", values_drop_na=TRUE) %>%
             mutate(Key = get_key_df(Key, params$GroupingKeyWord)$Key) %>%
             group_by(Key)
-          t_plot = plot_line(longer_df, add="mean_se", display=plot_settings$Lineplots$ErrorDisplay,
+          t_plot = plot_line(longer_df, add="mean_se", display=plot_settings$ErrorDisplay,
                              facet_by="Key", color_column = "Key" )
 
           if (params$Threshold)
@@ -78,7 +78,7 @@ SEM_Analyser = setRefClass(
                    Name = factor(Name, levels=unique(params$Stimulus$Name)))
 
           stimulus_plot = plot_line(df_average %>% group_by(Key, Stimulus),
-                             add="mean_se", display=plot_settings$Lineplots$ErrorDisplay,
+                             add="mean_se", display=plot_settings$ErrorDisplay,
                              facet_by=c("Key", "Stimulus"), color_column = "Key" )
           stimulus_plot$plot = stimulus_plot$plot +
             ylab(plot_settings$ylabTeX) +
@@ -96,7 +96,7 @@ SEM_Analyser = setRefClass(
           stimulus_plot_wrap$width = 1
           plotl[[stimulus_plot_wrap$file_name]] = stimulus_plot_wrap
 
-          name_plot = plot_line(df_average %>% group_by(Key, Name), add="mean_se", display=plot_settings$Lineplots$ErrorDisplay,
+          name_plot = plot_line(df_average %>% group_by(Key, Name), add="mean_se", display=plot_settings$ErrorDisplay,
                              facet_by=c("Key", "Name"), color_column = "Key",
                              xlab=xlab, ylab=plot_settings$ylabTeX)
           name_plot$plot$file_name = paste0(.self$ana_name, "_byName")

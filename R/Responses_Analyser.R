@@ -71,7 +71,7 @@ Responses_Analyser = setRefClass(
                                          label =  "p.signif", label.y = max(plot_data$data$values)*0.93, label.x.npc="center")
           }
           b_plot =  b_plot + xlab("") + ylab(plot_settings$ylabTeX)
-          ggpar(b_plot, palette = plot_settings$Lineplots$Colours)
+          ggpar(b_plot, palette = plot_settings$Colours)
           b_plot$file_name = paste(.self$ana_name, plot_data$plot_name, sep="_")
           b_plot$width = 1
           plotl[[b_plot$file_name]] = b_plot

@@ -18,9 +18,7 @@
 #' @import openxlsx
 #' @import dplyr
 #' @import ggpubr
-#' @importFrom latex2exp TeX
 #' @importFrom rlang .data
-#' @importFrom stats approxfun integrate
 #' @importFrom stats na.omit
 #'
 #' @export
@@ -44,11 +42,10 @@ performAnalysis = function(yaml_file = NULL )
 
   dirs = yaml$dirs
   manipulations = yaml$manipulate
-  manipulations$stimuli = setNames(manipulations$Stimulus$Time, manipulations$Stimulus$Name)
-  #plot_settings = prepare_plot_settings(yaml$plot_settings, group_number = length(manipulations$GroupingKeyWords))
+  manipulations$stimuli = stats::setNames(manipulations$Stimulus$Time, manipulations$Stimulus$Name)
   plot_settings = yaml$plot_settings
   plot_settings$ylabTeX = latex2exp::TeX(plot_settings$ylabTeX)
-  if (length(manipulations$GroupingKeyWords) != length(plot_settings$Lineplots$Colours))
+  if (length(manipulations$GroupingKeyWords) != length(plot_settings$Colours))
   {
     message("\tInformation: The number of GroupingKeyWords does not match the number of defined colors for the lineplots.\n
             \tYou may get an error during the analysis.")
@@ -143,8 +140,8 @@ performAnalysis = function(yaml_file = NULL )
     {
       filename = plot$file_name
       plot = plot  +
-        ggplot2::scale_colour_manual(values=plot_settings$Lineplots$Colours) +
-        ggplot2::scale_fill_manual(values=plot_settings$Lineplots$Colours)
+        ggplot2::scale_colour_manual(values=plot_settings$Colours) +
+        ggplot2::scale_fill_manual(values=plot_settings$Colours)
       if(filename == "TimeSlots_Trace")
       {
         width = plot$width

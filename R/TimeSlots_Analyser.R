@@ -45,11 +45,12 @@ TimeSlots_Analyser = setRefClass(
 
         if(plot_settings$Paired)
         {
-          b_plot = ggpubr::ggpaired (df_means, x="Key", y="Mean", id = "Name", line.color = "gray")
+          b_plot = ggpubr::ggpaired (df_means, x="Key", y="Mean", id = "Name",
+                                     line.color = "gray", color="Key")
         }
         else
         {
-          b_plot = ggpubr::ggboxplot(df_means, x="Key", y="Mean")
+          b_plot = ggpubr::ggboxplot(df_means, x="Key", y="Mean", color="Key")
         }
 
         if (length(params$GroupingKeyWord) > 1 & plot_settings$TestMethod != "none")
@@ -74,7 +75,7 @@ TimeSlots_Analyser = setRefClass(
         }
 
         longer_df = tidyr::pivot_longer(sem_plot_data, -c(x, Key), names_to = "Name", values_to = "y")
-        t_plot = plot_line(longer_df, add="mean_se", display=plot_settings$Lineplots$ErrorDisplay,
+        t_plot = plot_line(longer_df, add="mean_se", display=plot_settings$ErrorDisplay,
                            facet_by="Key", color_column = "Key", xlab=xlab, ylab=plot_settings$ylabTeX)
 
         for (key in params$GroupingKeyWords)

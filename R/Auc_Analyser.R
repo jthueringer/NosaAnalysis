@@ -83,7 +83,7 @@ Auc_Analyser = setRefClass(
             {
               #calculate auc
               timeline = df_stim_reduced[[stim]]$x[df_stim_reduced[[stim]]$Extended]
-              f1 = approxfun(timeline, df_stim_reduced[[stim]][[key]][[sample]][df_stim_reduced[[stim]]$Extended])
+              f1 = stats::approxfun(timeline, df_stim_reduced[[stim]][[key]][[sample]][df_stim_reduced[[stim]]$Extended])
               f1_integral = cubature::cubintegrate(f1, lower=head(timeline,1), upper=tail(timeline,1), method="pcubature")
               stim_auc = rbind(stim_auc, data.frame(Name = sample, Key = key, stim = f1_integral$integral))
             }
@@ -136,13 +136,13 @@ Auc_Analyser = setRefClass(
                                          label =  "p.signif", label.y = max(plot_data$data$AUC)*0.93, label.x.npc="center")
           }
           b_plot =  b_plot + xlab("") + ylab("AUC")
-          ggpar(b_plot, palette = plot_settings$Lineplots$Colours)
+          ggpar(b_plot, palette = plot_settings$Colours)
           b_plot$file_name = paste(.self$ana_name, plot_data$plot_name, sep="_")
 
           if (params$ControlPlots)
           {
             ## trace plot with auc under curve
-            t_plot = plot_line(trace_data, add="mean_se", display=c(plot_settings$Lineplots$ErrorDisplay, "area"),
+            t_plot = plot_line(trace_data, add="mean_se", display=c(plot_settings$ErrorDisplay, "area"),
                                facet_by=plot_data$facets, color_column = "Key",
                                area_from = -params$CalculationWindow$BeforePeak,
                                area_to = params$CalculationWindow$AfterPeak,

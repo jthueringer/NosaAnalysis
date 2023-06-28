@@ -26,12 +26,12 @@ Trace_Analyser = setRefClass(
         {
           for (col in names(data %>% select(contains(params$GroupingKeyWords[i])))){
             df = data.frame(x = data$Time, y = data[[col]]) %>% na.omit()
-            plot = plot_line(df, add="none", display=NULL, color_column = plot_settings$Lineplots$Colours[i],
+            plot = plot_line(df, add="none", display=NULL, color_column = plot_settings$Colours[i],
                              xlab=xlab, ylab=plot_settings$ylabTeX)$plot
             if (params$Threshold)
             {
               plot = plot +
-                geom_hline(yintercept = plot_settings$Threshold, linetype="dotted", colour=plot_settings$Lineplots$Colours[i])
+                geom_hline(yintercept = plot_settings$Threshold, linetype="dotted", colour=plot_settings$Colours[i])
             }
             plot$file_name = paste(.self$ana_name, col, sep = "_")
             plot$width = 2

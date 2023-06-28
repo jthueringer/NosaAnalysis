@@ -53,9 +53,8 @@ createYaml <- function(yc, dirs = list(), manipulate = list(), plot_settings = l
   default_plot_settings$TestMethod = "Allowed methods are one of 'none', 't.test', 'wilcox.test', 'anova', 'kruskal.test'"
   default_plot_settings$Threshold = 0.5
   default_plot_settings$ylabTeX = "Delta F/ F"
-  default_plot_settings$Lineplots = list()
-  default_plot_settings$Lineplots$Colours = c("green", "'#E7B800'")
-  default_plot_settings$Lineplots$ErrorDisplay = "Allowed are one of 'linerange', 'ribbon'"
+  default_plot_settings$Colours = c("green", "'#E7B800'")
+  default_plot_settings$ErrorDisplay = "Allowed are one of 'linerange', 'ribbon'"
 
   default_outputs = list()
   default_outputs$DataAsRObject = TRUE

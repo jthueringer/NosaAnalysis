@@ -11,7 +11,7 @@ test_that("data reduced by keywords", {
                                  "DataSettings$PeakSearchWindow$AfterStim = 0",
                                  "DataSettings$CalculationWindow$BeforePeak = 0.5", #TimeSlots:0
                                  "DataSettings$CalculationWindow$AfterPeak = 0.5",
-                                 "PlotSettings$Lineplots$Colours = c('green', '#E7B800')")) #TimeSlots:1
+                                 "PlotSettings$Colours = c('green', '#E7B800')")) #TimeSlots:1
 
   expect_output(nsr <-suppressMessages(performAnalysis(paste0(path, "/test.yaml"))))
   expect_equal(names(nsr$results), c("Responses", "TimeSlots"))

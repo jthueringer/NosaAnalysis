@@ -50,11 +50,10 @@ PlotSettings:
     'kruskal.test'
   Threshold: 0.5
   ylabTeX: Delta F/ F
-  Lineplots:
-    Colours:
-    - green
-    - '''#E7B800'''
-    ErrorDisplay: Allowed are one of 'linerange', 'ribbon'
+  Colours:
+  - green
+  - '''#E7B800'''
+  ErrorDisplay: Allowed are one of 'linerange', 'ribbon'
 Output:
   DataAsRObject: yes
   DataAsXlsx: yes
