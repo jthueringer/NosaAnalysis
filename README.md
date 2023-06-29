@@ -6,7 +6,7 @@ Various analysis methods for the (paired) input data are provided.
 
 NOSA analysis should be used with care. It will not check every user defined settings for validity and may crash.
 
-# Running NosaAnalysis from source code
+## Running NosaAnalysis from source code
 
 To run this package from source code, the following prerequisites are needed:
 
@@ -36,11 +36,11 @@ To run this package from source code, the following prerequisites are needed:
 if (!require(devtools, quietly = TRUE)) install.packages("devtools")
 library("devtools")
 
-install_github("jthueringer/NosaAnalysis", dependencies = TRUE, vignettes = TRUE)
+install_github("jthueringer/NosaAnalysis", dependencies = TRUE, build_vignettes = TRUE)
 library("NosaAnalysis")
 ```
 
-# Usage
+## Usage
 
 All analysis settings are made via a YAML file. A corresponding file with all possible default values can be written to disk via the following command:
 ```
