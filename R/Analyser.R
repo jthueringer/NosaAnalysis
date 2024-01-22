@@ -13,6 +13,9 @@
 #' @field plot_settings List of user defined plot settings (from yaml)
 #' @field ana_name String naming the instanced analyser
 #'
+#' @import tidyr
+#' @importFrom cubature cubintegrate
+#'
 #' @exportClass Analyser
 #' @export Analyser
 #'

@@ -16,7 +16,7 @@ SEM_Analyser = setRefClass(
         datal = list()
         xlab = grep("Time", names(data), value = TRUE)
 
-        data = data %>% rename(x = xlab)
+        data = data %>% rename(x = all_of(xlab))
 
         if (isTRUE(params$Trace))
         {

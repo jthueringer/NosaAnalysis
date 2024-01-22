@@ -21,7 +21,7 @@ test_that("correct calculation", {
   expect_equal(ana$plot_data[[1]], boxplot_result, tolerance = 0.5)
 
   stde = 0.1
-  trace_result = data.frame(Time = c(df$Time[1:10], df$Time),
+  trace_result = data.frame(x = c(df$Time[1:10], df$Time),
                             y = c(rep(0, 10), rep(5.5, 20))) %>%
     mutate(ymin = y-stde,
            ymax = y+stde,

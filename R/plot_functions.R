@@ -118,7 +118,7 @@ plot_line = function(df, add="none", display=NULL, facet_by = NULL, color_column
     {
       plotdata = plotdata %>% mutate(!!facet:= factor(extract_key(.data$PANEL, levels(df[[facet]])),levels=levels(df[[facet]])))
     }
-    plotdata = plotdata %>% select(-.data$PANEL)
+    plotdata = plotdata %>% select(-"PANEL")
   }
   else if (add=="none")
   {
@@ -133,7 +133,7 @@ plot_line = function(df, add="none", display=NULL, facet_by = NULL, color_column
     plotdata = extract_plot_data(plot, additional = c("ymin", "ymax", "group"), facet_levels=facet_levels) %>%
       mutate(!!color_column:=factor(.data$group))
     levels(plotdata[[color_column]]) = levels(df[[color_column]])
-    plotdata = plotdata %>% select(-.data$group)
+    plotdata = plotdata %>% select(-"group")
   }
   plot = ggpubr::ggline(plotdata, "x", "y", ymin="ymin", ymax="ymax", plot_type = "l",
                         color=color_column,

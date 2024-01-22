@@ -42,7 +42,7 @@ vignette("BasicGuide", package = "NosaAnalysis")
 ```
   Normalization:
     Execute: yes
-    Type: absolute
+    Type: relative
     KeyWord: pre
     From: 0.0
     To: 1.5
@@ -63,3 +63,6 @@ Output:
     Sheet: Processed
 ```
 
+```{r, echo=FALSE, out.width = "400px"}
+knitr::include_graphics("../inst/figures/TimeSlots.png", dpi=70)
+```

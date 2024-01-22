@@ -15,7 +15,7 @@ TimeSlots_Analyser = setRefClass(
         datal = list()
         xlab = grep("Time", names(data), value = TRUE)
         data = data %>%
-          rename(x = xlab)
+          rename(x = all_of(xlab))
 
         df_means = setNames(data.frame(matrix(ncol = 3, nrow = 0)), c("Name", "Key", "Mean"))
 
@@ -58,7 +58,7 @@ TimeSlots_Analyser = setRefClass(
           b_plot = b_plot +
             ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=params$PairedData, label.x.npc="center") +
             ggpubr::stat_compare_means(method = plot_settings$TestMethod, paired=params$PairedData,
-                                       label =  "p.signif", label.y = max(df_means$Mean)*0.93, label.x.npc="center")
+                                       label =  "p.signif", label.y = max(df_means$Mean)*0.9, label.x.npc="center")
         }
         b_plot =  b_plot + xlab("") + ylab(plot_settings$ylabTeX)
         b_plot$file_name = paste0(.self$ana_name, "_Boxplot" )
@@ -98,7 +98,7 @@ TimeSlots_Analyser = setRefClass(
         t_plot$plot$width = 2
         t_plot$plot$file_name = file_name
         plotl[[file_name]] = t_plot$plot
-        datal[[file_name]] = t_plot$data  %>% rename(!!all_of(xlab):="x")
+        datal[[file_name]] = t_plot$data  #%>% rename(!!all_of(xlab):="x")
 
         return(list(plots = plotl, data = datal, success = TRUE))
       },

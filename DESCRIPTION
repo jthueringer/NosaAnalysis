@@ -11,23 +11,22 @@ Imports:
     dplyr,
     gdata,
     ggplot2 (>= 3.3.5),
-    knitr (>= 1.10),
     latex2exp,
     methods,
     openxlsx,
-    plotrix (>= 3.8-2),
     readxl,
     rlang,
-    rmarkdown,
     tidyr,
     yaml
 Suggests: 
     testthat,
-    withr
+    withr,
+    rmarkdown,
+    knitr (>= 1.10)
 Depends:
     ggpubr (>= 0.4.0)
 VignetteBuilder: knitr
 License: MIT + file LICENSE
 Encoding: UTF-8
-RoxygenNote: 7.1.2
+RoxygenNote: 7.3.0
 Config/testthat/edition: 3
