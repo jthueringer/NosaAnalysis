@@ -75,7 +75,7 @@ The default **Sheets** show the allowed sheets that can be read in. These can be
     End: .inf
   Normalization:
     Execute: no
-    Type: relative or absolute
+    Type: relative, absolute, index or index_percent
     KeyWord: pre
     From: 0.0
     To: 1.5
@@ -99,7 +99,7 @@ The default **Sheets** show the allowed sheets that can be read in. These can be
 
 **DataCrop**: Sometimes the recordings exhibit artifacts at the beginning (e.g. sharp drop in fluorescence values within the first second), which is reflected in a large y-axis scale in the trace plots. Or the recordings of the individual samples take different lengths of time and only a certain time interval is needed for the analysis. **Start** and **End** need unquoted integers or floating numbers representing the source recording time unit (e.g. second).
 
-**Normalization**: Subsets a data frame by (a) matching the pattern **KeyWord** in the source names of the samples and (b) keeping all rows where the numeric 'Time' values are between (and include) **From** and **To**. Forms row means for each sample and subtracts (absolute normalization) or divides (relative normalization) this mean from all *paired* samples.
+**Normalization**: Subsets a data frame by (a) matching the pattern **KeyWord** in the source names of the samples and (b) keeping all rows where the numeric 'Time' values are between (and include) **From** and **To**. Forms row means for each sample and subtracts (absolute normalization) or divides (relative normalization) this mean from all *paired* samples. For absolute normalized data you can also get indexed data (absolute data divided by the mean) or indexed_percent data (indexed data multiplied with 100).
 
 **GroupingKeyWords**: Must be provided as a list. Sample names are groupable if the keyword is extracted and they are subsequently identical. E.g. example1_`pre`\_2 and example1_`post`\_2 are groupable, because both result to example1_\_2, but example1_`pre`\_2 and example1_2_`post` are not.
 

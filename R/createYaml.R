@@ -33,7 +33,7 @@ createYaml <- function(yc, dirs = list(), manipulate = list(), plot_settings = l
   default_manipulate$DataCrop$End = Inf
   default_manipulate$Normalization = list()
   default_manipulate$Normalization$Execute = FALSE
-  default_manipulate$Normalization$Type = "relative or absolute"
+  default_manipulate$Normalization$Type = "relative, absolute, index or index_percent"
   default_manipulate$Normalization$KeyWord = "pre"
   default_manipulate$Normalization$From = 0
   default_manipulate$Normalization$To = 1.5

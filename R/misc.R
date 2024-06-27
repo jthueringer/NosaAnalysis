@@ -270,6 +270,13 @@ normalize = function(data, params, grouping_keys)
     tmp = tmp %>%
       select(contains(c(params$KeyWord))) %>%
       rename_with(~ gsub(params$KeyWord, "", .x, fixed = TRUE), contains(params$KeyWord))
+
+    ## if paired data, than find the corresponding samples of all grouping keywords
+    data_names = names(data)
+    for (kw in grouping_keys)
+    {
+      data_names = gsub(kw, "", data_names)
+    }
     norm_means = rowMeans(data.frame(t(tmp)))
   }
   else
@@ -278,18 +285,32 @@ normalize = function(data, params, grouping_keys)
     return(list(success=FALSE,data=data))
   }
 
-  if (params$Type == "absolute")
+  if (params$Type %in% c("absolute", "index", "index_percent"))
   {
     for (name in names(norm_means))
     {
-      data = data %>% mutate(across(grep(name, names(data)), ~ .x -unname(norm_means[names(norm_means) == name])))
+      data = data %>% mutate(across(grep(name, data_names), ~ .x -unname(norm_means[names(norm_means) == name])))
+    }
+    if (params$Type %in% c("index", "index_percent"))
+    {
+      for (name in names(norm_means))
+      {
+        data = data %>% mutate(across(grep(name, data_names), ~ .x /unname(norm_means[names(norm_means) == name])))
+      }
+    }
+    if (params$Type == "index_percent")
+    {
+      for (name in names(norm_means))
+      {
+        data = data %>% mutate(across(grep(name, data_names), ~ .x * 100))
+      }
     }
   }
   else if (params$Type == "relative")
   {
     for (name in names(norm_means))
     {
-      data = data %>% mutate(across(grep(name, names(data)), ~ .x /unname(norm_means[names(norm_means) == name])))
+      data = data %>% mutate(across(grep(name, data_names), ~ .x /unname(norm_means[names(norm_means) == name])))
     }
   }
   else
